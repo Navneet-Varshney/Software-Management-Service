@@ -11,8 +11,10 @@
       "@rate-limiters/*": ["src/rate-limiters/*"],
       "@services/*": ["src/services/*"],
       "@controllers/*": ["src/controllers/*"],
-      "@routes/*": ["src/routers/*"],
-      "@models/*": ["src/models/*"]
+      "@routes/*": ["src/routes/*"],
+      "@models/*": ["src/models/*"],
+      "@internals/*": ["src/internals"],
+      "@responses/*": ["src/responses/*"]
     }
   },
   "exclude": ["node_modules"]

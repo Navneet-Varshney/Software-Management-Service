@@ -10,30 +10,32 @@
   "author": "Yatharth Kumar Saxena",
   "license": "ISC",
   "dependencies": {
+    "axios": "^1.13.6",
     "cookie-parser": "^1.4.7",
     "dotenv": "^17.3.1",
+    "dotenv-expand": "^12.0.3",
     "express": "^5.2.1",
     "express-rate-limit": "^8.2.1",
     "ioredis": "^5.10.0",
+    "jsonwebtoken": "^9.0.3",
     "module-alias": "^2.3.4",
     "mongoose": "^9.2.3",
-    "rate-limit-redis": "^4.3.1"
+    "rate-limit-redis": "^4.3.1",
+    "uuid": "^8.3.2"
   },
   "_moduleAliases": {
     "@": "src",
-    "@app": "src/app",
-    "@testing": "src/testing",
-    "@bootstrap": "src/bootstrap",
+    "@routes": "src/routes",
+    "@controllers": "src/controllers",
+    "@middlewares": "src/middlewares",
+    "@app": "src/app.js",
     "@configs": "src/configs",
     "@utils": "src/utils",
-    "@middlewares": "src/middlewares",
-    "@services": "src/services",
+    "@responses": "src/responses",
     "@rate-limiters": "src/rate-limiters",
-    "@controllers": "src/controllers",
-    "@routes": "src/routers",
     "@models": "src/models",
+    "@services": "src/services",
     "@cron-jobs": "src/cron-jobs",
-    "@internals": "src/internals",
-    "@responses": "src/responses"
+    "@internals": "src/internals"
   }
 }

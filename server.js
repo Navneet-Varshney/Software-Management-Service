@@ -1,4 +1,10 @@
-require("dotenv").config();
+const dotenv = require("dotenv");
+const dotenvExpand = require("dotenv-expand");
+
+// Load and expand environment variables
+const myEnv = dotenv.config();
+dotenvExpand.expand(myEnv);
+
 require("module-alias/register");
 
 const mongoose = require("mongoose");
@@ -16,6 +22,20 @@ const { errorMessage } = require("@/responses/common/error-handler.response");
         await mongoose.connect(DB_URL);
         logWithTime("✅ Connection established with MongoDB Successfully");
 
+        // 🔄 Microservice Init
+        try {
+            const {
+                initializeMicroservice,
+                setupTokenRotationScheduler
+            } = require("@services/bootstrap/microservice-init.service");
+
+            await initializeMicroservice();
+            setupTokenRotationScheduler();
+        } catch (err) {
+            logWithTime("⚠️ Microservice init failed");
+            errorMessage(err);
+        }
+        
         // 🚀 Start Server
         app.listen(PORT_NUMBER, () => {
             logWithTime(`🚀 Server running on port ${PORT_NUMBER}`);
