@@ -54,11 +54,8 @@ const adminSchema = new mongoose.Schema({
 
 }, { timestamps: true, versionKey: false });
 
-/* 🔐 Centralized Validation Hook */
 
-adminSchema.pre("validate", function (next) {
-
-    /* ---------- FirstName Validation ---------- */
+adminSchema.pre("validate", function () {
 
     if (
         FIRST_NAME_SETTING === FirstNameFieldSetting.DISABLED &&
@@ -79,7 +76,6 @@ adminSchema.pre("validate", function (next) {
         }
     }
 
-    next();
 });
 
 module.exports = {

@@ -10,11 +10,11 @@ const { errorMessage } = require("@/responses/common/error-handler.response");
  * Used during system initialization
  */
 
-const createSuperAdmin = async ({ adminId, firstName }) => {
+const createSuperAdmin = async ({ adminId, firstName=null }) => {
   try {
 
     // 1️⃣ Validate input
-    if (!adminId || !firstName) {
+    if (!adminId) {
       logFailure(
         SERVICE_NAMES.SOFTWARE_MANAGEMENT_SERVICE,
         SYSTEM_LOG_EVENTS.BOOTSTRAP_SUPER_ADMIN,

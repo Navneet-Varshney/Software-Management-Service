@@ -5,7 +5,8 @@ const {
 const {
     throwMissingFieldsError,
     throwConflictError,
-    throwInternalServerError
+    throwInternalServerError,
+    throwSpecificInternalServerError
 } = require("@/responses/common/error-handler.response");
 
 /**
@@ -48,9 +49,9 @@ const createSuperAdminController = async (req, res) => {
                     "If you need to modify the super admin, please contact system administrator."
                 );
             }
-            
+
             // Generic creation failed error
-            return throwInternalServerError(res, new Error(result.error || "Super admin creation failed"));
+            return throwSpecificInternalServerError(res, result.error || "Super admin creation failed");
         }
 
         // Success response
