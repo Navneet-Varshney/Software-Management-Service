@@ -14,48 +14,26 @@ if (!guard) {
     return;
 }
 
-const axios = require('axios');
-const { v4: uuidv4 } = require('uuid');
 const { getServiceToken } = require('../service-token');
-const { INTERNAL_API, HEADERS, SERVICE_NAMES, DEVICE } = require('../constants');
+const { INTERNAL_API, SERVICE_NAMES } = require('../constants');
+const { createInternalServiceClient } = require('@/utils/internal-service-client.util');
+
 const { logWithTime } = require('@/utils/time-stamps.util');
+const { ADMIN_PANEL_URIS } = require('@/configs/internal-uri.config');
 
 /**
  * Create axios instance with service authentication
  */
-const createAuthenticatedClient = async () => {
+const createAdminClient = async () => {
     const serviceToken = await getServiceToken(SERVICE_NAMES.SOFTWARE_MANAGEMENT_SERVICE);
-
-    return axios.create({
-        baseURL: INTERNAL_API.ADMIN_PANEL_SERVICE_URL,
-        timeout: INTERNAL_API.TIMEOUT,
-        headers: {
-            [HEADERS.SERVICE_TOKEN]: serviceToken,
-            [HEADERS.SERVICE_NAME]: SERVICE_NAMES.SOFTWARE_MANAGEMENT_SERVICE,
-            [HEADERS.REQUEST_ID]: uuidv4(),
-            [HEADERS.DEVICE_UUID]: DEVICE.UUID,
-            [HEADERS.DEVICE_TYPE]: DEVICE.TYPE,
-            'Content-Type': 'application/json'
-        }
-    });
-};
-
-/**
- * Retry logic for failed requests
- */
-const retryRequest = async (requestFn, retries = INTERNAL_API.RETRY_ATTEMPTS) => {
-    for (let attempt = 1; attempt <= retries; attempt++) {
-        try {
-            return await requestFn();
-        } catch (error) {
-            if (attempt === retries) {
-                throw error;
-            }
-            
-            logWithTime(`⚠️  Request failed (attempt ${attempt}/${retries}). Retrying in ${INTERNAL_API.RETRY_DELAY}ms...`);
-            await new Promise(resolve => setTimeout(resolve, INTERNAL_API.RETRY_DELAY));
-        }
-    }
+    return createInternalServiceClient(
+        INTERNAL_API.ADMIN_PANEL_SERVICE_URL,
+        serviceToken,
+        SERVICE_NAMES.SOFTWARE_MANAGEMENT_SERVICE,
+        INTERNAL_API.TIMEOUT,
+        INTERNAL_API.RETRY_ATTEMPTS,
+        INTERNAL_API.RETRY_DELAY
+    );
 };
 
 /**
@@ -67,32 +45,33 @@ const healthCheck = async () => {
     try {
         logWithTime('🏥 Checking Admin Panel Service health...');
         
-        const response = await retryRequest(async () => {
-            const client = await createAuthenticatedClient();
-            return await client.get('/admin-panel-service/api/v1/internal/software-management/health');
+        const client = await createAdminClient();
+        const result = await client.callService({
+            method: ADMIN_PANEL_URIS.HEALTH_CHECK.method,
+            uri: ADMIN_PANEL_URIS.HEALTH_CHECK.uri
         });
 
-        const isLive = response.status === 200 && response.data?.success === true;
-        
-        if (isLive) {
-            logWithTime('✅ Admin Panel is live');
+        if (result.success && result.data?.success === true) {
+            logWithTime('✅ Admin Panel Service is live');
+            return {
+                success: true,
+                data: result.data
+            };
         } else {
-            logWithTime('⚠️  Admin Panel responded but status is not healthy');
+            logWithTime('⚠️  Admin Panel Service responded but status is not healthy');
+            return {
+                success: false,
+                error: result.error || 'Service not healthy'
+            };
         }
-        
-        return {
-            success: isLive,
-            data: response.data || null
-        };
     } catch (error) {
-        logWithTime(`❌ Admin Panel Service is not reachable: ${error.message}`);
+        logWithTime(`❌ Admin Panel Service health check failed: ${error.message}`);
         return {
             success: false,
             error: error.message
         };
     }
 };
-
 module.exports = {
     healthCheck
 };
