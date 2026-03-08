@@ -1,5 +1,5 @@
 const { AdminModel } = require("@/models/index");
-const { AdminTypes } = require("@configs/enums.config");
+const { AdminRoleTypes } = require("@configs/enums.config");
 const { SYSTEM_LOG_EVENTS, SERVICE_NAMES } = require("@/configs/system-log-events.config");
 const { logWithTime } = require("@utils/time-stamps.util");
 const { logSuccess, logFailure, logError } = require("@services/audit/service-tracker.service");
@@ -34,7 +34,7 @@ const createSuperAdmin = async ({ adminId, firstName=null }) => {
 
     // 2️⃣ Check if SUPER_ADMIN already exists
     const existingSuperAdmin = await AdminModel.findOne({
-      adminType: AdminTypes.SUPER_ADMIN
+      role: AdminRoleTypes.CEO
     });
 
     if (existingSuperAdmin) {
@@ -60,7 +60,7 @@ const createSuperAdmin = async ({ adminId, firstName=null }) => {
     const superAdmin = await AdminModel.create({
       adminId,
       firstName,
-      adminType: AdminTypes.SUPER_ADMIN,
+      role: AdminRoleTypes.CEO,
       createdBy: "SYSTEM",
       isActive: true
     });
@@ -77,7 +77,7 @@ const createSuperAdmin = async ({ adminId, firstName=null }) => {
         metadata: {
           adminId: superAdmin.adminId,
           firstName: superAdmin.firstName,
-          adminType: superAdmin.adminType
+          role: AdminRoleTypes.CEO
         }
       }
     );
@@ -91,7 +91,7 @@ const createSuperAdmin = async ({ adminId, firstName=null }) => {
       message: "Super admin created successfully",
       data: {
         adminId: superAdmin.adminId,
-        adminType: superAdmin.adminType,
+        role: AdminRoleTypes.CEO,
         firstName: superAdmin.firstName
       }
     };
