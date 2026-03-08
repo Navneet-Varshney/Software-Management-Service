@@ -6,8 +6,8 @@ module.exports = {
     firstNameRegex: /^[a-zA-Z\s'-]+$/,
     UUID_V4_REGEX: /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
     mongoIdRegex: /^[a-f\d]{24}$/i,
-    adminIdRegex: /^ADM[0-9]{7}$/,
-    clientIdRegex: /^CLT[0-9]{7}$/,
-    userIdRegex: /^USR[0-9]{7}$/,
+    // Uniform ID pattern: All users (Admin, Client, User) use USR prefix
+    // Differentiation is done via type field in database, not ID prefix
+    customIdRegex: /^USR[0-9]{7}$/,
     requestIdRegex: /^REQ[0-9]{10}$/
 }
