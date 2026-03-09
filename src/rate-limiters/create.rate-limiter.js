@@ -20,17 +20,17 @@ const createRateLimiter = ({ maxRequests, windowMs, message }) => {
     }),
     
     keyGenerator: (req) => {
-      const adminId = req.admin?.adminId; 
-      const deviceId = req.deviceId;     
+      const userId = req?.admin?.adminId || req?.client?.clientId;
+      const deviceId = req.device.deviceUUID;
       const path = req.originalUrl || req.url;
 
       // Note: Make sure this middleware runs AFTER auth/device middleware
-      if (!adminId || !deviceId) {
+      if (!userId || !deviceId) {
         // Log warning but prevent crash by returning a fallback key or throwing explicit error
-        throw new Error("Admin ID or Device ID missing for rate limiter key generation");
+        throw new Error("User ID or Device ID missing for rate limiter key generation");
       }
 
-      return `${adminId}:${deviceId}:${path}`;
+      return `${userId}:${deviceId}:${path}`;
     },
 
     windowMs,
