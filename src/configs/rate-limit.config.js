@@ -21,6 +21,19 @@ module.exports = {
   },
 
   perUserAndDevice: {
-
+    welcomeAdmin: {
+      maxRequests: 5,
+      windowMs: 60 * 1000, // 1 minute
+      prefix: "welcome_admin",
+      reason: "Welcome admin endpoint abuse",
+      message: "Too many requests to welcome admin endpoint. Please try again later."
+    },
+    welcomeClient: {
+      maxRequests: 5,
+      windowMs: 60 * 1000, // 1 minute
+      prefix: "welcome_client",
+      reason: "Welcome client endpoint abuse",
+      message: "Too many requests to welcome client endpoint. Please try again later."
+    }
   }
 };

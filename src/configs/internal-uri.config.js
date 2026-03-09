@@ -19,10 +19,14 @@ const requestMethod = {
 /**
  * Custom Auth Service Internal API Endpoints
  */
-const CUSTOM_AUTH_URIS = {
+const AUTH_SERVICE_URIS = {
     HEALTH_CHECK: {
         method: "GET",
         uri: "/custom-auth-service/api/v1/internal/software-management/health"
+    },
+    POST_REFRESH: {
+        method: requestMethod.POST,
+        uri: "/custom-auth-service/api/v1/internal/post-refresh"
     }
 };
 
@@ -41,7 +45,7 @@ const ADMIN_PANEL_URIS = {
 };
 
 module.exports = {
-    CUSTOM_AUTH_URIS,
+    AUTH_SERVICE_URIS,
     ADMIN_PANEL_URIS,
     requestMethod
 };
