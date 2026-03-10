@@ -25,10 +25,13 @@ const {
  */
 const createProjectController = async (req, res) => {
   try {
-    const { name, description, problemStatement, goal, projectCreationReason } = req.body;
+    const {
+      name, description, problemStatement, goal,
+      projectCreationReasonType,
+      projectCreationReasonDescription,
+    } = req.body;
 
     // ── Derive createdBy from authenticated admin ────────────────────
-    // (presence + validation already done by middleware before this point)
     const createdBy = req.admin.adminId;
 
     // ── Call service (activity tracking happens inside the service) ──
@@ -38,7 +41,8 @@ const createProjectController = async (req, res) => {
       problemStatement,
       goal,
       createdBy,
-      projectCreationReason,
+      projectCreationReasonType,
+      projectCreationReasonDescription,
       auditContext: {
         admin: req.admin,
         device: req.device,
