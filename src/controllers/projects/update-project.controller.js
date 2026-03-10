@@ -8,7 +8,9 @@ const {
   throwDBResourceNotFoundError,
   throwInternalServerError,
   logMiddlewareError,
+  throwSpecificInternalServerError
 } = require("@/responses/common/error-handler.response");
+const { isValidMongoID } = require("@/utils/id-validators.util");
 
 /**
  * Controller: Update Project
@@ -36,6 +38,10 @@ const updateProjectController = async (req, res) => {
     // ── Validate route param ──────────────────────────────────────────
     if (!projectId) {
       return throwMissingFieldsError(res, ["projectId"]);
+    }
+
+    if (!isValidMongoID(projectId)) {
+      return throwBadRequestError(res, "Invalid projectId format", "projectId must be a valid ObjectId string.");
     }
 
     // ── Ensure at least one updatable field is present ───────────────
@@ -75,7 +81,7 @@ const updateProjectController = async (req, res) => {
         return throwBadRequestError(res, "Validation error", result.error);
       }
       logMiddlewareError("updateProject", result.message, req);
-      return throwInternalServerError(res, new Error(result.message));
+      return throwSpecificInternalServerError(res, );
     }
 
     // ── Success ───────────────────────────────────────────────────────

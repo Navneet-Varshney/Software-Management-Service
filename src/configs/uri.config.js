@@ -27,7 +27,7 @@ module.exports = {
     },
     ADMIN_ROUTES: {
         // Projects
-        CREATE_PROJECT: `/projects`,           // POST   /software-management-service/api/v1/admin/projects
-        UPDATE_PROJECT: `/projects/:projectId`, // PATCH  /software-management-service/api/v1/admin/projects/:projectId
+        CREATE_PROJECT: `/create-project`,           // POST   /software-management-service/api/v1/admin/create-project
+        UPDATE_PROJECT: `/update-project/:projectId`, // PATCH  /software-management-service/api/v1/admin/update-project/:projectId
     }
 };
