@@ -19,7 +19,8 @@ const DB_COLLECTIONS = {
     SPECIAL_PERMISSIONS: "special_permissions",
     BLOCKED_PERMISSIONS: "blocked_permissions",
     SERVICE_TRACKERS: "service_trackers",
-    SERVICE_TOKENS: "service_tokens"
+    SERVICE_TOKENS: "service_tokens",
+    PROJECTS: "projects"
 }
 
 module.exports = { DB_COLLECTIONS };

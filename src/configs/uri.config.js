@@ -9,10 +9,12 @@ const API_PREFIX = `${BASE_PATH}${API_VERSION}`;
 
 const INTERNAL_BASE = `${API_PREFIX}/internal`;  // /software-management-service/api/v1/internal
 const TEST_BASE = `${API_PREFIX}/test`; // /software-management-service/api/v1/test
+const ADMIN_BASE = `${API_PREFIX}/admin`; // /software-management-service/api/v1/admin
 
 module.exports = {
-    INTERNAL_BASE: INTERNAL_BASE,
-    TEST_BASE: TEST_BASE,
+    INTERNAL_BASE,
+    TEST_BASE,
+    ADMIN_BASE,
     INTERNAL_ROUTES: {
         CREATE_SUPER_ADMIN: `/create-super-admin`, // /software-management-service/api/v1/internal/create-super-admin
         CREATE_USER: `/create-user`, // /software-management-service/api/v1/internal/admin-panel/create-user
@@ -22,5 +24,10 @@ module.exports = {
     TEST_ROUTES: {
         WELCOME_ADMIN: `/welcome-admin`, // /software-management-service/api/v1/test/welcome-admin
         WELCOME_CLIENT: `/welcome-client` // /software-management-service/api/v1/test/welcome-client
+    },
+    ADMIN_ROUTES: {
+        // Projects
+        CREATE_PROJECT: `/projects`,           // POST   /software-management-service/api/v1/admin/projects
+        UPDATE_PROJECT: `/projects/:projectId`, // PATCH  /software-management-service/api/v1/admin/projects/:projectId
     }
 };

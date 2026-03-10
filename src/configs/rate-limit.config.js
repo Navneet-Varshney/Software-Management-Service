@@ -34,6 +34,20 @@ module.exports = {
       prefix: "welcome_client",
       reason: "Welcome client endpoint abuse",
       message: "Too many requests to welcome client endpoint. Please try again later."
+    },
+    createProject: {
+      maxRequests: 10,
+      windowMs: 60 * 1000, // 1 minute
+      prefix: "create_project",
+      reason: "Create project endpoint abuse",
+      message: "Too many requests to create project endpoint. Please try again later."
+    },
+    updateProject: {
+      maxRequests: 10,
+      windowMs: 60 * 1000, // 1 minute
+      prefix: "update_project",
+      reason: "Update project endpoint abuse",
+      message: "Too many requests to update project endpoint. Please try again later."
     }
   }
 };

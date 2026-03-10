@@ -173,6 +173,25 @@ const ClientRoleTypes = Object.freeze({
   OTHER: "other"
 });
 
+const ProjectCreationReason = Object.freeze({
+  NEW_FEATURE: "new_feature",
+  CLIENT_REQUEST: "client_request",
+  INTERNAL_INITIATIVE: "internal_initiative",
+  RESEARCH: "research",
+  MAINTENANCE: "maintenance",
+  OTHER: "other"
+});
+
+const ProjectUpdationReason = Object.freeze({
+  SCOPE_CHANGE: "scope_change",
+  REQUIREMENT_UPDATE: "requirement_update",
+  ERROR_CORRECTION: "error_correction",
+  PERFORMANCE_IMPROVEMENT: "performance_improvement",
+  CLIENT_FEEDBACK: "client_feedback",
+  INTERNAL_REVIEW: "internal_review",
+  OTHER: "other"
+});
+
 module.exports = {
   AdminTypes,
   RoleHierarchy,
@@ -197,5 +216,7 @@ module.exports = {
   ClientStatus,
   ClientTypes,
   AdminRoleTypes,
-  ClientRoleTypes
+  ClientRoleTypes,
+  ProjectCreationReason,
+  ProjectUpdationReason
 };

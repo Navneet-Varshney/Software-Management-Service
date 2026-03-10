@@ -44,5 +44,23 @@ module.exports = {
   orgNameLength: {
     min: 2,
     max: 200
+  },
+
+  // ─── Project Fields ───────────────────────────────────────────────────────
+  projectNameLength: {
+    min: 3,
+    max: 150
+  },
+  projectDescriptionLength: {
+    min: 10,
+    max: 2000
+  },
+  problemStatementLength: {
+    min: 10,
+    max: 2000
+  },
+  projectGoalLength: {
+    min: 10,
+    max: 1000
   }
 };
