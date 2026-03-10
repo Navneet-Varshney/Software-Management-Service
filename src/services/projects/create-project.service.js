@@ -30,7 +30,8 @@ const createProjectService = async ({
   problemStatement,
   goal,
   createdBy,
-  projectCreationReason,
+  projectCreationReasonType,
+  projectCreationReasonDescription,
   auditContext,
 }) => {
   try {
@@ -40,7 +41,8 @@ const createProjectService = async ({
       problemStatement,
       goal,
       createdBy,
-      projectCreationReason,
+      projectCreationReasonType,
+      projectCreationReasonDescription: projectCreationReasonDescription || null,
       // version defaults to "v1.0" as per schema
     });
 
