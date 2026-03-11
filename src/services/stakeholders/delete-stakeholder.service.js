@@ -1,0 +1,103 @@
+// services/stakeholders/delete-stakeholder.service.js
+
+const { ProjectModel }     = require("@models/project.model");
+const { StakeholderModel } = require("@models/stakeholder.model");
+const { versionControlService } = require("@services/common/version.service");
+const { convertOnHoldToActiveProjectService } = require("@services/projects/on-hold-project.service");
+const { logActivityTrackerEvent } = require("@services/audit/activity-tracker.service");
+const { prepareAuditData } = require("@utils/audit-data.util");
+const { ACTIVITY_TRACKER_EVENTS } = require("@configs/tracker.config");
+const { ProjectStatus } = require("@configs/enums.config");
+
+/**
+ * Soft-deletes a stakeholder and runs version control on the project's current phase.
+ * Deletion reason is REQUIRED (enforced by presence middleware).
+ *
+ * @param {Object} stakeholder  - Mongoose stakeholder document (from req.stakeholder)
+ * @param {Object} params
+ * @param {string} params.deletedBy
+ * @param {string} params.deletionReasonType
+ * @param {string|null} params.deletionReasonDescription
+ * @param {Object} params.auditContext - { admin, device, requestId }
+ * @returns {{ success: boolean, message?: string }}
+ */
+const deleteStakeholderService = async (
+  stakeholder, projectId,
+  { deletedBy, deletionReasonType, deletionReasonDescription, auditContext }
+) => {
+  try {
+    // ── Guard ─────────────────────────────────────────────────────────────────
+    if (stakeholder.isDeleted) {
+      return { success: false, message: "Stakeholder is already deleted" };
+    }
+
+    // ── Load project for version control + ON_HOLD check ───────────────────────
+    const project = await ProjectModel.findOne({ _id: stakeholder.projectId, isDeleted: false });
+
+    if (project && project.projectStatus === ProjectStatus.ON_HOLD) {
+      const converted = await convertOnHoldToActiveProjectService(project._id.toString(), {
+        convertedBy: deletedBy,
+        auditContext,
+      });
+      if (!converted.success) {
+        return { success: false, message: converted.message };
+      }
+    }
+
+    const oldStakeholder = stakeholder.toObject ? stakeholder.toObject() : { ...stakeholder };
+
+    // ── Soft-delete ───────────────────────────────────────────────────────────
+    const updatedStakeholder = await StakeholderModel.findByIdAndUpdate(
+      stakeholder._id,
+      {
+        $set: {
+          isDeleted:                 true,
+          deletedAt:                 new Date(),
+          deletedBy,
+          deletionReasonType,
+          deletionReasonDescription: deletionReasonDescription || null,
+        },
+      },
+      { new: true, runValidators: true }
+    );
+
+    // ── Version control (reuses the project already fetched above) ───────────
+    if (project && !project.isDeleted) {
+      await versionControlService(
+        project,
+        `Stakeholder ${stakeholder.stakeholderId} removed from project — version bump`,
+        deletedBy,
+        auditContext
+      );
+    }
+
+    // ── Activity tracker ──────────────────────────────────────────────────────
+    const { admin, device, requestId } = auditContext || {};
+    const { oldData, newData } = prepareAuditData(oldStakeholder, updatedStakeholder);
+    logActivityTrackerEvent(
+      admin,
+      device,
+      requestId,
+      ACTIVITY_TRACKER_EVENTS.DELETE_STAKEHOLDER,
+      `Stakeholder ${stakeholder.stakeholderId} deleted from project ${stakeholder.projectId} by ${deletedBy}. Reason: ${deletionReasonType}`,
+      {
+        oldData,
+        newData,
+        adminActions: {
+          targetId: stakeholder._id?.toString(),
+          reason:   deletionReasonType,
+        },
+      }
+    );
+
+    return { success: true };
+
+  } catch (error) {
+    if (error.name === "ValidationError") {
+      return { success: false, message: "Validation error", error: error.message };
+    }
+    return { success: false, message: "Internal error while deleting stakeholder", error: error.message };
+  }
+};
+
+module.exports = { deleteStakeholderService };
