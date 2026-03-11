@@ -4,22 +4,8 @@ const { ProjectModel } = require("@models/project.model");
 const { logActivityTrackerEvent } = require("@services/audit/activity-tracker.service");
 const { prepareAuditData } = require("@utils/audit-data.util");
 const { ACTIVITY_TRACKER_EVENTS } = require("@configs/tracker.config");
-
-/**
- * Increments the minor version segment of a version string.
- *   "v1.0" → "v1.1"  |  "v1.9" → "v1.10"
- *
- * @param {string} currentVersion - e.g. "v1.0"
- * @returns {string} next version string
- */
-const incrementVersion = (currentVersion) => {
-  const match = currentVersion.match(/^v(\d+)\.(\d+)$/);
-  if (!match) return currentVersion; // Should not happen; keep as-is if format breaks
-
-  const major = parseInt(match[1], 10);
-  const minor = parseInt(match[2], 10) + 1;
-  return `v${major}.${minor}`;
-};
+const { generateVersion } = require("@/utils/version.util");
+const { ProjectStatus } = require("@/configs/enums.config");
 
 /**
  * Updates the core content fields of an existing project.
@@ -46,21 +32,23 @@ const incrementVersion = (currentVersion) => {
 const updateProjectService = async (projectId, updates) => {
   try {
     // 1. Fetch current document (needed for audit + version increment)
-    const existing = await ProjectModel.findById(projectId);
+    const existing = await ProjectModel.findOne({
+      _id: projectId,
+      isDeleted: false
+    });
 
     if (!existing) {
       return { success: false, message: "Project not found" };
     }
 
-    // ── Guard: soft-deleted ──────────────────────────────────────────
-    if (existing.isDeleted) {
-      return { success: false, message: "Project is deleted" };
+    const blockedStatuses = [ProjectStatus.COMPLETED, ProjectStatus.ABORTED, ProjectStatus.ARCHIVED];
+    if (blockedStatuses.includes(existing.projectStatus)) {
+      return {
+        success: false,
+        message: `Cannot update a ${existing.projectStatus} project`,
+      };
     }
 
-    // ── Guard: completed (nothing can be done after completion) ─────
-    if (existing.projectStatus === "COMPLETED") {
-      return { success: false, message: "Project is already completed" };
-    }
     // 2. Build update payload — only include supplied fields
     const allowedFields = ["name", "description", "problemStatement", "goal"];
     const updatePayload = {};
@@ -78,11 +66,11 @@ const updateProjectService = async (projectId, updates) => {
     });
 
     if (!hasActualChanges) {
-      return { success: false, message: "No changes detected" };
+      return { success: true, message: "No changes detected, Project Document remains unchanged" };
     }
 
     // 3. Increment version only when something genuinely changed
-    updatePayload.version = incrementVersion(existing.version);
+    updatePayload.version = generateVersion(1, existing.version);
 
     // 4. Stamp updatedBy and updation reason
     updatePayload.updatedBy = updates.updatedBy;

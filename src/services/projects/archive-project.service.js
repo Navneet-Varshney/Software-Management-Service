@@ -26,17 +26,15 @@ const { ProjectStatus } = require("@configs/enums.config");
  */
 const archiveProjectService = async (projectId, params) => {
   try {
-    const existing = await ProjectModel.findById(projectId);
+    const existing = await ProjectModel.findOne({
+      _id: projectId,
+      isDeleted: false
+    });
 
     if (!existing) {
       return { success: false, message: "Project not found" };
     }
-
-    // ── Guard: soft-deleted ──────────────────────────────────────────
-    if (existing.isDeleted) {
-      return { success: false, message: "Project is deleted" };
-    }
-
+    
     // ── Guard: already archived ──────────────────────────────────────
     if (existing.isArchived) {
       return { success: false, message: "Project is already archived" };

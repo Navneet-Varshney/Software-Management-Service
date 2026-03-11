@@ -26,15 +26,13 @@ const { ProjectStatus } = require("@configs/enums.config");
  */
 const deleteProjectService = async (projectId, params) => {
   try {
-    const existing = await ProjectModel.findById(projectId);
+    const existing = await ProjectModel.findOne({
+      _id: projectId,
+      isDeleted: false
+    });
 
     if (!existing) {
       return { success: false, message: "Project not found" };
-    }
-
-    // ── Guard: already deleted (delete only once) ────────────────────
-    if (existing.isDeleted) {
-      return { success: false, message: "Project is already deleted" };
     }
 
     // ── Guard: ACTIVE projects cannot be deleted ────────────────
@@ -44,7 +42,7 @@ const deleteProjectService = async (projectId, params) => {
 
     // ── Guard: COMPLETED projects cannot be deleted ──────────────
     if (existing.projectStatus === ProjectStatus.COMPLETED) {
-      return { success: false, message: "Project is already completed" };
+      return { success: false, message: "Completed projects cannot be deleted" };
     }
 
     // ARCHIVED projects CAN be deleted
