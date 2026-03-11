@@ -2,16 +2,23 @@ const {
   projectNameLength,
   descriptionLength,
   problemStatementLength,
-  projectGoalLength,
+  projectGoalLength
 } = require("./fields-length.config");
 
 const {
   ProjectCreationReasonHelper,
   ProjectUpdationReasonHelper,
+  ProjectOnHoldReasonHelper,
   ProjectAbortReasonHelper,
   ProjectResumeReasonHelper,
   ProjectDeletionReasonHelper,
+  AdminRoleTypesHelper,
+  ClientRoleTypesHelper,
+  StakeholderDeletionReasonHelper,
+  ProjectRoleTypesHelper,
 } = require("@utils/enum-validators.util");
+
+const { customIdRegex, mongoIdRegex } = require("./regex.config");
 
 /**
  * Validation rules – single source of truth for field-level constraints.
@@ -36,6 +43,9 @@ const validationRules = {
   projectGoal: {
     length: { min: projectGoalLength.min, max: projectGoalLength.max },
   },
+  mongoId: {
+    regex: mongoIdRegex
+  },
 
   // ── Project enum fields ────────────────────────────
   projectCreationReasonType: {
@@ -43,6 +53,9 @@ const validationRules = {
   },
   projectUpdationReasonType: {
     enum: ProjectUpdationReasonHelper,
+  },
+  onHoldReasonType: {
+    enum: ProjectOnHoldReasonHelper,
   },
   abortReasonType: {
     enum: ProjectAbortReasonHelper,
@@ -57,6 +70,23 @@ const validationRules = {
   // ── Reason description (shared length rule) ───────
   reasonDescription: {
     length: { min: descriptionLength.min, max: descriptionLength.max },
+  },
+
+  // ── Stakeholder fields ───────────────────────────
+  userId: {
+    regex: customIdRegex,
+  },
+  adminRole: {
+    enum: AdminRoleTypesHelper,
+  },
+  projectRole: {
+    enum: ProjectRoleTypesHelper
+  },
+  clientRole: {
+    enum: ClientRoleTypesHelper,
+  },
+  stakeholderDeletionReasonType: {
+    enum: StakeholderDeletionReasonHelper,
   },
 
 };

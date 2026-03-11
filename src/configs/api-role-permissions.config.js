@@ -26,6 +26,11 @@ const ApiRolePermissions = Object.freeze({
       AdminRoleTypes.MANAGER,
     ],
 
+    onHoldProject: [
+      AdminRoleTypes.CEO,
+      AdminRoleTypes.MANAGER,
+    ],
+
     abortProject: [
       AdminRoleTypes.CEO,
       AdminRoleTypes.MANAGER,
@@ -60,6 +65,40 @@ const ApiRolePermissions = Object.freeze({
     ],
 
     getProjects: [
+      AdminRoleTypes.CEO,
+      AdminRoleTypes.BUSINESS_ANALYST,
+      AdminRoleTypes.MANAGER,
+      AdminRoleTypes.ANALYST,
+      AdminRoleTypes.DEVELOPER,
+      AdminRoleTypes.OTHER,
+    ],
+  },
+
+  // ── Stakeholder operations (admin-only) ───────────────────────────────────
+  stakeholder: {
+    createStakeholder: [
+      AdminRoleTypes.CEO,
+      AdminRoleTypes.BUSINESS_ANALYST,
+      AdminRoleTypes.MANAGER,
+    ],
+    updateStakeholder: [
+      AdminRoleTypes.CEO,
+      AdminRoleTypes.BUSINESS_ANALYST,
+      AdminRoleTypes.MANAGER,
+    ],
+    deleteStakeholder: [
+      AdminRoleTypes.CEO,
+      AdminRoleTypes.MANAGER,
+    ],
+    getStakeholder: [
+      AdminRoleTypes.CEO,
+      AdminRoleTypes.BUSINESS_ANALYST,
+      AdminRoleTypes.MANAGER,
+      AdminRoleTypes.ANALYST,
+      AdminRoleTypes.DEVELOPER,
+      AdminRoleTypes.OTHER,
+    ],
+    getStakeholders: [
       AdminRoleTypes.CEO,
       AdminRoleTypes.BUSINESS_ANALYST,
       AdminRoleTypes.MANAGER,

@@ -49,6 +49,13 @@ module.exports = {
       reason: "Update project endpoint abuse",
       message: "Too many requests to update project endpoint. Please try again later."
     },
+    onHoldProject: {
+      maxRequests: 10,
+      windowMs: 60 * 1000,
+      prefix: "on_hold_project",
+      reason: "On-hold project endpoint abuse",
+      message: "Too many requests to on-hold project endpoint. Please try again later."
+    },
     abortProject: {
       maxRequests: 10,
       windowMs: 60 * 1000,
@@ -97,6 +104,41 @@ module.exports = {
       prefix: "get_projects",
       reason: "Get projects endpoint abuse",
       message: "Too many requests to get projects endpoint. Please try again later."
+    },
+    createStakeholder: {
+      maxRequests: 10,
+      windowMs: 60 * 1000,
+      prefix: "create_stakeholder",
+      reason: "Create stakeholder endpoint abuse",
+      message: "Too many requests to create stakeholder endpoint. Please try again later."
+    },
+    updateStakeholder: {
+      maxRequests: 10,
+      windowMs: 60 * 1000,
+      prefix: "update_stakeholder",
+      reason: "Update stakeholder endpoint abuse",
+      message: "Too many requests to update stakeholder endpoint. Please try again later."
+    },
+    deleteStakeholder: {
+      maxRequests: 5,
+      windowMs: 60 * 1000,
+      prefix: "delete_stakeholder",
+      reason: "Delete stakeholder endpoint abuse",
+      message: "Too many requests to delete stakeholder endpoint. Please try again later."
+    },
+    getStakeholder: {
+      maxRequests: 30,
+      windowMs: 60 * 1000,
+      prefix: "get_stakeholder",
+      reason: "Get stakeholder endpoint abuse",
+      message: "Too many requests to get stakeholder endpoint. Please try again later."
+    },
+    getStakeholders: {
+      maxRequests: 30,
+      windowMs: 60 * 1000,
+      prefix: "get_stakeholders",
+      reason: "Get stakeholders endpoint abuse",
+      message: "Too many requests to get stakeholders endpoint. Please try again later."
     }
   }
 };

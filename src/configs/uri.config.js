@@ -9,12 +9,16 @@ const API_PREFIX = `${BASE_PATH}${API_VERSION}`;
 
 const INTERNAL_BASE = `${API_PREFIX}/internal`;  // /software-management-service/api/v1/internal
 const TEST_BASE = `${API_PREFIX}/test`; // /software-management-service/api/v1/test
-const ADMIN_BASE = `${API_PREFIX}/admin`; // /software-management-service/api/v1/admin
+const PROJECT_BASE = `${API_PREFIX}/projects`; // /software-management-service/api/v1/projects
+const STAKEHOLDER_BASE = `${API_PREFIX}/stakeholders`; // /software-management-service/api/v1/stakeholders
+const CLIENT_BASE = `${API_PREFIX}/clients`; // /software-management-service/api/v1/clients
 
 module.exports = {
     INTERNAL_BASE,
     TEST_BASE,
-    ADMIN_BASE,
+    PROJECT_BASE,
+    STAKEHOLDER_BASE,
+    CLIENT_BASE,
     INTERNAL_ROUTES: {
         CREATE_SUPER_ADMIN: `/create-super-admin`, // /software-management-service/api/v1/internal/create-super-admin
         CREATE_USER: `/create-user`, // /software-management-service/api/v1/internal/admin-panel/create-user
@@ -25,16 +29,30 @@ module.exports = {
         WELCOME_ADMIN: `/welcome-admin`, // /software-management-service/api/v1/test/welcome-admin
         WELCOME_CLIENT: `/welcome-client` // /software-management-service/api/v1/test/welcome-client
     },
-    ADMIN_ROUTES: {
+    PROJECT_ROUTES: {
         // Projects
-        CREATE_PROJECT:   `/create-project`,                     // POST    /api/v1/admin/create-project
-        UPDATE_PROJECT:   `/update-project/:projectId`,          // PATCH   /api/v1/admin/update-project/:projectId
-        ABORT_PROJECT:    `/abort-project/:projectId`,           // PATCH   /api/v1/admin/abort-project/:projectId
-        COMPLETE_PROJECT: `/complete-project/:projectId`,        // PATCH   /api/v1/admin/complete-project/:projectId
-        RESUME_PROJECT:   `/resume-project/:projectId`,          // PATCH   /api/v1/admin/resume-project/:projectId
-        DELETE_PROJECT:   `/delete-project/:projectId`,          // DELETE  /api/v1/admin/delete-project/:projectId
-        ARCHIVE_PROJECT: `/archive-project/:projectId`,           // PATCH   /api/v1/admin/archive-project/:projectId
-        GET_PROJECT:     `/get-project/:projectId`,               // GET     /api/v1/admin/get-project/:projectId
-        GET_PROJECTS:    `/get-projects`,                         // GET     /api/v1/admin/get-projects
+        CREATE_PROJECT:   `/create`,                     // POST    /api/v1/projects/create
+        UPDATE_PROJECT:   `/update/:projectId`,          // PATCH   /api/v1/projects/update/:projectId
+        ON_HOLD_PROJECT:  `/on-hold/:projectId`,           // PATCH   /api/v1/projects/on-hold/:projectId
+        ABORT_PROJECT:    `/abort/:projectId`,           // PATCH   /api/v1/projects/abort/:projectId
+        COMPLETE_PROJECT: `/complete/:projectId`,        // PATCH   /api/v1/projects/complete/:projectId
+        RESUME_PROJECT:   `/resume/:projectId`,          // PATCH   /api/v1/projects/resume/:projectId
+        DELETE_PROJECT:   `/delete/:projectId`,          // DELETE  /api/v1/projects/delete/:projectId
+        ARCHIVE_PROJECT: `/archive/:projectId`,           // PATCH   /api/v1/projects/archive/:projectId
+        GET_PROJECT:     `/get/:projectId`,               // GET     /api/v1/projects/get/:projectId
+        LIST_PROJECTS:    `/list`                        // GET     /api/v1/projects/list
+    },
+    STAKEHOLDER_ROUTES: {
+        CREATE_STAKEHOLDER: `/create`,                     // POST    /api/v1/stakeholders/create
+        UPDATE_STAKEHOLDER: `/update/:stakeholderId`,       // PATCH   /api/v1/stakeholders/update/:stakeholderId
+        DELETE_STAKEHOLDER: `/delete/:stakeholderId`,       // DELETE  /api/v1/stakeholders/delete/:stakeholderId
+        GET_STAKEHOLDER:    `/get/:stakeholderId`,          // GET     /api/v1/stakeholders/get/:stakeholderId
+        LIST_STAKEHOLDERS:   `/list`                            // GET     /api/v1/stakeholders/list
+    },
+    CLIENT_ROUTES: {
+        GET_PROJECT: `/view-project/:projectId`, // GET /api/v1/clients/get/:projectId
+        LIST_PROJECTS: `/list-project`, // GET /api/v1/clients/list
+        GET_STAKEHOLDER: `/get-stakeholder/:stakeholderId`, // GET /api/v1/clients/get-stakeholder/:stakeholderId
+        LIST_STAKEHOLDERS: `/list-stakeholder` // GET /api/v1/clients/list-stakeholder
     }
 };

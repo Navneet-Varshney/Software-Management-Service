@@ -105,6 +105,22 @@ const FieldDefinitions = {
     },
   },
 
+  // ── ON_HOLD PROJECT ──────────────────────────────────────
+  ON_HOLD_PROJECT: {
+    ON_HOLD_REASON_TYPE: {
+      field: "onHoldReasonType",
+      required: true,
+      validation: validationRules.onHoldReasonType,
+      description: "Reason category for putting on hold (enum)"
+    },
+    ON_HOLD_REASON_DESCRIPTION: {
+      field: "onHoldReasonDescription",
+      required: false,
+      validation: validationRules.reasonDescription,
+      description: "Optional free-text elaboration on on-hold reason"
+    },
+  },
+
   // ── ABORT PROJECT ────────────────────────────────────────────────────
   ABORT_PROJECT: {
     ABORT_REASON_TYPE: {
@@ -158,6 +174,56 @@ const FieldDefinitions = {
 
   // ── ARCHIVE PROJECT (no required body fields – projectId in params) ─
   ARCHIVE_PROJECT: {},
+
+  // ── CREATE STAKEHOLDER ────────────────────────────────────────────────
+  // NOTE: role-guard middleware handles admin vs client role-type split;
+  //       validation middleware only checks userId format and field presence.
+  CREATE_STAKEHOLDER: {
+    PROJECT_ID: {
+      field: "projectId",
+      required: true,
+      validation: validationRules.mongoId,   // MongoID check handled in service / fetch middleware
+      description: "MongoDB ObjectId of the project this stakeholder belongs to"
+    },
+    USER_ID: {
+      field: "userId",
+      required: true,
+      validation: validationRules.userId,
+      description: "USR-prefixed custom user ID of the stakeholder (admin or client)"
+    },
+    ROLE: {
+      field: "role",
+      required: true,
+      validation: null,   // role-guard middleware enforces admin vs client split
+      description: "ProjectRole (admin) or ClientRole (client) — enforced by role-guard"
+    },
+  },
+
+  // ── UPDATE STAKEHOLDER ────────────────────────────────────────────────
+  UPDATE_STAKEHOLDER: {
+    ROLE: {
+      field: "role",
+      required: true,
+      validation: null,   // role-guard middleware enforces admin vs client split
+      description: "New role to assign — must match the user's entity type"
+    },
+  },
+
+  // ── DELETE STAKEHOLDER ────────────────────────────────────────────────
+  DELETE_STAKEHOLDER: {
+    DELETION_REASON_TYPE: {
+      field: "deletionReasonType",
+      required: true,
+      validation: validationRules.stakeholderDeletionReasonType,
+      description: "Reason category for deleting the stakeholder (enum)"
+    },
+    DELETION_REASON_DESCRIPTION: {
+      field: "deletionReasonDescription",
+      required: false,
+      validation: validationRules.reasonDescription,
+      description: "Optional free-text elaboration on deletion reason"
+    },
+  },
 
 };
 
