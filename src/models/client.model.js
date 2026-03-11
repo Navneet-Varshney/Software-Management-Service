@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const { firstNameLength } = require("@configs/fields-length.config");
-const { FirstNameFieldSetting, ClientRoleTypes } = require("@configs/enums.config");
+const { FirstNameFieldSetting, ClientTypes } = require("@configs/enums.config");
 const { firstNameRegex, customIdRegex } = require("@configs/regex.config");
 const { FIRST_NAME_SETTING } = require("@configs/security.config");
 const { DB_COLLECTIONS } = require("@/configs/db-collections.config");
@@ -46,10 +46,19 @@ const clientSchema = new mongoose.Schema({
 
     /* ---------------- Governance Hierarchy ---------------- */
 
-    role: {
+    clientType: {
         type: String,
-        enum: Object.values(ClientRoleTypes),
-        required: true
+        enum: Object.values(ClientTypes),
+        default: ClientTypes.INDIVIDUAL
+    },
+
+    organizationIds: {
+        type: [mongoose.Schema.Types.ObjectId],
+        default: [],
+        validate: {
+            validator: arr => new Set(arr.map(String)).size === arr.length,
+            message: "Duplicate organizationIds are not allowed."
+        }
     }
 
 }, { timestamps: true, versionKey: false });
@@ -74,6 +83,27 @@ clientSchema.pre("validate", function () {
                 "First Name is required as per configuration."
             );
         }
+    }
+
+    // Organization validation
+    if (this.clientType !== ClientTypes.INDIVIDUAL) {
+        if (!this.organizationIds || this.organizationIds.length === 0) {
+            this.invalidate(
+                "organizationIds",
+                "At least one organizationId is required when clientType is not INDIVIDUAL."
+            );
+        }
+    }
+
+    if (
+        this.clientType === ClientTypes.INDIVIDUAL &&
+        this.organizationIds &&
+        this.organizationIds.length > 0
+    ) {
+        this.invalidate(
+            "organizationIds",
+            "Individual clients cannot belong to organizations."
+        );
     }
 
 });

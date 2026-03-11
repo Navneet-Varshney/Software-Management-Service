@@ -3,7 +3,7 @@
 const mongoose = require("mongoose");
 const { DB_COLLECTIONS } = require("@/configs/db-collections.config");
 const { customIdRegex } = require("@configs/regex.config");
-const { ProjectCreationReason, ProjectUpdationReason, ProjectStatus, ProjectResumeReason, ProjectAbortReason, ProjectDeletionReason, Phases } = require("@configs/enums.config");
+const { ProjectCreationReason, ProjectUpdationReason, ProjectStatus, ProjectOnHoldReason, ProjectResumeReason, ProjectAbortReason, ProjectDeletionReason, Phases } = require("@configs/enums.config");
 const {
   projectNameLength,
   descriptionLength,
@@ -158,6 +158,34 @@ const projectSchema = new mongoose.Schema(
       trim: true,
       minlength: descriptionLength.min,
       maxlength: descriptionLength.max,
+    },
+
+    onHoldReasonType: {
+      type: String,
+      default: null,
+      enum: {
+        values: [null, ...Object.values(ProjectOnHoldReason)],
+        message: `onHoldReasonType must be one of: ${Object.values(ProjectOnHoldReason).join(", ")}`
+      }
+    },
+
+    onHoldReasonDescription: {
+      type: String,
+      default: null,
+      trim: true,
+      minlength: descriptionLength.min,
+      maxlength: descriptionLength.max,
+    },
+
+    onHoldAt: {
+      type: Date,
+      default: null,
+    },
+
+    onHoldBy: {
+      type: String,
+      default: null,
+      match: [customIdRegex, "onHoldBy must be a valid USR ID."],
     },
 
     completedAt: {

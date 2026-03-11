@@ -1,11 +1,13 @@
 const { customIdRegex } = require("@/configs/regex.config");
 const { DB_COLLECTIONS } = require("@/configs/db-collections.config");
-const { InceptionDeletionReason } = require("@/configs/enums.config");
+const { PhaseDeletionReason } = require("@/configs/enums.config");
+const { descriptionLength } = require("@/configs/fields-length.config");
+const mongoose = require("mongoose");
 
 const inceptionSchema = new mongoose.Schema({
 
   projectId: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
     ref: DB_COLLECTIONS.PROJECTS,
     required: true,
     index: true
@@ -50,7 +52,7 @@ const inceptionSchema = new mongoose.Schema({
 
   deletionReasonType: {
     type: String,
-    enum: Object.values(InceptionDeletionReason),
+    enum: Object.values(PhaseDeletionReason),
     default: null
   },
 

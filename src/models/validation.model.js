@@ -1,12 +1,13 @@
+const mongoose = require("mongoose");
 const { descriptionLength } = require("@/configs/fields-length.config");
 const { customIdRegex } = require("@/configs/regex.config");
 const { DB_COLLECTIONS } = require("@/configs/db-collections.config");
-const { ValidationDeletionReason } = require("@/configs/enums.config");
+const { PhaseDeletionReason, ValidationPhaseStatus } = require("@/configs/enums.config");
 
 const validationSchema = new mongoose.Schema({
 
   projectId: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
     ref: DB_COLLECTIONS.PROJECTS,
     required: true,
     index: true
@@ -33,6 +34,17 @@ const validationSchema = new mongoose.Schema({
     match: customIdRegex
   },
 
+  status : { 
+    type: String,
+    enum: Object.values(ValidationPhaseStatus),
+    default: ValidationPhaseStatus.DRAFT
+  },
+
+  isApproved: {
+    type: Boolean,
+    default: false
+  },
+
   isDeleted: {
     type: Boolean,
     default: false
@@ -51,7 +63,7 @@ const validationSchema = new mongoose.Schema({
 
   deletionReasonType: {
     type: String,
-    enum: Object.values(ValidationDeletionReason),
+    enum: Object.values(PhaseDeletionReason),
     default: null
   },
 

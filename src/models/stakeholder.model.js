@@ -1,7 +1,8 @@
-const { ClientRoleTypes, Phases, AdminRoleTypes } = require("@/configs/enums.config");
+const { ClientRoleTypes, Phases, StakeholderDeletionReason, ProjectRoleTypes } = require("@/configs/enums.config");
 const { customIdRegex } = require("@/configs/regex.config");
 const mongoose = require("mongoose");
 const { DB_COLLECTIONS } = require("@configs/db-collections.config");
+const { descriptionLength } = require("@/configs/fields-length.config");
 
 const stakeholderSchema = new mongoose.Schema({
 
@@ -13,8 +14,14 @@ const stakeholderSchema = new mongoose.Schema({
     index: true
   },
 
+  organizationId: {
+    type: mongoose.Schema.Types.ObjectId,
+    default: null,
+    index: true
+  },
+
   projectId: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
     ref: DB_COLLECTIONS.PROJECTS,
     required: true,
     index: true
@@ -22,7 +29,7 @@ const stakeholderSchema = new mongoose.Schema({
 
   role: {
     type: String,
-    enum: [...Object.values(ClientRoleTypes), ...Object.values(AdminRoleTypes)],
+    enum: [...Object.values(ClientRoleTypes), ...Object.values(ProjectRoleTypes)],
     required: true
   },
 
@@ -43,6 +50,35 @@ const stakeholderSchema = new mongoose.Schema({
     default: Phases.INCEPTION,
     immutable: true,
     required: true
+  },
+
+  isDeleted: {
+    type: Boolean,
+    default: false
+  },
+
+  deletedAt: {
+    type: Date,
+    default: null
+  },
+
+  deletedBy: {
+    type: String,
+    default: null,
+    match: customIdRegex
+  },
+
+  deletionReasonType: {
+    type: String,
+    default: null, 
+    enum: Object.values(StakeholderDeletionReason)
+  },
+
+  deletionReasonDescription: {
+    type: String,
+    default: null,
+    minlength: descriptionLength.min,
+    maxlength: descriptionLength.max
   }
 
 }, {
@@ -52,7 +88,7 @@ const stakeholderSchema = new mongoose.Schema({
 });
 
 stakeholderSchema.index(
-  { stakeholderId: 1, projectId: 1 },
+  { stakeholderId: 1, projectId: 1, organizationId: 1 },
   { unique: true }
 );
 
