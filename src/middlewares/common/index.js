@@ -6,7 +6,8 @@ const { validateJwtPayloadMiddleware } = require("./validate-jwt-payload.middlew
 const { validateRedisPayloadMiddleware } = require("./validate-redis-payload.middleware");
 const { verifyDeviceField } = require("./verify-device-field.middleware");
 const { verifyJWTSignatureMiddleware } = require("./verify-jwt-signature.middleware");
-const { apiAuthorizationMiddleware } = require("./api-authorization.middleware");
+const { apiAuthorizationMiddleware } = require("../admins/admin-api-authorization.middleware");
+const { checkUserIsStakeholder } = require("../stakeholders/check-user-is-stakeholder.middleware");
 
 const commonMiddlewares = {
     requestIdMiddleware,
@@ -17,7 +18,8 @@ const commonMiddlewares = {
     validateRedisPayloadMiddleware,
     isUserAccountBlocked,
     isUserAccountActive,
-    apiAuthorizationMiddleware
+    apiAuthorizationMiddleware,
+    checkUserIsStakeholder
 }
 
 module.exports = {
