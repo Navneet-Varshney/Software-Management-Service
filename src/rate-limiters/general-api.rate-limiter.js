@@ -8,6 +8,7 @@ const welcomeClientRateLimiter = createRateLimiter(perUserAndDevice.welcomeClien
 
 const createProjectRateLimiter   = createRateLimiter(perUserAndDevice.createProject);
 const updateProjectRateLimiter   = createRateLimiter(perUserAndDevice.updateProject);
+const onHoldProjectRateLimiter   = createRateLimiter(perUserAndDevice.onHoldProject);
 const abortProjectRateLimiter    = createRateLimiter(perUserAndDevice.abortProject);
 const completeProjectRateLimiter = createRateLimiter(perUserAndDevice.completeProject);
 const resumeProjectRateLimiter   = createRateLimiter(perUserAndDevice.resumeProject);
@@ -16,11 +17,18 @@ const archiveProjectRateLimiter  = createRateLimiter(perUserAndDevice.archivePro
 const getProjectRateLimiter      = createRateLimiter(perUserAndDevice.getProject);
 const getProjectsRateLimiter     = createRateLimiter(perUserAndDevice.getProjects);
 
+const createStakeholderRateLimiter = createRateLimiter(perUserAndDevice.createStakeholder);
+const updateStakeholderRateLimiter = createRateLimiter(perUserAndDevice.updateStakeholder);
+const deleteStakeholderRateLimiter = createRateLimiter(perUserAndDevice.deleteStakeholder);
+const getStakeholderRateLimiter    = createRateLimiter(perUserAndDevice.getStakeholder);
+const getStakeholdersRateLimiter   = createRateLimiter(perUserAndDevice.getStakeholders);
+
 module.exports = {
     welcomeAdminRateLimiter,
     welcomeClientRateLimiter,
     createProjectRateLimiter,
     updateProjectRateLimiter,
+    onHoldProjectRateLimiter,
     abortProjectRateLimiter,
     completeProjectRateLimiter,
     resumeProjectRateLimiter,
@@ -28,4 +36,9 @@ module.exports = {
     archiveProjectRateLimiter,
     getProjectRateLimiter,
     getProjectsRateLimiter,
+    createStakeholderRateLimiter,
+    updateStakeholderRateLimiter,
+    deleteStakeholderRateLimiter,
+    getStakeholderRateLimiter,
+    getStakeholdersRateLimiter,
 }
