@@ -1,15 +1,15 @@
 // routes/admin.routes.js
 
 const express = require("express");
-const adminRouter = express.Router();
+const projectRouter = express.Router();
 
-const { ADMIN_ROUTES } = require("@/configs/uri.config");
-const { baseAuthAdminMiddlewares } = require("./middleware.gateway.routes");
-const { apiAuthorizationMiddleware } = require("@middlewares/common/api-authorization.middleware");
-const { adminMiddlewares } = require("@middlewares/admins");
+const { PROJECT_ROUTES } = require("@/configs/uri.config");
+const { baseAuthAdminMiddlewares, baseAuthClientMiddlewares, checkClientIsStakeholder } = require("./middleware.gateway.routes");
+const { adminApiAuthorizationMiddleware: apiAuthorizationMiddleware } = require("@/middlewares/admins/admin-api-authorization.middleware");
 const {
   createProjectRateLimiter,
   updateProjectRateLimiter,
+  onHoldProjectRateLimiter,
   abortProjectRateLimiter,
   completeProjectRateLimiter,
   resumeProjectRateLimiter,
@@ -21,6 +21,7 @@ const {
 
 const { createProjectController }           = require("@controllers/projects/create-project.controller");
 const { updateProjectController }           = require("@controllers/projects/update-project.controller");
+const { onHoldProjectController }           = require("@controllers/projects/on-hold-project.controller");
 const { abortProjectController }            = require("@controllers/projects/abort-project.controller");
 const { completeProjectController }         = require("@controllers/projects/complete-project.controller");
 const { resumeProjectController }           = require("@controllers/projects/resume-project.controller");
@@ -30,6 +31,8 @@ const { getProjectAdminController }         = require("@controllers/projects/get
 const { getProjectsAdminController }        = require("@controllers/projects/get-projects-admin.controller");
 const { getProjectClientController }        = require("@controllers/projects/get-project-client.controller");
 const { getProjectsClientController }       = require("@controllers/projects/get-projects-client.controller");
+const { fetchProjectMiddleware } = require("@/middlewares/projects/fetch-project.middleware");
+const { projectMiddlewares } = require("@/middlewares/projects");
 
 const {
   CREATE_PROJECT,
@@ -40,8 +43,8 @@ const {
   DELETE_PROJECT,
   ARCHIVE_PROJECT,
   GET_PROJECT,
-  GET_PROJECTS,
-} = ADMIN_ROUTES;
+  LIST_PROJECTS: GET_PROJECTS,
+} = PROJECT_ROUTES;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Middleware chain order:
@@ -58,14 +61,14 @@ const {
  * Create a new project.
  * Allowed roles: CEO, Business Analyst
  */
-adminRouter.post(
+projectRouter.post(
   CREATE_PROJECT,
   [
     ...baseAuthAdminMiddlewares,
     createProjectRateLimiter,
     apiAuthorizationMiddleware.authorizeAdminCreateProject,
-    adminMiddlewares.createProjectPresenceMiddleware,
-    adminMiddlewares.createProjectValidationMiddleware,
+    projectMiddlewares.createProjectPresenceMiddleware,
+    projectMiddlewares.createProjectValidationMiddleware,
   ],
   createProjectController
 );
@@ -75,16 +78,35 @@ adminRouter.post(
  * Update core content fields of an existing project.
  * Allowed roles: CEO, Business Analyst, Manager
  */
-adminRouter.patch(
+projectRouter.patch(
   UPDATE_PROJECT,
   [
     ...baseAuthAdminMiddlewares,
     updateProjectRateLimiter,
     apiAuthorizationMiddleware.authorizeAdminUpdateProject,
-    adminMiddlewares.updateProjectPresenceMiddleware,
-    adminMiddlewares.updateProjectValidationMiddleware,
+    fetchProjectMiddleware,
+    projectMiddlewares.updateProjectPresenceMiddleware,
+    projectMiddlewares.updateProjectValidationMiddleware,
   ],
   updateProjectController
+);
+
+/**
+ * PATCH /software-management-service/api/v1/projects/on-hold/:projectId
+ * Put an active project on hold.
+ * Allowed roles: CEO, Manager
+ */
+projectRouter.patch(
+  `/on-hold/:projectId`,
+  [
+    ...baseAuthAdminMiddlewares,
+    onHoldProjectRateLimiter,
+    apiAuthorizationMiddleware.authorizeAdminOnHoldProject,
+    fetchProjectMiddleware,
+    projectMiddlewares.onHoldProjectPresenceMiddleware,
+    projectMiddlewares.onHoldProjectValidationMiddleware,
+  ],
+  onHoldProjectController
 );
 
 /**
@@ -92,14 +114,15 @@ adminRouter.patch(
  * Abort an active/draft/on-hold project.
  * Allowed roles: CEO, Manager
  */
-adminRouter.patch(
+projectRouter.patch(
   ABORT_PROJECT,
   [
     ...baseAuthAdminMiddlewares,
     abortProjectRateLimiter,
     apiAuthorizationMiddleware.authorizeAdminAbortProject,
-    adminMiddlewares.abortProjectPresenceMiddleware,
-    adminMiddlewares.abortProjectValidationMiddleware,
+    fetchProjectMiddleware,
+    projectMiddlewares.abortProjectPresenceMiddleware,
+    projectMiddlewares.abortProjectValidationMiddleware,
   ],
   abortProjectController
 );
@@ -109,14 +132,15 @@ adminRouter.patch(
  * Mark an active project as completed.
  * Allowed roles: CEO, Manager
  */
-adminRouter.patch(
+projectRouter.patch(
   COMPLETE_PROJECT,
   [
     ...baseAuthAdminMiddlewares,
     completeProjectRateLimiter,
     apiAuthorizationMiddleware.authorizeAdminCompleteProject,
-    adminMiddlewares.completeProjectPresenceMiddleware,
-    adminMiddlewares.completeProjectValidationMiddleware,
+    fetchProjectMiddleware,
+    projectMiddlewares.completeProjectPresenceMiddleware,
+    projectMiddlewares.completeProjectValidationMiddleware,
   ],
   completeProjectController
 );
@@ -126,14 +150,15 @@ adminRouter.patch(
  * Resume an on-hold or aborted project.
  * Allowed roles: CEO, Manager
  */
-adminRouter.patch(
+projectRouter.patch(
   RESUME_PROJECT,
   [
     ...baseAuthAdminMiddlewares,
     resumeProjectRateLimiter,
     apiAuthorizationMiddleware.authorizeAdminResumeProject,
-    adminMiddlewares.resumeProjectPresenceMiddleware,
-    adminMiddlewares.resumeProjectValidationMiddleware,
+    fetchProjectMiddleware,
+    projectMiddlewares.resumeProjectPresenceMiddleware,
+    projectMiddlewares.resumeProjectValidationMiddleware,
   ],
   resumeProjectController
 );
@@ -143,14 +168,15 @@ adminRouter.patch(
  * Soft-delete a project (one-time, irreversible).
  * Allowed roles: CEO only
  */
-adminRouter.delete(
+projectRouter.delete(
   DELETE_PROJECT,
   [
     ...baseAuthAdminMiddlewares,
     deleteProjectRateLimiter,
     apiAuthorizationMiddleware.authorizeAdminDeleteProject,
-    adminMiddlewares.deleteProjectPresenceMiddleware,
-    adminMiddlewares.deleteProjectValidationMiddleware,
+    fetchProjectMiddleware,
+    projectMiddlewares.deleteProjectPresenceMiddleware,
+    projectMiddlewares.deleteProjectValidationMiddleware,
   ],
   deleteProjectController
 );
@@ -160,12 +186,13 @@ adminRouter.delete(
  * Archive a completed project (irreversible; archived projects can be deleted).
  * Allowed roles: CEO, Manager
  */
-adminRouter.patch(
+projectRouter.patch(
   ARCHIVE_PROJECT,
   [
     ...baseAuthAdminMiddlewares,
     archiveProjectRateLimiter,
     apiAuthorizationMiddleware.authorizeAdminArchiveProject,
+    fetchProjectMiddleware
   ],
   archiveProjectController
 );
@@ -180,12 +207,12 @@ adminRouter.patch(
  * Fetch full details of a single project (admin view — all fields).
  * Allowed roles: All admin roles
  */
-adminRouter.get(
+projectRouter.get(
   GET_PROJECT,
   [
     ...baseAuthAdminMiddlewares,
     getProjectRateLimiter,
-    apiAuthorizationMiddleware.authorizeAdminGetProject,
+    fetchProjectMiddleware
   ],
   getProjectAdminController
 );
@@ -195,12 +222,11 @@ adminRouter.get(
  * Fetch paginated project list with optional filters (admin view — all fields).
  * Allowed roles: All admin roles
  */
-adminRouter.get(
+projectRouter.get(
   GET_PROJECTS,
   [
     ...baseAuthAdminMiddlewares,
-    getProjectsRateLimiter,
-    apiAuthorizationMiddleware.authorizeAdminGetProjects,
+    getProjectsRateLimiter
   ],
   getProjectsAdminController
 );
@@ -210,12 +236,12 @@ adminRouter.get(
  * Fetch a single project in client-safe view (restricted fields, no audit data).
  * Allowed roles: All admin roles
  */
-adminRouter.get(
+projectRouter.get(
   `/get-project-client/:projectId`,
   [
-    ...baseAuthAdminMiddlewares,
+    ...baseAuthClientMiddlewares,
     getProjectRateLimiter,
-    apiAuthorizationMiddleware.authorizeAdminGetProject,
+
   ],
   getProjectClientController
 );
@@ -225,14 +251,14 @@ adminRouter.get(
  * Fetch paginated projects in client-safe view (restricted fields, no deleted).
  * Allowed roles: All admin roles
  */
-adminRouter.get(
+projectRouter.get(
   `/get-projects-client`,
   [
-    ...baseAuthAdminMiddlewares,
+    checkClientIsStakeholder,
     getProjectsRateLimiter,
-    apiAuthorizationMiddleware.authorizeAdminGetProjects,
+
   ],
   getProjectsClientController
 );
 
-module.exports = { adminRouter };
+module.exports = { projectRouter };

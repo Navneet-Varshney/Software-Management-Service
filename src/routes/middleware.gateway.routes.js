@@ -5,6 +5,7 @@ const {
 const { commonMiddlewares } = require("@middlewares/common/index");
 const { adminMiddlewares } = require("@/middlewares/admins");
 const { clientMiddlewares } = require("@/middlewares/clients");
+const { projectMiddlewares } = require("@/middlewares/projects");
 
 const baseMiddlewares = [
     commonMiddlewares.requestIdMiddleware,
@@ -39,6 +40,18 @@ const baseAuthClientMiddlewares = [
     ...baseAuthMiddlewares,
     clientMiddlewares.fetchRequestClient,
     ...accountStatusMiddlewares
+];
+
+const checkClientIsStakeholder = [
+    ...baseAuthClientMiddlewares,
+    projectMiddlewares.fetchProjectMiddleware,
+    commonMiddlewares.checkUserIsStakeholder
+]
+
+const checkAdminIsStakeholder = [
+    ...baseAuthAdminMiddlewares,
+    projectMiddlewares.fetchProjectMiddleware,
+    commonMiddlewares.checkUserIsStakeholder
 ]
 
 const adminPanelInternalMiddlewares = [
@@ -51,5 +64,7 @@ module.exports = {
     authInternalMiddlewares,
     adminPanelInternalMiddlewares,
     baseAuthAdminMiddlewares,
-    baseAuthClientMiddlewares
+    baseAuthClientMiddlewares,
+    checkClientIsStakeholder,
+    checkAdminIsStakeholder
 };
