@@ -23,6 +23,11 @@ const deleteStakeholderRateLimiter = createRateLimiter(perUserAndDevice.deleteSt
 const getStakeholderRateLimiter    = createRateLimiter(perUserAndDevice.getStakeholder);
 const getStakeholdersRateLimiter   = createRateLimiter(perUserAndDevice.getStakeholders);
 
+const clientGetProjectRateLimiter      = createRateLimiter(perUserAndDevice.clientGetProject);
+const clientListProjectsRateLimiter    = createRateLimiter(perUserAndDevice.clientListProjects);
+const clientGetStakeholderRateLimiter  = createRateLimiter(perUserAndDevice.clientGetStakeholder);
+const clientListStakeholdersRateLimiter = createRateLimiter(perUserAndDevice.clientListStakeholders);
+
 module.exports = {
     welcomeAdminRateLimiter,
     welcomeClientRateLimiter,
@@ -41,4 +46,8 @@ module.exports = {
     deleteStakeholderRateLimiter,
     getStakeholderRateLimiter,
     getStakeholdersRateLimiter,
+    clientGetProjectRateLimiter,
+    clientListProjectsRateLimiter,
+    clientGetStakeholderRateLimiter,
+    clientListStakeholdersRateLimiter,
 }
