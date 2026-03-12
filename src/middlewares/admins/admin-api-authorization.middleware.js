@@ -1,5 +1,6 @@
 const {
-  createAdminRoleAuthMiddleware
+  createAdminRoleAuthMiddleware,
+  createAdminRoleOrStakeholderAuthMiddleware,
 } = require("@middlewares/factory/role-authorization.middleware-factory");
 
 const { ApiRolePermissions } = require("@configs/api-role-permissions.config");
@@ -28,6 +29,16 @@ const authorizeAdminDeleteStakeholder = createAdminRoleAuthMiddleware(ApiRolePer
 const authorizeAdminGetStakeholder    = createAdminRoleAuthMiddleware(ApiRolePermissions.stakeholder.getStakeholder);
 const authorizeAdminGetStakeholders   = createAdminRoleAuthMiddleware(ApiRolePermissions.stakeholder.getStakeholders);
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Combined: Role OR Stakeholder — for read/fetch endpoints
+// Admin gets access if their role is authorized OR if they are a stakeholder
+// of the relevant project (project-specific GET) / any project (list routes).
+// ─────────────────────────────────────────────────────────────────────────────
+const authorizeAdminGetProjectOrStakeholder    = createAdminRoleOrStakeholderAuthMiddleware(ApiRolePermissions.admin.getProject);
+const authorizeAdminGetProjectsOrStakeholder   = createAdminRoleOrStakeholderAuthMiddleware(ApiRolePermissions.admin.getProjects);
+const authorizeAdminGetStakeholderOrMember     = createAdminRoleOrStakeholderAuthMiddleware(ApiRolePermissions.stakeholder.getStakeholder);
+const authorizeAdminGetStakeholdersOrMember    = createAdminRoleOrStakeholderAuthMiddleware(ApiRolePermissions.stakeholder.getStakeholders);
+
 const adminApiAuthorizationMiddleware = {
   authorizeAdminCreateProject,
   authorizeAdminUpdateProject,
@@ -44,6 +55,11 @@ const adminApiAuthorizationMiddleware = {
   authorizeAdminDeleteStakeholder,
   authorizeAdminGetStakeholder,
   authorizeAdminGetStakeholders,
+  // Combined role-or-stakeholder variants
+  authorizeAdminGetProjectOrStakeholder,
+  authorizeAdminGetProjectsOrStakeholder,
+  authorizeAdminGetStakeholderOrMember,
+  authorizeAdminGetStakeholdersOrMember,
 }
 
 module.exports = {

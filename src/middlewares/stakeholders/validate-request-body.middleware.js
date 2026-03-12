@@ -8,9 +8,9 @@ const {
 const { checkBodyPresence } = require("../factory/validate-request-body.middleware-factory");
 
 const presenceMiddlewares = {
-  createStakeholderPresenceMiddleware: checkBodyPresence(createStakeholderField),
-  updateStakeholderPresenceMiddleware: checkBodyPresence(updateStakeholderField),
-  deleteStakeholderPresenceMiddleware: checkBodyPresence(deleteStakeholderField),
+  createStakeholderPresenceMiddleware: checkBodyPresence("createStakeholderPresence",createStakeholderField),
+  updateStakeholderPresenceMiddleware: checkBodyPresence("updateStakeholderPresence",updateStakeholderField),
+  deleteStakeholderPresenceMiddleware: checkBodyPresence("deleteStakeholderPresence",deleteStakeholderField),
 };
 
 module.exports = { presenceMiddlewares };

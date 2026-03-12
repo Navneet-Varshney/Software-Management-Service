@@ -13,14 +13,14 @@ const {
 const { checkBodyPresence } = require("../factory/validate-request-body.middleware-factory");
 
 const presenceMiddlewares = { 
-  createProjectPresenceMiddleware:   checkBodyPresence(createProjectField),
-  updateProjectPresenceMiddleware:   checkBodyPresence(updateProjectField),
-  onHoldProjectPresenceMiddleware:   checkBodyPresence(onHoldProjectField),
-  abortProjectPresenceMiddleware:    checkBodyPresence(abortProjectField),
-  completeProjectPresenceMiddleware: checkBodyPresence(completeProjectField),
-  resumeProjectPresenceMiddleware:  checkBodyPresence(resumeProjectField),
-  deleteProjectPresenceMiddleware:  checkBodyPresence(deleteProjectField),
-  archiveProjectPresenceMiddleware: checkBodyPresence(archiveProjectField),
+  createProjectPresenceMiddleware:   checkBodyPresence("createProjectPresence",   createProjectField),
+  updateProjectPresenceMiddleware:   checkBodyPresence("updateProjectPresence",   updateProjectField),
+  onHoldProjectPresenceMiddleware:   checkBodyPresence("onHoldProjectPresence",   onHoldProjectField),
+  abortProjectPresenceMiddleware:    checkBodyPresence("abortProjectPresence",    abortProjectField),
+  completeProjectPresenceMiddleware: checkBodyPresence("completeProjectPresence", completeProjectField),
+  resumeProjectPresenceMiddleware:   checkBodyPresence("resumeProjectPresence",   resumeProjectField),
+  deleteProjectPresenceMiddleware:   checkBodyPresence("deleteProjectPresence",   deleteProjectField),
+  archiveProjectPresenceMiddleware:  checkBodyPresence("archiveProjectPresence",  archiveProjectField),
 };
 
 module.exports = { presenceMiddlewares };
