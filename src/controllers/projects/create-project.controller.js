@@ -31,6 +31,10 @@ const createProjectController = async (req, res) => {
       name, description, problemStatement, goal,
       projectCreationReasonType,
       projectCreationReasonDescription,
+      projectCategory,
+      expectedBudget,
+      expectedTimelineMonths,
+      orgIds
     } = req.body;
 
     // ── Derive createdBy from authenticated admin ────────────────────
@@ -42,6 +46,10 @@ const createProjectController = async (req, res) => {
       description,
       problemStatement,
       goal,
+      projectCategory,
+      orgIds,
+      expectedBudget,
+      expectedTimelineMonths,
       createdBy,
       projectCreationReasonType,
       projectCreationReasonDescription,
@@ -57,7 +65,7 @@ const createProjectController = async (req, res) => {
         logWithTime(`❌ [createProjectController] Validation error: ${JSON.stringify(result.error)} | ${getLogIdentifiers(req)}`);
         return throwBadRequestError(res, "Validation error", result.error);
       }
-      logWithTime(`❌ [createProjectController] ${result.message} | ${getLogIdentifiers(req)}`);
+      logWithTime(`❌ [createProjectController] ${result.message} | detail: ${result.error || "N/A"} | ${getLogIdentifiers(req)}`);
       return throwSpecificInternalServerError(res, result.message);
     }
 

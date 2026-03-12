@@ -30,9 +30,8 @@ const { logWithTime } = require("@utils/time-stamps.util");
  */
 const updateStakeholderController = async (req, res) => {
   try {
-    const { role } = req.body;
+    const { role, projectId } = req.body;
     const updatedBy  = req.admin.adminId;
-    const projectId  = req.stakeholder.projectId?.toString();
 
     const result = await updateStakeholderService(req.stakeholder, projectId, {
       role,

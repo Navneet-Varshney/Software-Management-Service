@@ -1,6 +1,7 @@
 // controllers/stakeholders/get-stakeholder.controller.js
 
 const { getStakeholderService } = require("@services/stakeholders/get-stakeholder.service");
+const { resolveStakeholderName } = require("@utils/resolve-stakeholder-name.util");
 const { sendStakeholderFetchedSuccess } = require("@/responses/success/stakeholder.response");
 const {
   throwBadRequestError,
@@ -51,8 +52,12 @@ const getStakeholderController = async (req, res) => {
       return throwSpecificInternalServerError(res, result.message);
     }
 
+    // Resolve name from AdminModel / ClientModel and attach to response
+    const name = await resolveStakeholderName(result.stakeholder.stakeholderId);
+    const enriched = { ...result.stakeholder, name };
+
     logWithTime(`✅ [getStakeholderController] Stakeholder fetched successfully | ${getLogIdentifiers(req)}`);
-    return sendStakeholderFetchedSuccess(res, result.stakeholder);
+    return sendStakeholderFetchedSuccess(res, enriched);
   } catch (error) {
     logWithTime(`❌ [getStakeholderController] Unexpected error: ${error.message} | ${getLogIdentifiers(req)}`);
     return throwInternalServerError(res, error);

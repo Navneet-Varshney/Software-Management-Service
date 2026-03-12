@@ -1,6 +1,7 @@
 // controllers/stakeholders/get-stakeholders.controller.js
 
 const { getStakeholdersService } = require("@services/stakeholders/get-stakeholders.service");
+const { enrichStakeholdersWithName } = require("@utils/resolve-stakeholder-name.util");
 const { sendStakeholdersListFetchedSuccess } = require("@/responses/success/stakeholder.response");
 const {
   throwInternalServerError,
@@ -51,10 +52,13 @@ const getStakeholdersController = async (req, res) => {
       return throwSpecificInternalServerError(res, result.message);
     }
 
+    // Enrich each stakeholder with resolved name (batch lookup from Admin/Client)
+    const enriched = await enrichStakeholdersWithName(result.stakeholders);
+
     logWithTime(`✅ [getStakeholdersController] Stakeholders list fetched successfully | ${getLogIdentifiers(req)}`);
     return sendStakeholdersListFetchedSuccess(
       res,
-      result.stakeholders,
+      enriched,
       result.total,
       result.page,
       result.totalPages

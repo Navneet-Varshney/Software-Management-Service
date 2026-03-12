@@ -39,7 +39,7 @@ const VALID_PHASES   = Object.values(Phases);
  * @returns {400} Invalid filter values
  * @returns {500} Internal server error
  */
-const getProjectsAdminController = async (req, res) => {
+const listProjectsAdminController = async (req, res) => {
   try {
     const {
       projectStatus,
@@ -94,22 +94,22 @@ const getProjectsAdminController = async (req, res) => {
       includeDeleted: includeDeleted === "true",
       createdBy,
       search,
-      projectIds,
+      projectIds
     };
 
     const result = await listProjectsAdminService(filters, { page, limit, selectFields });
 
     if (!result.success) {
-      logWithTime(`❌ [getProjectsAdminController] ${result.message} | ${getLogIdentifiers(req)}`);
+      logWithTime(`❌ [listProjectsAdminController] ${result.message} | ${getLogIdentifiers(req)}`);
       return throwSpecificInternalServerError(res, result.message);
     }
 
-    logWithTime(`✅ [getProjectsAdminController] Projects list fetched successfully | ${getLogIdentifiers(req)}`);
+    logWithTime(`✅ Projects list fetched successfully | ${getLogIdentifiers(req)}`);
     return sendProjectsListFetchedSuccess(res, result.projects, result.total, result.page, result.totalPages);
   } catch (error) {
-    logWithTime(`❌ [getProjectsAdminController] Unexpected error: ${error.message} | ${getLogIdentifiers(req)}`);
+    logWithTime(`❌ [listProjectsAdminController] Unexpected error: ${error.message} | ${getLogIdentifiers(req)}`);
     return throwInternalServerError(res, error);
   }
 };
 
-module.exports = { getProjectsAdminController };
+module.exports = { listProjectsAdminController };

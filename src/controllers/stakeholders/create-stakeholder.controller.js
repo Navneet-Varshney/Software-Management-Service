@@ -32,20 +32,14 @@ const { logWithTime } = require("@/utils/time-stamps.util");
  */
 const createStakeholderController = async (req, res) => {
   try {
-    const { projectId, userId, role } = req.body;
+    const { projectId, userId, role, orgId } = req.body;
     const createdBy  = req.admin.adminId;
-
-    // Derive organizationId: only meaningful for client-type users
-    const organizationId =
-      req.stakeholderUser?.entityType === "client"
-        ? req.stakeholderUser.entity?.organizationId ?? null
-        : null;
 
     const result = await createStakeholderService({
       projectId,
       userId,
       role,
-      organizationId,
+      organizationId: orgId || null,
       createdBy,
       auditContext: {
         admin:     req.admin,
@@ -67,7 +61,8 @@ const createStakeholderController = async (req, res) => {
         logWithTime(`❌ [createStakeholderController] Invalid projectId format | ${getLogIdentifiers(req)}`);
         return throwBadRequestError(res, "Invalid projectId format", "projectId must be a valid MongoDB ObjectId.");
       }
-      if (result.message?.startsWith("Cannot add a stakeholder to a")) {
+      if (result.message?.startsWith("Cannot add a stakeholder to a") ||
+          result.message === "Stakeholders cannot be added to an individual project") {
         logWithTime(`❌ [createStakeholderController] ${result.message} | ${getLogIdentifiers(req)}`);
         return throwBadRequestError(res, result.message);
       }

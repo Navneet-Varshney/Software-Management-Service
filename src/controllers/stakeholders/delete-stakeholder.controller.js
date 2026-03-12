@@ -48,6 +48,10 @@ const deleteStakeholderController = async (req, res) => {
         logWithTime(`❌ [deleteStakeholderController] Stakeholder is already deleted | ${getLogIdentifiers(req)}`);
         return throwBadRequestError(res, "Stakeholder is already deleted");
       }
+      if (result.message === "Stakeholders cannot be removed from an individual project") {
+        logWithTime(`❌ [deleteStakeholderController] ${result.message} | ${getLogIdentifiers(req)}`);
+        return throwBadRequestError(res, result.message);
+      }
       if (result.message === "Validation error") {
         logWithTime(`❌ [deleteStakeholderController] Validation error: ${JSON.stringify(result.error)} | ${getLogIdentifiers(req)}`);
         return throwBadRequestError(res, "Validation error", result.error);
