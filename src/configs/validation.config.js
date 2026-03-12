@@ -16,9 +16,10 @@ const {
   ClientRoleTypesHelper,
   StakeholderDeletionReasonHelper,
   ProjectRoleTypesHelper,
+  ProjectCategoryTypesHelper
 } = require("@utils/enum-validators.util");
 
-const { customIdRegex, mongoIdRegex } = require("./regex.config");
+const { customIdRegex, mongoIdRegex, budgetRegex, timelineRegex } = require("./regex.config");
 
 /**
  * Validation rules – single source of truth for field-level constraints.
@@ -45,6 +46,12 @@ const validationRules = {
   },
   mongoId: {
     regex: mongoIdRegex
+  },
+  budget: {
+    regex: budgetRegex
+  },
+  timeline:{
+    regex: timelineRegex
   },
 
   // ── Project enum fields ────────────────────────────
@@ -87,6 +94,9 @@ const validationRules = {
   },
   stakeholderDeletionReasonType: {
     enum: StakeholderDeletionReasonHelper,
+  },
+  projectCategoryType: {
+    enum: ProjectCategoryTypesHelper,
   },
 
 };

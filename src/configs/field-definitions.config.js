@@ -15,16 +15,6 @@ const { validationRules } = require("./validation.config");
 
 const FieldDefinitions = {
 
-  // ── Kept for reference – expand when CREATE_ADMIN endpoint is built ──
-  CREATE_ADMIN: {
-    ADMIN_TYPE: {
-      field: "adminType",
-      required: true,
-      validation: validationRules.adminType,
-      description: "Type of admin (SUPER_ADMIN, SUB_ADMIN)"
-    }
-  },
-
   // ── CREATE PROJECT ───────────────────────────────────────────────────
   CREATE_PROJECT: {
     NAME: {
@@ -62,6 +52,24 @@ const FieldDefinitions = {
       required: false,
       validation: validationRules.reasonDescription,
       description: "Optional free-text elaboration on creation reason"
+    },
+    PROJECT_CATEGORY: {
+      field: "projectCategory",
+      required: true,
+      validation: validationRules.projectCategoryType,
+      description: "Category of project: individual | organization | multi_organization"
+    },
+    EXPECTED_BUDGET: {
+      field: "expectedBudget",
+      required: false,
+      validation: validationRules.budget,
+      description: "Optional expected budget (number)"
+    },
+    EXPECTED_TIMELINE: {
+      field: "expectedTimelineMonths",
+      required: false,
+      validation: validationRules.timeline,
+      description: "Optional expected timeline in months (number)"
     },
   },
 
@@ -102,6 +110,24 @@ const FieldDefinitions = {
       required: false,
       validation: validationRules.reasonDescription,
       description: "Optional free-text elaboration on updation reason"
+    },
+    ORG_ID: {
+      field: "orgId",
+      required: false,
+      validation: validationRules.mongoId,
+      description: "ORGANIZATION only: replace the single associated org"
+    },
+    EXPECTED_BUDGET: {
+      field: "expectedBudget",
+      required: false,
+      validation: null,
+      description: "Optional expected budget (number)"
+    },
+    EXPECTED_TIMELINE: {
+      field: "expectedTimelineMonths",
+      required: false,
+      validation: null,
+      description: "Optional expected timeline in months (number)"
     },
   },
 
@@ -197,6 +223,12 @@ const FieldDefinitions = {
       validation: null,   // role-guard middleware enforces admin vs client split
       description: "ProjectRole (admin) or ClientRole (client) — enforced by role-guard"
     },
+    orgId: {
+      field: "orgId",
+      required: false,
+      validation: validationRules.mongoId,
+      description: "MongoDB ObjectId of the Organization this stakeholder belongs to (derived from req.stakeholder but can be overridden)"
+    }
   },
 
   // ── UPDATE STAKEHOLDER ────────────────────────────────────────────────
@@ -207,10 +239,34 @@ const FieldDefinitions = {
       validation: null,   // role-guard middleware enforces admin vs client split
       description: "New role to assign — must match the user's entity type"
     },
+    projectId: {
+      field: "projectId",
+      required: true,
+      validation: validationRules.mongoId,   // MongoID check handled in service / fetch middleware
+      description: "MongoDB ObjectId of the project this stakeholder belongs to (derived from req.stakeholder but can be overridden)"
+    },
+    orgId: {
+      field: "orgId",
+      required: false,
+      validation: validationRules.mongoId,
+      description: "MongoDB ObjectId of the Organization this stakeholder belongs to (derived from req.stakeholder but can be overridden)"
+    }
   },
 
   // ── DELETE STAKEHOLDER ────────────────────────────────────────────────
   DELETE_STAKEHOLDER: {
+    projectId: {
+      field: "projectId",
+      required: true,
+      validation: validationRules.mongoId,   // MongoID check handled in service / fetch middleware
+      description: "MongoDB ObjectId of the project this stakeholder belongs to (derived from req.stakeholder but can be overridden)"
+    },
+    orgId: {
+      field: "orgId",
+      required: false,
+      validation: validationRules.mongoId,
+      description: "MongoDB ObjectId of the Organization this stakeholder belongs to (derived from req.stakeholder but can be overridden)"
+    },
     DELETION_REASON_TYPE: {
       field: "deletionReasonType",
       required: true,

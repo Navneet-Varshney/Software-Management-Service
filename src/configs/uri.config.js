@@ -50,9 +50,9 @@ module.exports = {
         LIST_STAKEHOLDERS:   `/list`                            // GET     /api/v1/stakeholders/list
     },
     CLIENT_ROUTES: {
-        GET_PROJECT: `/view-project/:projectId`, // GET /api/v1/clients/get/:projectId
-        LIST_PROJECTS: `/list-project`, // GET /api/v1/clients/list
-        GET_STAKEHOLDER: `/get-stakeholder/:stakeholderId`, // GET /api/v1/clients/get-stakeholder/:stakeholderId
-        LIST_STAKEHOLDERS: `/list-stakeholder` // GET /api/v1/clients/list-stakeholder
+        GET_PROJECT:       `/view-project/:projectId`,         // GET /software-management-service/api/v1/clients/view-project/:projectId
+        LIST_PROJECTS:     `/list-projects`,                   // GET /software-management-service/api/v1/clients/list-projects
+        GET_STAKEHOLDER:   `/get-stakeholder/:stakeholderId`,  // GET /software-management-service/api/v1/clients/get-stakeholder/:stakeholderId
+        LIST_STAKEHOLDERS: `/list-stakeholders`                // GET /software-management-service/api/v1/clients/list-stakeholders
     }
 };

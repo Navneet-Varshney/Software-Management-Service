@@ -224,8 +224,7 @@ const ProjectStatus = Object.freeze({
   ACTIVE: "ACTIVE",
   ON_HOLD: "ON_HOLD",
   COMPLETED: "COMPLETED",
-  ABORTED: "ABORTED",
-  ARCHIVED: "ARCHIVED"
+  ABORTED: "ABORTED"
 });
 
 const ProjectDeletionReason = Object.freeze({
@@ -275,6 +274,12 @@ const ProjectRoleTypes = Object.freeze({
   OTHER: "other"
 });
 
+const ProjectCategoryTypes = Object.freeze({
+  INDIVIDUAL: "individual",
+  ORGANIZATION: "organization",
+  MULTI_ORGANIZATION: "multi_organization"
+});
+
 module.exports = {
   AdminTypes,
   RoleHierarchy,
@@ -311,5 +316,6 @@ module.exports = {
   StakeholderDeletionReason,
   PhaseDeletionReason,
   ValidationPhaseStatus,
-  ProjectRoleTypes
+  ProjectRoleTypes,
+  ProjectCategoryTypes
 };

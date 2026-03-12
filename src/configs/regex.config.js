@@ -9,5 +9,7 @@ module.exports = {
     // Uniform ID pattern: All users (Admin, Client, User) use USR prefix
     // Differentiation is done via type field in database, not ID prefix
     customIdRegex: /^USR[0-9]{7}$/,
-    requestIdRegex: /^REQ[0-9]{10}$/
+    requestIdRegex: /^REQ[0-9]{10}$/,
+    timelineRegex: /^(?:[1-9]|[1-9]\d|1[01]\d|120)$/,
+    budgetRegex: /^\d{1,12}$/
 }

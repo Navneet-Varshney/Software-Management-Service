@@ -139,6 +139,36 @@ module.exports = {
       prefix: "get_stakeholders",
       reason: "Get stakeholders endpoint abuse",
       message: "Too many requests to get stakeholders endpoint. Please try again later."
+    },
+
+    // ── Client-facing read endpoints ─────────────────────────────────────────
+    clientGetProject: {
+      maxRequests: 30,
+      windowMs: 60 * 1000,
+      prefix: "client_get_project",
+      reason: "Client get project endpoint abuse",
+      message: "Too many requests to view project. Please try again later."
+    },
+    clientListProjects: {
+      maxRequests: 30,
+      windowMs: 60 * 1000,
+      prefix: "client_list_projects",
+      reason: "Client list projects endpoint abuse",
+      message: "Too many requests to list projects. Please try again later."
+    },
+    clientGetStakeholder: {
+      maxRequests: 30,
+      windowMs: 60 * 1000,
+      prefix: "client_get_stakeholder",
+      reason: "Client get stakeholder endpoint abuse",
+      message: "Too many requests to get stakeholder. Please try again later."
+    },
+    clientListStakeholders: {
+      maxRequests: 30,
+      windowMs: 60 * 1000,
+      prefix: "client_list_stakeholders",
+      reason: "Client list stakeholders endpoint abuse",
+      message: "Too many requests to list stakeholders. Please try again later."
     }
   }
 };
