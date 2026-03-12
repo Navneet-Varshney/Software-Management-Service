@@ -1,12 +1,12 @@
 const { ClientRoleTypes, Phases, StakeholderDeletionReason, ProjectRoleTypes } = require("@/configs/enums.config");
-const { customIdRegex } = require("@/configs/regex.config");
+const { customIdRegex, mongoIdRegex } = require("@/configs/regex.config");
 const mongoose = require("mongoose");
 const { DB_COLLECTIONS } = require("@configs/db-collections.config");
 const { descriptionLength } = require("@/configs/fields-length.config");
 
 const stakeholderSchema = new mongoose.Schema({
 
-  stakeholderId: {
+  userId: {
     type: String,
     immutable: true,
     required: true,
@@ -15,7 +15,8 @@ const stakeholderSchema = new mongoose.Schema({
   },
 
   organizationId: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: String,
+    match: mongoIdRegex,
     default: null,
     index: true
   },
@@ -88,7 +89,7 @@ const stakeholderSchema = new mongoose.Schema({
 });
 
 stakeholderSchema.index(
-  { stakeholderId: 1, projectId: 1, organizationId: 1 },
+  { userId: 1, projectId: 1 },
   { unique: true }
 );
 

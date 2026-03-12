@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const { firstNameLength } = require("@configs/fields-length.config");
 const { FirstNameFieldSetting, ClientTypes } = require("@configs/enums.config");
-const { firstNameRegex, customIdRegex } = require("@configs/regex.config");
+const { firstNameRegex, customIdRegex, mongoIdRegex } = require("@configs/regex.config");
 const { FIRST_NAME_SETTING } = require("@configs/security.config");
 const { DB_COLLECTIONS } = require("@/configs/db-collections.config");
 
@@ -53,10 +53,13 @@ const clientSchema = new mongoose.Schema({
     },
 
     organizationIds: {
-        type: [mongoose.Schema.Types.ObjectId],
+        type: [{
+            type: String,
+            match: mongoIdRegex
+        }],
         default: [],
         validate: {
-            validator: arr => new Set(arr.map(String)).size === arr.length,
+            validator: arr => new Set(arr).size === arr.length,
             message: "Duplicate organizationIds are not allowed."
         }
     }

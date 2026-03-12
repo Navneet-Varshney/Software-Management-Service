@@ -2,8 +2,8 @@
 
 const mongoose = require("mongoose");
 const { DB_COLLECTIONS } = require("@/configs/db-collections.config");
-const { customIdRegex } = require("@configs/regex.config");
-const { ProjectCreationReason, ProjectUpdationReason, ProjectStatus, ProjectOnHoldReason, ProjectResumeReason, ProjectAbortReason, ProjectDeletionReason, Phases } = require("@configs/enums.config");
+const { customIdRegex, mongoIdRegex } = require("@configs/regex.config");
+const { ProjectCreationReason, ProjectUpdationReason, ProjectStatus, ProjectOnHoldReason, ProjectResumeReason, ProjectAbortReason, ProjectDeletionReason, Phases, ProjectCategoryTypes } = require("@configs/enums.config");
 const {
   projectNameLength,
   descriptionLength,
@@ -62,6 +62,44 @@ const projectSchema = new mongoose.Schema(
     version: {
       type: String,
       default: "v1.0",
+    },
+
+    expectedBudget: {
+      type: Number,
+      default: null,
+      min: [0, "Expected budget cannot be negative."],
+    },
+
+    expectedTimelineMonths: {
+      type: Number,
+      default: null,
+      min: [0, "Expected timeline cannot be negative."],
+    },
+
+    linkedProjectId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: DB_COLLECTIONS.PROJECTS,
+      default: null
+    },
+
+    projectCategory: {
+      type: String,
+      enum: Object.values(ProjectCategoryTypes),
+      default: ProjectCategoryTypes.INDIVIDUAL
+    },
+
+    orgIds: {
+      type: [{
+        type: String,
+        match: mongoIdRegex
+      }],
+      default: [],
+      validate: {
+        validator: function (v) {
+          return new Set(v).size === v.length;
+        },
+        message: "Duplicate organisation IDs are not allowed."
+      }
     },
 
     /* ── Audit trail ────────────────────────────────────────────────── */
@@ -268,7 +306,30 @@ const projectSchema = new mongoose.Schema(
   }
 );
 
-projectSchema.pre("save", function (next) {
+projectSchema.pre("validate", async function () {
+
+  const orgIds = this.orgIds || [];
+
+  if (this.projectCategory === ProjectCategoryTypes.INDIVIDUAL) {
+    if (orgIds.length !== 0) {
+      throw new Error("Individual projects must not contain any organisation IDs.");
+    }
+  }
+
+  if (this.projectCategory === ProjectCategoryTypes.ORGANIZATION) {
+    if (orgIds.length !== 1) {
+      throw new Error("Organisation projects must contain exactly one organisation ID.");
+    }
+  }
+
+  if (this.projectCategory === ProjectCategoryTypes.MULTI_ORGANIZATION) {
+    if (orgIds.length < 1) {
+      throw new Error("Multi-organisation projects must contain at least one organisation ID.");
+    }
+  }
+});
+
+projectSchema.pre("save", async function () {
   if (this.projectStatus === ProjectStatus.ABORTED && !this.abortedAt) {
     this.abortedAt = new Date();
   }
@@ -277,7 +338,9 @@ projectSchema.pre("save", function (next) {
     this.completedAt = new Date();
   }
 
-  next();
+  if (this.projectCategory === ProjectCategoryTypes.INDIVIDUAL) {
+    this.orgIds = [];
+  }
 });
 
 const ProjectModel = mongoose.model(DB_COLLECTIONS.PROJECTS, projectSchema);
