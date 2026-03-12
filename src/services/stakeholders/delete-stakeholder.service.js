@@ -7,7 +7,7 @@ const { convertOnHoldToActiveProjectService } = require("@services/projects/on-h
 const { logActivityTrackerEvent } = require("@services/audit/activity-tracker.service");
 const { prepareAuditData } = require("@utils/audit-data.util");
 const { ACTIVITY_TRACKER_EVENTS } = require("@configs/tracker.config");
-const { ProjectStatus } = require("@configs/enums.config");
+const { ProjectStatus, ProjectCategoryTypes } = require("@configs/enums.config");
 
 /**
  * Soft-deletes a stakeholder and runs version control on the project's current phase.
@@ -33,6 +33,11 @@ const deleteStakeholderService = async (
 
     // ── Load project for version control + ON_HOLD check ───────────────────────
     const project = await ProjectModel.findOne({ _id: stakeholder.projectId, isDeleted: false });
+
+    // ── Guard: individual projects cannot have stakeholders removed ────────────
+    if (project && project.projectCategory === ProjectCategoryTypes.INDIVIDUAL) {
+      return { success: false, message: "Stakeholders cannot be removed from an individual project" };
+    }
 
     if (project && project.projectStatus === ProjectStatus.ON_HOLD) {
       const converted = await convertOnHoldToActiveProjectService(project._id.toString(), {

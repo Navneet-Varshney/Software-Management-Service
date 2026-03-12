@@ -5,7 +5,8 @@ const { logActivityTrackerEvent } = require("@services/audit/activity-tracker.se
 const { prepareAuditData } = require("@utils/audit-data.util");
 const { ACTIVITY_TRACKER_EVENTS } = require("@configs/tracker.config");
 const { generateVersion } = require("@/utils/version.util");
-const { ProjectStatus } = require("@/configs/enums.config");
+const { ProjectStatus, ProjectCategoryTypes } = require("@/configs/enums.config");
+const { isValidMongoID } = require("@/utils/id-validators.util");
 
 /**
  * Updates the core content fields of an existing project.
@@ -22,8 +23,13 @@ const { ProjectStatus } = require("@/configs/enums.config");
  * @param {string} [updates.description]
  * @param {string} [updates.problemStatement]
  * @param {string} [updates.goal]
- * @param {string} updates.updatedBy                    - Admin USR ID
- * @param {string} updates.projectUpdationReasonType    - enum value (required)
+ * @param {number} [updates.expectedBudget]
+ * @param {number} [updates.expectedTimelineMonths]
+ * @param {string[]} [updates.addedOrgIds]           - MULTI_ORGANIZATION only: org IDs to add
+ * @param {string[]} [updates.removedOrgIds]         - MULTI_ORGANIZATION only: org IDs to remove
+ * @param {string} [updates.orgId]                  - ORGANIZATION only: replace single orgId
+ * @param {string} updates.updatedBy
+ * @param {string} updates.projectUpdationReasonType
  * @param {string} [updates.projectUpdationReasonDescription]
  * @param {Object} updates.auditContext
  *
@@ -50,7 +56,7 @@ const updateProjectService = async (projectId, updates) => {
     }
 
     // 2. Build update payload — only include supplied fields
-    const allowedFields = ["name", "description", "problemStatement", "goal"];
+    const allowedFields = ["name", "description", "problemStatement", "goal", "expectedBudget", "expectedTimelineMonths"];
     const updatePayload = {};
 
     allowedFields.forEach((field) => {
@@ -59,8 +65,55 @@ const updateProjectService = async (projectId, updates) => {
       }
     });
 
+    // 2b. Org IDs management based on project category
+    let hasOrgChanges = false;
+
+    if (existing.projectCategory === ProjectCategoryTypes.INDIVIDUAL) {
+      // Individual projects never have orgIds — silently clear if somehow polluted
+      if (existing.orgIds && existing.orgIds.length > 0) {
+        updatePayload.orgIds = [];
+        hasOrgChanges = true;
+      }
+
+    } else if (existing.projectCategory === ProjectCategoryTypes.ORGANIZATION) {
+      // Allow replacing the single orgId
+      if (updates.orgId !== undefined) {
+        if (!isValidMongoID(updates.orgId)) {
+          return { success: false, message: "orgId must be a valid MongoDB ObjectId string" };
+        }
+        updatePayload.orgIds = [updates.orgId.toString()];
+        hasOrgChanges = existing.orgIds?.[0] !== updates.orgId.toString();
+      }
+
+    } else if (existing.projectCategory === ProjectCategoryTypes.MULTI_ORGANIZATION) {
+      const hasAdded   = Array.isArray(updates.addedOrgIds)   && updates.addedOrgIds.length > 0;
+      const hasRemoved = Array.isArray(updates.removedOrgIds) && updates.removedOrgIds.length > 0;
+
+      if (hasAdded || hasRemoved) {
+        const addedOrgIds   = (updates.addedOrgIds   || []).map(id => id.toString());
+        const removedOrgIds = (updates.removedOrgIds || []).map(id => id.toString());
+
+        // Validate all supplied IDs
+        const allSupplied = [...addedOrgIds, ...removedOrgIds];
+        if (!allSupplied.every(id => isValidMongoID(id))) {
+          return { success: false, message: "All org IDs must be valid MongoDB ObjectId strings" };
+        }
+
+        const currentSet = new Set(existing.orgIds.map(id => id.toString()));
+        addedOrgIds.forEach(id => currentSet.add(id));
+        removedOrgIds.forEach(id => currentSet.delete(id));
+
+        if (currentSet.size < 1) {
+          return { success: false, message: "A multi-organization project must retain at least one organisation" };
+        }
+
+        updatePayload.orgIds = [...currentSet];
+        hasOrgChanges = true;
+      }
+    }
+
     // 2a. Bail out early if none of the supplied values actually differ
-    const hasActualChanges = allowedFields.some((field) => {
+    const hasActualChanges = hasOrgChanges || allowedFields.some((field) => {
       if (updatePayload[field] === undefined) return false;
       return updatePayload[field] !== existing[field];
     });

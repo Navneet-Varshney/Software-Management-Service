@@ -1,15 +1,15 @@
 // services/stakeholders/create-stakeholder.service.js
 
 const mongoose = require("mongoose");
-const { ProjectModel }     = require("@models/project.model");
+const { ProjectModel } = require("@models/project.model");
 const { StakeholderModel } = require("@models/stakeholder.model");
-const { InceptionModel }   = require("@models/inception.model");
+const { InceptionModel } = require("@models/inception.model");
 const { versionControlService } = require("@services/common/version.service");
 const { convertOnHoldToActiveProjectService } = require("@services/projects/on-hold-project.service");
 const { logActivityTrackerEvent } = require("@services/audit/activity-tracker.service");
 const { prepareAuditData } = require("@utils/audit-data.util");
 const { ACTIVITY_TRACKER_EVENTS } = require("@configs/tracker.config");
-const { Phases, ProjectStatus } = require("@configs/enums.config");
+const { Phases, ProjectStatus, ProjectCategoryTypes } = require("@configs/enums.config");
 const { logWithTime } = require("@utils/time-stamps.util");
 
 /**
@@ -42,7 +42,22 @@ const createStakeholderService = async ({
       isDeleted: false
     });
 
-    if (!project)       return { success: false, message: "Project not found" };
+    if (!project) return { success: false, message: "Project not found" };
+
+    // ── Guard: individual projects cannot have stakeholders ───────────────────
+    if (project.projectCategory === ProjectCategoryTypes.INDIVIDUAL) {
+      const existingStakeholder = await StakeholderModel.findOne({
+        projectId,
+        isDeleted: false
+      });
+
+      if (existingStakeholder) {
+        return {
+          success: false,
+          message: "Individual projects can only have one stakeholder"
+        };
+      }
+    }
 
     const blockedStatuses = [ProjectStatus.COMPLETED, ProjectStatus.ABORTED, ProjectStatus.ARCHIVED];
     if (blockedStatuses.includes(project.projectStatus)) {
@@ -76,7 +91,7 @@ const createStakeholderService = async ({
 
     // ── Create stakeholder ────────────────────────────────────────────────────
     const stakeholderData = {
-      stakeholderId:  userId,   // stakeholderId === userId per design
+      stakeholderId: userId,   // stakeholderId === userId per design
       projectId,
       role,
       createdBy,
@@ -98,7 +113,7 @@ const createStakeholderService = async ({
         await InceptionModel.create({
           projectId,
           cycleNumber: 0,
-          version:     "v1.0",
+          version: "v1.0",
           createdBy,
         });
         logWithTime(`[createStakeholderService] InceptionModel auto-created for project ${projectId}`);

@@ -220,9 +220,83 @@ const listProjectsClientService = async (filters = {}, pagination = {}) => {
   }
 };
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Service 5: Get single project – Stakeholder view (same restricted fields as client)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * @param {string} projectId
+ * @returns {{ success: true, project } | { success: false, message }}
+ */
+const getProjectStakeholderService = async (projectId) => {
+  try {
+    const project = await ProjectModel.findById(projectId, CLIENT_DETAIL_FIELDS).lean();
+
+    if (!project) {
+      return { success: false, message: "Project not found" };
+    }
+
+    if (project.isDeleted) {
+      return { success: false, message: "Project not found" };
+    }
+
+    return { success: true, project };
+  } catch (error) {
+    return { success: false, message: "Internal error while fetching project", error: error.message };
+  }
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Service 6: Get project list – Stakeholder view (restricted fields + no deleted)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * @param {Object} filters  - see buildListFilter (includeDeleted always false)
+ * @param {Object} pagination
+ * @param {number} pagination.page
+ * @param {number} pagination.limit
+ * @param {string[]} [selectFields]  - must be a subset of CLIENT_DETAIL_FIELDS keys
+ *
+ * @returns {{ success: true, projects, total, page, totalPages } | { success: false, message }}
+ */
+const listProjectsStakeholderService = async (filters = {}, pagination = {}) => {
+  try {
+    const { page = 1, limit = 20, selectFields } = pagination;
+    const skip = (page - 1) * limit;
+
+    const query = buildListFilter({ ...filters, includeDeleted: false });
+
+    let projection = CLIENT_DETAIL_FIELDS;
+    if (selectFields && selectFields.length > 0) {
+      const allowed = Object.keys(CLIENT_DETAIL_FIELDS);
+      const safe = selectFields.filter((f) => allowed.includes(f));
+      projection = safe.length > 0
+        ? safe.reduce((acc, f) => { acc[f] = 1; return acc; }, {})
+        : CLIENT_DETAIL_FIELDS;
+    }
+
+    const [projects, total] = await Promise.all([
+      ProjectModel.find(query, projection).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
+      ProjectModel.countDocuments(query),
+    ]);
+
+    return {
+      success: true,
+      projects,
+      total,
+      page,
+      totalPages: Math.ceil(total / limit),
+    };
+  } catch (error) {
+    return { success: false, message: "Internal error while listing projects", error: error.message };
+  }
+};
+
 module.exports = {
   getProjectAdminService,
   getProjectClientService,
+  getProjectStakeholderService,
   listProjectsAdminService,
   listProjectsClientService,
+  listProjectsStakeholderService,
 };

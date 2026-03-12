@@ -45,6 +45,9 @@ const abortProjectService = async (projectId, params) => {
     if (existing.projectStatus === ProjectStatus.ABORTED) {
       return { success: false, message: "Project is already aborted" };
     }
+    if(existing.projectStatus === ProjectStatus.ARCHIVED) {
+      return { success: false, message: "Project is archived and cannot be aborted" };
+    }
 
     // ── Build update payload ─────────────────────────────────────────
     const updatePayload = {
