@@ -1,6 +1,5 @@
 // services/stakeholders/update-stakeholder.service.js
 
-const { ProjectModel }     = require("@models/project.model");
 const { StakeholderModel } = require("@models/stakeholder.model");
 const { versionControlService } = require("@services/common/version.service");
 const { convertOnHoldToActiveProjectService } = require("@services/projects/on-hold-project.service");
@@ -21,16 +20,8 @@ const { ProjectStatus } = require("@configs/enums.config");
  * @param {Object} params.auditContext - { admin, device, requestId }
  * @returns {{ success: boolean, stakeholder?: Object, message?: string }}
  */
-const updateStakeholderService = async (stakeholder, projectId, { role, updatedBy, auditContext }) => {
+const updateStakeholderService = async (stakeholder, project, { role, updatedBy, auditContext }) => {
   try {
-    // ── Guard ─────────────────────────────────────────────────────────────────
-    if (stakeholder.isDeleted) {
-      return { success: false, message: "Stakeholder is deleted" };
-    }
-
-    // ── Load project and guard status ─────────────────────────────────────────
-    const project = await ProjectModel.findOne({ _id: stakeholder.projectId, isDeleted: false });
-    if (!project) return { success: false, message: "Associated project not found" };
 
     const blockedStatuses = [ProjectStatus.COMPLETED, ProjectStatus.ABORTED, ProjectStatus.ARCHIVED];
     if (blockedStatuses.includes(project.projectStatus)) {
@@ -42,7 +33,7 @@ const updateStakeholderService = async (stakeholder, projectId, { role, updatedB
 
     // ── Auto-convert ON_HOLD → ACTIVE before proceeding ────────────────────────
     if (project.projectStatus === ProjectStatus.ON_HOLD) {
-      const converted = await convertOnHoldToActiveProjectService(project._id.toString(), {
+      const converted = await convertOnHoldToActiveProjectService(project, {
         convertedBy: updatedBy,
         auditContext,
       });

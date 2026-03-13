@@ -1,32 +1,45 @@
 // services/stakeholders/get-stakeholder.service.js
 
-const { StakeholderModel } = require("@models/stakeholder.model");
-const { isValidCustomId }   = require("@utils/id-validators.util");
-
 /**
- * Fetches a single stakeholder by MongoDB _id.
- * Guards against deleted stakeholders.
+ * Admin/full view of a stakeholder record.
  *
- * @param {string} stakeholderId - MongoDB ObjectId string
- * @param {Object} auditContext  - { admin, device, requestId }
- * @returns {{ success: boolean, stakeholder?: Object, message?: string }}
+ * @param {Object} stakeholder
+ * @returns {{ success: boolean, stakeholder?: Object, message?: string, error?: string }}
  */
-const getStakeholderService = async (stakeholderId, auditContext) => {
+const getStakeholderAdminService = async (stakeholder) => {
   try {
-    if (!isValidCustomId(stakeholderId)) {
-      return { success: false, message: "Invalid stakeholderId format" };
-    }
-
-    const stakeholder = await StakeholderModel.findOne({stakeholderId, isDeleted: false }).lean();
-
-    if (!stakeholder)         return { success: false, message: "Stakeholder not found" };
-    if (stakeholder.isDeleted) return { success: false, message: "Stakeholder is deleted" };
-
-    return { success: true, stakeholder };
-
+    const stakeholderData = stakeholder?.toObject ? stakeholder.toObject() : stakeholder;
+    return { success: true, stakeholder: stakeholderData };
   } catch (error) {
     return { success: false, message: "Internal error while fetching stakeholder", error: error.message };
   }
 };
 
-module.exports = { getStakeholderService };
+/**
+ * Restricted stakeholder view for stakeholder/member access.
+ *
+ * @param {Object} stakeholder
+ * @returns {{ success: boolean, stakeholder?: Object, message?: string, error?: string }}
+ */
+const getStakeholderClientService = async (stakeholder) => {
+  try {
+    const stakeholderData = stakeholder?.toObject ? stakeholder.toObject() : stakeholder;
+
+    return {
+      success: true,
+      stakeholder: {
+        stakeholderId: stakeholderData.userId,
+        role: stakeholderData.role,
+        phase: stakeholderData.phase,
+        joinedAt: stakeholderData.createdAt,
+      },
+    };
+  } catch (error) {
+    return { success: false, message: "Internal error while fetching stakeholder", error: error.message };
+  }
+};
+
+module.exports = {
+  getStakeholderAdminService,
+  getStakeholderClientService,
+};

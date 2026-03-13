@@ -1,6 +1,5 @@
 // services/stakeholders/create-stakeholder.service.js
 
-const mongoose = require("mongoose");
 const { ProjectModel } = require("@models/project.model");
 const { StakeholderModel } = require("@models/stakeholder.model");
 const { InceptionModel } = require("@models/inception.model");
@@ -19,7 +18,8 @@ const { logWithTime } = require("@utils/time-stamps.util");
  *  - Bumps the current-phase version via versionControlService.
  *
  * @param {Object} params
- * @param {string} params.projectId       - MongoDB ObjectId string of the project
+ * @param {Object} params.project
+ * @param {string} params.project._id      - MongoDB ObjectId string of the project
  * @param {string} params.userId          - USR-prefixed custom ID (becomes stakeholderId)
  * @param {string} params.role            - Validated role (admin or client type)
  * @param {string|null} params.organizationId - MongoDB ObjectId string (clients only, else null)
@@ -28,7 +28,7 @@ const { logWithTime } = require("@utils/time-stamps.util");
  * @returns {{ success: boolean, stakeholder?: Object, message?: string, error?: string }}
  */
 const createStakeholderService = async ({
-  projectId,
+  project,
   userId,
   role,
   organizationId = null,
@@ -36,18 +36,13 @@ const createStakeholderService = async ({
   auditContext,
 }) => {
   try {
-    // ── Fetch project ─────────────────────────────────────────────────────────
-    const project = await ProjectModel.findOne({
-      _id: projectId,
-      isDeleted: false
-    });
 
-    if (!project) return { success: false, message: "Project not found" };
-
+    const projectId = project._id.toString();
+    
     // ── Guard: individual projects cannot have stakeholders ───────────────────
     if (project.projectCategory === ProjectCategoryTypes.INDIVIDUAL) {
       const existingStakeholder = await StakeholderModel.findOne({
-        projectId,
+        projectId: project._id,
         isDeleted: false
       });
 
@@ -59,7 +54,7 @@ const createStakeholderService = async ({
       }
     }
 
-    const blockedStatuses = [ProjectStatus.COMPLETED, ProjectStatus.ABORTED, ProjectStatus.ARCHIVED];
+    const blockedStatuses = [ProjectStatus.COMPLETED, ProjectStatus.ABORTED];
     if (blockedStatuses.includes(project.projectStatus)) {
       return {
         success: false,
@@ -69,7 +64,7 @@ const createStakeholderService = async ({
 
     // ── Auto-convert ON_HOLD → ACTIVE before proceeding ────────────────────────
     if (project.projectStatus === ProjectStatus.ON_HOLD) {
-      const converted = await convertOnHoldToActiveProjectService(project._id.toString(), {
+      const converted = await convertOnHoldToActiveProjectService(project, {
         convertedBy: createdBy,
         auditContext,
       });
@@ -81,8 +76,8 @@ const createStakeholderService = async ({
 
     // ── Guard: prevent duplicate stakeholder ──────────────────────────────────
     const existing = await StakeholderModel.findOne({
-      stakeholderId: userId,
-      projectId,
+      userId: userId,
+      projectId: projectId,
       isDeleted: false,
     });
     if (existing) {
@@ -91,14 +86,34 @@ const createStakeholderService = async ({
 
     // ── Create stakeholder ────────────────────────────────────────────────────
     const stakeholderData = {
-      stakeholderId: userId,   // stakeholderId === userId per design
-      projectId,
+      userId,
+      projectId: projectId,
       role,
       createdBy,
       phase: project.currentPhase,
     };
-    if (organizationId && mongoose.Types.ObjectId.isValid(organizationId)) {
-      stakeholderData.organizationId = organizationId;
+    if (project.projectCategory === ProjectCategoryTypes.INDIVIDUAL) {
+    } else {
+      const stakeholderOrgId = organizationId;
+      // For org-based projects verify the stakeholder's org is associated with the project
+      if (project.projectCategory === ProjectCategoryTypes.ORGANIZATION) {
+        const projectOrgId = project.orgIds[0];
+        if (stakeholderOrgId != projectOrgId) {
+          logWithTime(`❌ [createStakeholderService] Cannot add stakeholder with org ${stakeholderOrgId} to organization project with org ${projectOrgId} | project ${projectId}`);
+          return { success: false, message: "Your organisation is not associated with this project." };
+        }
+      }
+      if (
+        project.projectCategory === ProjectCategoryTypes.MULTI_ORGANIZATION
+      ) {
+        const orgMatches = Array.isArray(project.orgIds) &&
+          project.orgIds.some(id => id.toString() === stakeholderOrgId);
+
+        if (!orgMatches) {
+          logWithTime(`❌ [createStakeholderService] User ${userId} org ${stakeholderOrgId} is not in project org list for project ${projectId}`);
+          return { success: false, message: "Your organisation is not associated with this project." };
+        }
+      }
     }
 
     const stakeholder = await StakeholderModel.create(stakeholderData);
@@ -108,10 +123,10 @@ const createStakeholderService = async ({
 
     if (project.currentPhase === Phases.INCEPTION) {
       // 1. Auto-create InceptionModel doc if not yet present
-      const inceptionExists = await InceptionModel.findOne({ projectId, isDeleted: false });
+      const inceptionExists = await InceptionModel.findOne({ projectId: project._id, isDeleted: false });
       if (!inceptionExists) {
         await InceptionModel.create({
-          projectId,
+          projectId: project._id,
           cycleNumber: 0,
           version: "v1.0",
           createdBy,
@@ -122,7 +137,7 @@ const createStakeholderService = async ({
       // 2. Promote DRAFT → ACTIVE
       if (project.projectStatus === ProjectStatus.DRAFT) {
         updatedProject = await ProjectModel.findByIdAndUpdate(
-          projectId,
+          project._id,
           { $set: { projectStatus: ProjectStatus.ACTIVE } },
           { new: true }
         );
