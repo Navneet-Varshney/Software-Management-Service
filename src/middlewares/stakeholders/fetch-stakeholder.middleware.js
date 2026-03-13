@@ -1,14 +1,30 @@
 const { StakeholderModel } = require("@models/stakeholder.model");
 const { ProjectCategoryTypes } = require("@configs/enums.config");
 const { logMiddlewareError } = require("@utils/log-error.util");
-const { throwAccessDeniedError, throwInternalServerError } = require("@responses/common/error-handler.response");
+const {
+    throwAccessDeniedError,
+    throwInternalServerError,
+    throwMissingFieldsError,
+    throwValidationError,
+    throwDBResourceNotFoundError,
+} = require("@responses/common/error-handler.response");
 const { logWithTime } = require("@/utils/time-stamps.util");
-const { checkUserRoleType } = require("@/utils/role-check.util");
+const { isValidCustomId } = require("@/utils/id-validators.util");
 
-const checkUserIsStakeholder = async (req, res, next) => {
+const fetchStakeholderMiddleware = async (req, res, next) => {
     try {
-        const userId = req?.admin?.adminId || req?.client?.clientId;
+        const { userId } = req.params;
         const project = req.project;
+
+        if (!userId) {
+            logMiddlewareError("checkUserIsStakeholder", "Missing userId in request parameters", req);
+            return throwMissingFieldsError(res, "User ID is required to verify stakeholder status.");
+        }
+
+        if (!isValidCustomId(userId)) {
+            logMiddlewareError("checkUserIsStakeholder", "Invalid userId format", req);
+            return throwValidationError(res, ["Invalid userId format. Must be a valid custom ID string."]);
+        }
 
         const stakeholder = await StakeholderModel.findOne({
             userId: userId,
@@ -53,13 +69,7 @@ const checkUserIsStakeholder = async (req, res, next) => {
             }
         }
 
-        req.stakeholder = stakeholder; // Attach stakeholder info to request for downstream use
-        const { isAdmin, isClient } = checkUserRoleType(stakeholder.role);
-        req.authorizationContext = {
-            grantedBy: "stakeholder-membership",
-            requesterType: req.admin ? "admin" : "client",
-            stakeholderRoleType: isAdmin ? "admin" : isClient ? "client" : "unknown",
-        };
+        req.foundStakeholder = stakeholder; // Attach stakeholder info to request for downstream use
 
         logWithTime(`✅ User ${userId} is a stakeholder of project ${project._id}`);
         return next();
@@ -70,5 +80,5 @@ const checkUserIsStakeholder = async (req, res, next) => {
 }
 
 module.exports = {
-    checkUserIsStakeholder
+    fetchStakeholderMiddleware
 }

@@ -7,11 +7,13 @@ const {
 } = require("./role-guard.middleware");
 const { validationMiddlewares } = require("./field-validation.middleware");
 const { presenceMiddlewares } = require("./validate-request-body.middleware");
+const { fetchStakeholderMiddleware } = require("./fetch-stakeholder.middleware");
 
 const stakeholderMiddlewares = {
   checkUserIsStakeholder,
   createStakeholderRoleGuardMiddleware,
   updateStakeholderRoleGuardMiddleware,
+  fetchStakeholderMiddleware,
   ...validationMiddlewares,
   ...presenceMiddlewares,
 };
