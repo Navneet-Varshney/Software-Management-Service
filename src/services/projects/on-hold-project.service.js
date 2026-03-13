@@ -18,7 +18,9 @@ const { generateVersion } = require("@/utils/version.util");
  *
  * Version is NOT incremented – on-hold is a lifecycle event.
  *
- * @param {string} projectId
+ * @param {Object} project
+ * @param {string} project._id
+ * @param {string} project.projectStatus
  * @param {Object} params
  * @param {string} params.onHoldBy              - Admin USR ID
  * @param {string} params.onHoldReasonType      - enum value (required)
@@ -27,23 +29,15 @@ const { generateVersion } = require("@/utils/version.util");
  *
  * @returns {{ success: true, project } | { success: false, message, error? }}
  */
-const onHoldProjectService = async (projectId, params) => {
+const onHoldProjectService = async (project, params) => {
     try {
-        const existing = await ProjectModel.findOne({
-            _id: projectId,
-            isDeleted: false
-        });
 
-        if (!existing) {
-            return { success: false, message: "Project not found" };
-        }
-
-        const blockedStatuses = [ProjectStatus.DRAFT, ProjectStatus.ON_HOLD, ProjectStatus.ABORTED, ProjectStatus.ARCHIVED, ProjectStatus.COMPLETED];
-        if (blockedStatuses.includes(existing.projectStatus)) {
+        const blockedStatuses = [ProjectStatus.DRAFT, ProjectStatus.ON_HOLD, ProjectStatus.ABORTED, ProjectStatus.COMPLETED];
+        if (blockedStatuses.includes(project.projectStatus)) {
             return {
                 success: false,
                 message: "Only an ACTIVE project can be put on hold",
-                currentStatus: existing.projectStatus,
+                currentStatus: project.projectStatus,
             };
         }
 
@@ -57,22 +51,22 @@ const onHoldProjectService = async (projectId, params) => {
         };
 
         const updatedProject = await ProjectModel.findByIdAndUpdate(
-            projectId,
+            project._id,
             { $set: updatePayload },
             { new: true, runValidators: true }
         );
 
         // ── Fire-and-forget: activity tracking ──────────────────────────
         const { admin, device, requestId } = params.auditContext || {};
-        const { oldData, newData } = prepareAuditData(existing, updatedProject);
+        const { oldData, newData } = prepareAuditData(project, updatedProject);
 
         logActivityTrackerEvent(
             admin,
             device,
             requestId,
             ACTIVITY_TRACKER_EVENTS.ON_HOLD_PROJECT,
-            `Project '${updatedProject.name}' (${projectId}) put on hold by ${params.onHoldBy}. Reason: ${params.onHoldReasonType}`,
-            { oldData, newData, adminActions: { targetId: projectId } }
+            `Project '${updatedProject.name}' (${project._id}) put on hold by ${params.onHoldBy}. Reason: ${params.onHoldReasonType}`,
+            { oldData, newData, adminActions: { targetId: project._id } }
         );
 
         return { success: true, project: updatedProject };
@@ -93,35 +87,29 @@ const onHoldProjectService = async (projectId, params) => {
  * Increments the minor version on conversion so the audit trail reflects
  * that the document state changed.
  *
- * @param {string} projectId
+ * @param {Object} project
+ * @param {string} project._id
+ * @param {string} project.projectStatus
  * @param {Object} params
  * @param {string} params.convertedBy   - Admin USR ID (or system identifier)
  * @param {Object} params.auditContext
  *
  * @returns {{ success: true, project } | { success: false, message, error? }}
  */
-const convertOnHoldToActiveProjectService = async (projectId, params) => {
+const convertOnHoldToActiveProjectService = async (project, params) => {
     try {
-        const existing = await ProjectModel.findOne({
-            _id: projectId,
-            isDeleted: false
-        });
 
-        if (!existing) {
-            return { success: false, message: "Project not found" };
-        }
-
-        if (existing.projectStatus !== ProjectStatus.ON_HOLD) {
+        if (project.projectStatus !== ProjectStatus.ON_HOLD) {
             return {
                 success: false,
                 message: "Only an ON_HOLD project can be auto-converted to ACTIVE",
-                currentStatus: existing.projectStatus,
+                currentStatus: project.projectStatus,
             };
         }
 
         const updatePayload = {
             projectStatus: ProjectStatus.ACTIVE,
-            version: generateVersion(1, existing.version),
+            version: generateVersion(1, project.version),
             updatedBy: params.convertedBy,
             // clear any stale on-hold-related stamps
             isArchived: false,
@@ -130,22 +118,22 @@ const convertOnHoldToActiveProjectService = async (projectId, params) => {
         };
 
         const updatedProject = await ProjectModel.findByIdAndUpdate(
-            projectId,
+            project._id,
             { $set: updatePayload },
             { new: true, runValidators: true }
         );
 
         // ── Fire-and-forget: activity tracking ──────────────────────────
         const { admin, device, requestId } = params.auditContext || {};
-        const { oldData, newData } = prepareAuditData(existing, updatedProject);
+        const { oldData, newData } = prepareAuditData(project, updatedProject);
 
         logActivityTrackerEvent(
             admin,
             device,
             requestId,
             ACTIVITY_TRACKER_EVENTS.CONVERT_ON_HOLD_TO_ACTIVE,
-            `Project '${updatedProject.name}' (${projectId}) auto-converted from ON_HOLD to ACTIVE (${existing.version} → ${updatedProject.version}) by ${params.convertedBy}`,
-            { oldData, newData, adminActions: { targetId: projectId } }
+            `Project '${updatedProject.name}' (${project._id}) auto-converted from ON_HOLD to ACTIVE (${project.version} → ${updatedProject.version}) by ${params.convertedBy}`,
+            { oldData, newData, adminActions: { targetId: project._id } }
         );
 
         return { success: true, project: updatedProject };

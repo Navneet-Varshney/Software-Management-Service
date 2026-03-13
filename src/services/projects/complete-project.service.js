@@ -17,35 +17,29 @@ const { ProjectStatus } = require("@configs/enums.config");
  *
  * Version is NOT incremented – completing is a lifecycle event.
  *
- * @param {string} projectId
+ * @param {Object} project
+ * @param {string} project._id
+ * @param {string} project.projectStatus
  * @param {Object} params
  * @param {string} params.completedBy   - Admin USR ID
  * @param {Object} params.auditContext
  *
  * @returns {{ success: true, project } | { success: false, message, error? }}
  */
-const completeProjectService = async (projectId, params) => {
+const completeProjectService = async (project, params) => {
   try {
-    const existing = await ProjectModel.findOne({
-      _id: projectId,
-      isDeleted: false
-    });
-
-    if (!existing) {
-      return { success: false, message: "Project not found" };
-    }
 
     // ── Guard: already completed ─────────────────────────────────────
-    if (existing.projectStatus === ProjectStatus.COMPLETED) {
+    if (project.projectStatus === ProjectStatus.COMPLETED) {
       return { success: false, message: "Project is already completed" };
     }
 
     // ── Guard: must be ACTIVE to complete ────────────────────────────
-    if (existing.projectStatus !== ProjectStatus.ACTIVE) {
+    if (project.projectStatus !== ProjectStatus.ACTIVE) {
       return {
         success: false,
         message: "Only an ACTIVE project can be completed",
-        currentStatus: existing.projectStatus,
+        currentStatus: project.projectStatus,
       };
     }
 
@@ -56,22 +50,22 @@ const completeProjectService = async (projectId, params) => {
     };
 
     const updatedProject = await ProjectModel.findByIdAndUpdate(
-      projectId,
+      project._id,
       { $set: updatePayload },
       { new: true, runValidators: true }
     );
 
     // ── Fire-and-forget: activity tracking ──────────────────────────
     const { admin, device, requestId } = params.auditContext || {};
-    const { oldData, newData } = prepareAuditData(existing, updatedProject);
+    const { oldData, newData } = prepareAuditData(project, updatedProject);
 
     logActivityTrackerEvent(
       admin,
       device,
       requestId,
       ACTIVITY_TRACKER_EVENTS.COMPLETE_PROJECT,
-      `Project '${updatedProject.name}' (${projectId}) marked as completed by ${params.completedBy}`,
-      { oldData, newData, adminActions: { targetId: projectId } }
+      `Project '${updatedProject.name}' (${project._id}) marked as completed by ${params.completedBy}`,
+      { oldData, newData, adminActions: { targetId: project._id } }
     );
 
     return { success: true, project: updatedProject };

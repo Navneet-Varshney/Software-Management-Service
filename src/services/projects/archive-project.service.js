@@ -17,62 +17,56 @@ const { ProjectStatus } = require("@configs/enums.config");
  *
  * Version is NOT incremented – archiving is a lifecycle event.
  *
- * @param {string} projectId
+ * @param {Object} project
+ * @param {string} project._id
+ * @param {boolean} project.isArchived
+ * @param {string} project.projectStatus
  * @param {Object} params
  * @param {string} params.archivedBy    - Admin USR ID
  * @param {Object} params.auditContext
  *
  * @returns {{ success: true, project } | { success: false, message, error? }}
  */
-const archiveProjectService = async (projectId, params) => {
+const archiveProjectService = async (project, params) => {
   try {
-    const existing = await ProjectModel.findOne({
-      _id: projectId,
-      isDeleted: false
-    });
-
-    if (!existing) {
-      return { success: false, message: "Project not found" };
-    }
     
     // ── Guard: already archived ──────────────────────────────────────
-    if (existing.isArchived) {
+    if (project.isArchived) {
       return { success: false, message: "Project is already archived" };
     }
 
-    // ── Guard: only COMPLETED projects can be archived ───────────────
-    if (existing.projectStatus !== ProjectStatus.COMPLETED) {
+    // ── Guard: only COMPLETED and ABORTED projects can be archived ───────────────
+    if (project.projectStatus !== ProjectStatus.COMPLETED && project.projectStatus !== ProjectStatus.ABORTED) {
       return {
         success: false,
-        message: "Only a COMPLETED project can be archived",
-        currentStatus: existing.projectStatus,
+        message: "Only a COMPLETED or ABORTED project can be archived",
+        currentStatus: project.projectStatus,
       };
     }
 
     const updatePayload = {
-      projectStatus: ProjectStatus.ARCHIVED,
       isArchived: true,
       archivedAt: new Date(),
       archivedBy: params.archivedBy,
     };
 
     const updatedProject = await ProjectModel.findByIdAndUpdate(
-      projectId,
+      project._id,
       { $set: updatePayload },
       { new: true, runValidators: true }
     );
 
     // ── Fire-and-forget: activity tracking ──────────────────────────
     const { admin, device, requestId } = params.auditContext || {};
-    const { oldData, newData } = prepareAuditData(existing, updatedProject);
+    const { oldData, newData } = prepareAuditData(project, updatedProject);
 
     logActivityTrackerEvent(
       admin,
       device,
       requestId,
       ACTIVITY_TRACKER_EVENTS.ARCHIVE_PROJECT,
-      `Project '${updatedProject.name}' (${projectId}) archived by ${params.archivedBy}`,
-      { oldData, newData, adminActions: { targetId: projectId } }
+      `Project '${updatedProject.name}' (${project._id}) archived by ${params.archivedBy}`,
+      { oldData, newData, adminActions: { targetId: project._id } }
     );
 
     return { success: true, project: updatedProject };

@@ -17,7 +17,9 @@ const { ProjectStatus } = require("@configs/enums.config");
  *
  * Version is NOT incremented – resuming is a lifecycle event.
  *
- * @param {string} projectId
+ * @param {Object} project
+ * @param {string} project._id
+ * @param {string} project.projectStatus
  * @param {Object} params
  * @param {string} params.resumeReasonType
  * @param {string} [params.resumeReasonDescription]
@@ -26,29 +28,21 @@ const { ProjectStatus } = require("@configs/enums.config");
  *
  * @returns {{ success: true, project } | { success: false, message, error? }}
  */
-const resumeProjectService = async (projectId, params) => {
+const resumeProjectService = async (project, params) => {
   try {
-    const existing = await ProjectModel.findOne({
-      _id: projectId,
-      isDeleted: false
-    });
-
-    if (!existing) {
-      return { success: false, message: "Project not found" };
-    }
 
     // ── Guard: completed projects cannot be resumed ──────────────────
-    if (existing.projectStatus === ProjectStatus.COMPLETED) {
+    if (project.projectStatus === ProjectStatus.COMPLETED) {
       return { success: false, message: "Project is already completed" };
     }
 
     // ── Guard: must be ON_HOLD or ABORTED ────────────────────────────
     const resumableStatuses = [ProjectStatus.ON_HOLD, ProjectStatus.ABORTED];
-    if (!resumableStatuses.includes(existing.projectStatus)) {
+    if (!resumableStatuses.includes(project.projectStatus)) {
       return {
         success: false,
         message: "Only an ON_HOLD or ABORTED project can be resumed",
-        currentStatus: existing.projectStatus,
+        currentStatus: project.projectStatus,
       };
     }
 
@@ -60,22 +54,22 @@ const resumeProjectService = async (projectId, params) => {
     };
 
     const updatedProject = await ProjectModel.findByIdAndUpdate(
-      projectId,
+      project._id,
       { $set: updatePayload },
       { new: true, runValidators: true }
     );
 
     // ── Fire-and-forget: activity tracking ──────────────────────────
     const { admin, device, requestId } = params.auditContext || {};
-    const { oldData, newData } = prepareAuditData(existing, updatedProject);
+    const { oldData, newData } = prepareAuditData(project, updatedProject);
 
     logActivityTrackerEvent(
       admin,
       device,
       requestId,
       ACTIVITY_TRACKER_EVENTS.RESUME_PROJECT,
-      `Project '${updatedProject.name}' (${projectId}) resumed by ${params.resumedBy}. Reason: ${params.resumeReasonType}`,
-      { oldData, newData, adminActions: { targetId: projectId } }
+      `Project '${updatedProject.name}' (${project._id}) resumed by ${params.resumedBy}. Reason: ${params.resumeReasonType}`,
+      { oldData, newData, adminActions: { targetId: project._id } }
     );
 
     return { success: true, project: updatedProject };

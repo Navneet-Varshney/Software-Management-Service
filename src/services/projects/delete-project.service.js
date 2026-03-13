@@ -15,7 +15,9 @@ const { ProjectStatus } = require("@configs/enums.config");
  * After deletion, no further operations (update / abort / complete / resume)
  * are permitted on the project.
  *
- * @param {string} projectId
+ * @param {Object} project
+ * @param {string} project._id
+ * @param {string} project.projectStatus
  * @param {Object} params
  * @param {string} params.deletionReasonType
  * @param {string} [params.deletionReasonDescription]
@@ -24,24 +26,16 @@ const { ProjectStatus } = require("@configs/enums.config");
  *
  * @returns {{ success: true } | { success: false, message, error? }}
  */
-const deleteProjectService = async (projectId, params) => {
+const deleteProjectService = async (project, params) => {
   try {
-    const existing = await ProjectModel.findOne({
-      _id: projectId,
-      isDeleted: false
-    });
-
-    if (!existing) {
-      return { success: false, message: "Project not found" };
-    }
 
     // ── Guard: ACTIVE projects cannot be deleted ────────────────
-    if (existing.projectStatus === ProjectStatus.ACTIVE) {
+    if (project.projectStatus === ProjectStatus.ACTIVE) {
       return { success: false, message: "Project is currently active" };
     }
 
     // ── Guard: COMPLETED projects cannot be deleted ──────────────
-    if (existing.projectStatus === ProjectStatus.COMPLETED) {
+    if (project.projectStatus === ProjectStatus.COMPLETED) {
       return { success: false, message: "Completed projects cannot be deleted" };
     }
 
@@ -56,22 +50,22 @@ const deleteProjectService = async (projectId, params) => {
     };
 
     const updatedProject = await ProjectModel.findByIdAndUpdate(
-      projectId,
+      project._id,
       { $set: updatePayload },
       { new: true, runValidators: true }
     );
 
     // ── Fire-and-forget: activity tracking ──────────────────────────
     const { admin, device, requestId } = params.auditContext || {};
-    const { oldData, newData } = prepareAuditData(existing, updatedProject);
+    const { oldData, newData } = prepareAuditData(project, updatedProject);
 
     logActivityTrackerEvent(
       admin,
       device,
       requestId,
       ACTIVITY_TRACKER_EVENTS.DELETE_PROJECT,
-      `Project '${existing.name}' (${projectId}) soft-deleted by ${params.deletedBy}. Reason: ${params.deletionReasonType}`,
-      { oldData, newData, adminActions: { targetId: projectId } }
+      `Project '${project.name}' (${project._id}) soft-deleted by ${params.deletedBy}. Reason: ${params.deletionReasonType}`,
+      { oldData, newData, adminActions: { targetId: project._id } }
     );
 
     return { success: true };

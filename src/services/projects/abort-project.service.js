@@ -7,7 +7,7 @@ const { ACTIVITY_TRACKER_EVENTS } = require("@configs/tracker.config");
 const { ProjectStatus } = require("@configs/enums.config");
 
 /**
- * Aborts an existing project.
+ * Aborts an project project.
  *
  * Allowed source statuses : DRAFT | ACTIVE | ON_HOLD
  * Blocked if              : isDeleted === true  |  projectStatus === COMPLETED  |  projectStatus === ABORTED
@@ -18,7 +18,9 @@ const { ProjectStatus } = require("@configs/enums.config");
  *
  * Version is NOT incremented – abort is a lifecycle event, not a content change.
  *
- * @param {string} projectId
+ * @param {Object} project
+ * @param {string} project._id
+ * @param {string} project.projectStatus
  * @param {Object} params
  * @param {string} params.abortReasonType
  * @param {string} [params.abortReasonDescription]
@@ -27,26 +29,16 @@ const { ProjectStatus } = require("@configs/enums.config");
  *
  * @returns {{ success: true, project } | { success: false, message, error? }}
  */
-const abortProjectService = async (projectId, params) => {
-  try {
-    const existing = await ProjectModel.findOne({
-      _id: projectId,
-      isDeleted: false
-    });
 
-    if (!existing) {
-      return { success: false, message: "Project not found" };
-    }
+const abortProjectService = async (project, params) => {
+  try {
 
     // ── Guard: terminal statuses ─────────────────────────────────────
-    if (existing.projectStatus === ProjectStatus.COMPLETED) {
+    if (project.projectStatus === ProjectStatus.COMPLETED) {
       return { success: false, message: "Project is already completed" };
     }
-    if (existing.projectStatus === ProjectStatus.ABORTED) {
+    if (project.projectStatus === ProjectStatus.ABORTED) {
       return { success: false, message: "Project is already aborted" };
-    }
-    if(existing.projectStatus === ProjectStatus.ARCHIVED) {
-      return { success: false, message: "Project is archived and cannot be aborted" };
     }
 
     // ── Build update payload ─────────────────────────────────────────
@@ -59,22 +51,22 @@ const abortProjectService = async (projectId, params) => {
     };
 
     const updatedProject = await ProjectModel.findByIdAndUpdate(
-      projectId,
+      project._id,
       { $set: updatePayload },
       { new: true, runValidators: true }
     );
 
     // ── Fire-and-forget: activity tracking ──────────────────────────
     const { admin, device, requestId } = params.auditContext || {};
-    const { oldData, newData } = prepareAuditData(existing, updatedProject);
+    const { oldData, newData } = prepareAuditData(project, updatedProject);
 
     logActivityTrackerEvent(
       admin,
       device,
       requestId,
       ACTIVITY_TRACKER_EVENTS.ABORT_PROJECT,
-      `Project '${updatedProject.name}' (${projectId}) aborted by ${params.abortedBy}. Reason: ${params.abortReasonType}`,
-      { oldData, newData, adminActions: { targetId: projectId } }
+      `Project '${updatedProject.name}' (${project._id}) aborted by ${params.abortedBy}. Reason: ${params.abortReasonType}`,
+      { oldData, newData, adminActions: { targetId: project._id } }
     );
 
     return { success: true, project: updatedProject };
