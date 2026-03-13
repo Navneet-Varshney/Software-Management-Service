@@ -1,29 +1,29 @@
 // middlewares/factory/role-authorization.middleware-factory.js
 
 const { hasRequiredRole } = require("@utils/has-required-role.util");
-const { StakeholderModel } = require("@models/stakeholder.model");
 const {
   throwAccessDeniedError,
   throwUnauthorizedError,
-  throwInternalServerError,
   logMiddlewareError,
-  throwSpecificInternalServerError,
+  throwInternalServerError
 } = require("@/responses/common/error-handler.response");
 const { logWithTime } = require("@/utils/time-stamps.util");
+const { checkUserIsStakeholder } = require("../stakeholders/check-user-is-stakeholder.middleware");
 
 // Admin Authorization Role Middlewares
 
 const createAdminRoleAuthMiddleware = (allowedRoles) => {
   // Guard: catch misconfigured calls at boot time rather than at request time.
+
   if (!Array.isArray(allowedRoles) || allowedRoles.length === 0) {
     logMiddlewareError(
       "AdminRoleAuth",
       "Middleware misconfiguration: allowedRoles must be a non-empty array.",
       {}
     );
-    return throwSpecificInternalServerError(
-      "AdminRoleAuth",
-      "Middleware misconfiguration: allowedRoles must be a non-empty array."
+
+    throw new Error(
+      "AdminRoleAuth middleware misconfiguration: allowedRoles must be a non-empty array."
     );
   }
 
@@ -48,7 +48,7 @@ const createAdminRoleAuthMiddleware = (allowedRoles) => {
       return throwAccessDeniedError(res, "You do not have the required role to perform this action.");
     }
 
-    logWithTime(`✅ Admin '${admin.adminId}' passed role check. Access granted.`);
+    logWithTime(`✅ Admin '${admin.adminId}' with role '${admin.role}' passed role check.`);
     return next();
   };
 };
@@ -63,9 +63,8 @@ const createClientRoleAuthMiddleware = (allowedRoles) => {
       "Middleware misconfiguration: allowedRoles must be a non-empty array.",
       {}
     );
-    return throwSpecificInternalServerError(
-      "ClientRoleAuth",
-      "Middleware misconfiguration: allowedRoles must be a non-empty array."
+    throw new Error(
+      "ClientRoleAuth middleware misconfiguration: allowedRoles must be a non-empty array."
     );
   }
 
@@ -95,86 +94,38 @@ const createClientRoleAuthMiddleware = (allowedRoles) => {
   };
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Combined: Admin Role  OR  Stakeholder access
-// ─────────────────────────────────────────────────────────────────────────────
-
-/**
- * Factory that produces a middleware granting access via TWO independent paths:
- *
- *  Path 1 – Role check:
- *    admin.role is in allowedRoles  →  allow
- *
- *  Path 2 – Stakeholder check:
- *    If req.project is available (fetchProjectMiddleware ran):
- *      admin.adminId exists as an active stakeholder of that specific project → allow
- *    Otherwise (list routes with no single projectId):
- *      admin.adminId exists as an active stakeholder of ANY project → allow
- *
- *  If neither path passes → 403 Access Denied.
- *
- * @param {string[]} allowedRoles - AdminRoleTypes values
- */
 const createAdminRoleOrStakeholderAuthMiddleware = (allowedRoles) => {
-  if (!Array.isArray(allowedRoles) || allowedRoles.length === 0) {
-    logMiddlewareError(
-      "AdminRoleOrStakeholderAuth",
-      "Middleware misconfiguration: allowedRoles must be a non-empty array.",
-      {}
-    );
-    return throwSpecificInternalServerError(
-      "AdminRoleOrStakeholderAuth",
-      "Middleware misconfiguration: allowedRoles must be a non-empty array."
-    );
-  }
 
   return async (req, res, next) => {
     try {
-      const admin = req.admin;
 
-      if (!admin) {
-        logMiddlewareError(
-          "AdminRoleOrStakeholderAuth",
-          "req.admin is missing – authentication middleware may not have run.",
-          req
-        );
-        return throwUnauthorizedError(res, "Admin", "Authentication required before access check.");
+      const user = req?.admin || req?.client;
+      const project = req.project;
+
+      if (req.admin) {
+        if (hasRequiredRole(user, allowedRoles)) {
+          req.authorizationContext = {
+            grantedBy: "admin-role",
+            requesterType: "admin",
+          };
+          logWithTime(`✅ Admin '${user.adminId}' authorized via role`);
+          return next();
+        } else {
+          logWithTime(`🔎 Checking Admin is Stakeholder of project with id ${project._id} or not`);
+          return checkUserIsStakeholder(req, res, next);
+        }
+
       }
 
-      // ── Path 1: role-based ────────────────────────────────────────────────
-      if (hasRequiredRole(admin, allowedRoles)) {
-        return next();
-      }
+      // fallback to stakeholder
+      return checkUserIsStakeholder(req, res, next);
 
-      // ── Path 2: stakeholder-based ─────────────────────────────────────────
-      const stakeholderQuery = {
-        stakeholderId: admin.adminId,
-        isDeleted: false,
-      };
-
-      // If a specific project was already fetched, scope the check to it
-      if (req.project?._id) {
-        stakeholderQuery.projectId = req.project._id;
-      }
-
-      const isStakeholder = await StakeholderModel.exists(stakeholderQuery);
-
-      if (isStakeholder) {
-        logWithTime(`✅ Admin '${admin.adminId}' passed stakeholder check for project '${stakeholderQuery.projectId || "ANY"}'. Access granted.`);
-        return next();
-      }
-
+    } catch (err) {
       logMiddlewareError(
-        "AdminRoleOrStakeholderAuth",
-        `Admin '${admin.adminId}' role '${admin.role}' not permitted and is not a stakeholder.`,
+        "AdminOrStakeholderAuth",
+        `Unexpected error: ${err.message}`,
         req
       );
-      return throwAccessDeniedError(
-        res,
-        "You do not have the required role or stakeholder membership to access this resource."
-      );
-    } catch (err) {
-      logMiddlewareError("AdminRoleOrStakeholderAuth", `Unexpected error: ${err.message}`, req);
       return throwInternalServerError(res, err);
     }
   };
@@ -183,5 +134,5 @@ const createAdminRoleOrStakeholderAuthMiddleware = (allowedRoles) => {
 module.exports = {
   createAdminRoleAuthMiddleware,
   createClientRoleAuthMiddleware,
-  createAdminRoleOrStakeholderAuthMiddleware,
+  createAdminRoleOrStakeholderAuthMiddleware
 };
