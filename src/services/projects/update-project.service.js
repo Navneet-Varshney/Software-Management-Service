@@ -1,5 +1,3 @@
-// services/projects/update-project.service.js
-
 const { ProjectModel } = require("@models/project.model");
 const { logActivityTrackerEvent } = require("@services/audit/activity-tracker.service");
 const { prepareAuditData } = require("@utils/audit-data.util");
@@ -7,12 +5,17 @@ const { ACTIVITY_TRACKER_EVENTS } = require("@configs/tracker.config");
 const { generateVersion } = require("@/utils/version.util");
 const { ProjectStatus, ProjectCategoryTypes } = require("@/configs/enums.config");
 const { isValidMongoID } = require("@/utils/id-validators.util");
-
+const {
+  validateLinkedProjectIds
+} = require("@/services/projects/linked-projects.service");
 
 const updateProjectService = async (existingProject, updates) => {
   try {
 
+    /* ───────── Status Guard ───────── */
+
     const blockedStatuses = [ProjectStatus.COMPLETED, ProjectStatus.ABORTED];
+
     if (blockedStatuses.includes(existingProject.projectStatus)) {
       return {
         success: false,
@@ -20,7 +23,8 @@ const updateProjectService = async (existingProject, updates) => {
       };
     }
 
-    // 2. Build update payload — only include supplied fields
+    /* ───────── Allowed Fields Update ───────── */
+
     const allowedFields = [
       "name",
       "description",
@@ -32,96 +36,172 @@ const updateProjectService = async (existingProject, updates) => {
 
     const updatePayload = {};
 
-    allowedFields.forEach((field) => {
+    allowedFields.forEach(field => {
       if (updates[field] !== undefined) {
         updatePayload[field] = updates[field];
       }
     });
 
-    // 2b. Org IDs management based on project category
+    /* ───────── Organization Handling ───────── */
+
     let hasOrgChanges = false;
 
+    const existingOrgIds = (existingProject.orgIds || []).map(id => id.toString());
+
+    const addedRaw = [...new Set((updates.addedOrgIds || []).map(id => id.toString()))]
+      .filter(id => isValidMongoID(id));
+
+    const removedRaw = [...new Set((updates.removedOrgIds || []).map(id => id.toString()))]
+      .filter(id => isValidMongoID(id));
+
+    const addedSet = new Set(addedRaw);
+    const removedSet = new Set(removedRaw);
+
+    const finalAdded = [...addedSet].filter(id => !removedSet.has(id));
+    const finalRemoved = [...removedSet].filter(id => !addedSet.has(id));
+
+    const currentSet = new Set(existingOrgIds);
+
+    finalAdded.forEach(id => currentSet.add(id));
+    finalRemoved.forEach(id => currentSet.delete(id));
+
+    const finalOrgIds = [...currentSet];
+
     if (existingProject.projectCategory === ProjectCategoryTypes.INDIVIDUAL) {
-      if ((updates.addedOrgIds || []).length > 0 || (updates.removedOrgIds || []).length > 0) {
+
+      if (finalAdded.length) {
         return {
           success: false,
           message: "Data integrity violation: individual projects cannot contain organisations"
         };
       }
-    } else if (existingProject.projectCategory === ProjectCategoryTypes.ORGANIZATION) {
-      // Ignore orgId fields
 
-      // In Single Org Projects, orgIds is considered as immutable after creation. 
-      // To change the org association, the project must be recreated. 
-      // This is to maintain data integrity and avoid complex cascading updates that could arise from changing the org association of an existing project.
+    }
 
-      if (updates.orgId || updates.addedOrgIds || updates.removedOrgIds) {
+    else if (existingProject.projectCategory === ProjectCategoryTypes.ORGANIZATION) {
+
+      if (finalAdded.length || finalRemoved.length) {
         return {
           success: false,
           message: "Organization association cannot be modified for single-organization projects"
         };
       }
 
-    } else if (existingProject.projectCategory === ProjectCategoryTypes.MULTI_ORGANIZATION) {
-      const existingOrgIds = (existingProject.orgIds || []).map(o => o.toString());
+    }
 
-      const addedOrgIds = [...new Set((updates.addedOrgIds || []).map(id => id.toString()))]
-        .filter(id => isValidMongoID(id))
-        .filter(id => !existingOrgIds.includes(id));
-
-      const removedOrgIds = [...new Set((updates.removedOrgIds || []).map(id => id.toString()))]
-        .filter(id => isValidMongoID(id))
-        .filter(id => existingOrgIds.includes(id));
-
-      const removedSet = new Set(removedOrgIds);
-
-      const finalAdded = addedOrgIds.filter(id => !removedSet.has(id));
-
-      const currentSet = new Set(existingOrgIds);
-
-      finalAdded.forEach(id => currentSet.add(id));
-      removedOrgIds.forEach(id => currentSet.delete(id));
-
-      const finalOrgIds = [...currentSet];
+    else if (existingProject.projectCategory === ProjectCategoryTypes.MULTI_ORGANIZATION) {
 
       if (finalOrgIds.length < 1) {
-        return { success: false, message: "A multi-organization project must retain at least one organisation" }
+        return {
+          success: false,
+          message: "A multi-organization project must retain at least one organisation"
+        };
       }
 
-      if (finalAdded.length > 0 || removedOrgIds.length > 0) {
+      if (finalAdded.length || finalRemoved.length) {
         updatePayload.orgIds = finalOrgIds;
         hasOrgChanges = true;
       }
     }
 
-    // 2a. Bail out early if none of the supplied values actually differ
-    const hasActualChanges = hasOrgChanges || allowedFields.some((field) => {
-      if (updatePayload[field] === undefined) return false;
-      return updatePayload[field] !== existingProject[field];
+    /* ───────── Linked Project Validation ───────── */
+
+    const linkedProjectsValidation = await validateLinkedProjectIds({
+      projectId: existingProject._id,
+      addedLinkedProjectIds: updates.addedLinkedProjectIds || [],
+      removedLinkedProjectIds: updates.removedLinkedProjectIds || []
     });
 
-    if (!hasActualChanges) {
-      return { success: true, message: "No changes detected, Project Document remains unchanged" };
+    if (!linkedProjectsValidation.success) {
+      return linkedProjectsValidation;
     }
 
-    // 3. Increment version only when something genuinely changed
-    updatePayload.version = generateVersion(1, existingProject.version);
+    const addedIds = linkedProjectsValidation.addedLinkedProjectIds;
+    const removedIds = linkedProjectsValidation.removedLinkedProjectIds;
 
-    // 4. Stamp updatedBy and updation reason
+    const existingLinkedProjectIds =
+      (existingProject.linkedProjectIds || []).map(id => id.toString());
+
+    const linkedIdsAfterRemoval =
+      existingLinkedProjectIds.filter(id => !removedIds.includes(id));
+
+    const finalLinkedProjectIds = [
+      ...new Set([
+        ...linkedIdsAfterRemoval,
+        ...addedIds
+      ])
+    ];
+
+    if (finalLinkedProjectIds.includes(existingProject._id.toString())) {
+      return {
+        success: false,
+        message: "A project cannot be linked to itself"
+      };
+    }
+
+    const existingLinkedSet = new Set(existingLinkedProjectIds);
+    const finalLinkedSet = new Set(finalLinkedProjectIds);
+
+    const hasLinkedProjectChanges =
+      existingLinkedSet.size !== finalLinkedSet.size ||
+      existingLinkedProjectIds.some(id => !finalLinkedSet.has(id));
+
+    if (hasLinkedProjectChanges) {
+      updatePayload.linkedProjectIds = finalLinkedProjectIds;
+    }
+
+    /* ───────── Detect Actual Changes ───────── */
+
+    const hasActualChanges =
+      hasOrgChanges ||
+      hasLinkedProjectChanges ||
+      allowedFields.some(field =>
+        updatePayload[field] !== undefined &&
+        updatePayload[field] !== existingProject[field]
+      );
+
+    if (!hasActualChanges) {
+      return {
+        success: true,
+        message: "No changes detected, Project Document remains unchanged"
+      };
+    }
+
+    /* ───────── Version Increment ───────── */
+
+    const shouldIncrementVersion =
+      hasOrgChanges ||
+      hasLinkedProjectChanges ||
+      allowedFields.some(field =>
+        updatePayload[field] !== undefined &&
+        updatePayload[field] !== existingProject[field]
+      );
+
+    if (shouldIncrementVersion) {
+      updatePayload.version = generateVersion(1, existingProject.version);
+    }
+
     updatePayload.updatedBy = updates.updatedBy;
-    updatePayload.projectUpdationReasonType = updates.projectUpdationReasonType;
-    updatePayload.projectUpdationReasonDescription = updates.projectUpdationReasonDescription || null;
 
-    // 5. Persist – { new: true } returns the updated document
+    updatePayload.projectUpdationReasonType = updates.projectUpdationReasonType;
+
+    updatePayload.projectUpdationReasonDescription =
+      updates.projectUpdationReasonDescription || null;
+
+    /* ───────── Persist Update ───────── */
+
     const updatedProject = await ProjectModel.findByIdAndUpdate(
       existingProject._id,
       { $set: updatePayload },
       { new: true, runValidators: true }
     );
 
-    // ── Fire-and-forget: activity tracking ──────────────────────────
+    /* ───────── Activity Tracker ───────── */
+
     const { admin, device, requestId } = updates.auditContext || {};
-    const { oldData, newData } = prepareAuditData(existingProject, updatedProject);
+
+    const { oldData, newData } =
+      prepareAuditData(existingProject, updatedProject);
 
     logActivityTrackerEvent(
       admin,
@@ -132,28 +212,32 @@ const updateProjectService = async (existingProject, updates) => {
       {
         oldData,
         newData,
-        adminActions: { targetId: existingProject._id },
+        adminActions: { targetId: existingProject._id }
       }
     );
 
     return {
       success: true,
       oldProject: existingProject,
-      project: updatedProject,
+      project: updatedProject
     };
-  } catch (error) {
+
+  }
+
+  catch (error) {
+
     if (error.name === "ValidationError") {
       return {
         success: false,
         message: "Validation error",
-        error: error.message,
+        error: error.message
       };
     }
 
     return {
       success: false,
       message: "Internal error while updating project",
-      error: error.message,
+      error: error.message
     };
   }
 };

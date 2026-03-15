@@ -1,10 +1,12 @@
-// services/projects/create-project.service.js
 
+const mongoose = require("mongoose");
 const { ProjectModel } = require("@models/project.model");
+const { InceptionModel } = require("@models/inception.model");
 const { logActivityTrackerEvent } = require("@services/audit/activity-tracker.service");
 const { ACTIVITY_TRACKER_EVENTS } = require("@configs/tracker.config");
 const { ProjectCategoryTypes } = require("@configs/enums.config");
 const { isValidMongoID } = require("@/utils/id-validators.util");
+const { validateLinkedProjectIds } = require("@/services/projects/linked-projects.service");
 const { logWithTime } = require("@utils/time-stamps.util");
 
 /**
@@ -33,6 +35,7 @@ const createProjectService = async ({
   goal,
   projectCategory,
   orgIds,
+  linkedProjectIds,
   expectedBudget,
   expectedTimelineMonths,
   createdBy,
@@ -75,14 +78,28 @@ const createProjectService = async ({
       resolvedOrgIds = [...new Set(orgIds.map(id => id.toString()))];
     }
 
+    const projectId = new mongoose.Types.ObjectId();
+
+    const linkedProjectsValidation = await validateLinkedProjectIds({
+      projectId,
+      addedLinkedProjectIds: linkedProjectIds,
+      removedLinkedProjectIds: null
+    });
+
+    if (!linkedProjectsValidation.success) {
+      return linkedProjectsValidation;
+    }
+
     // ── Persist ───────────────────────────────────────────────────────
     const project = await ProjectModel.create({
+      _id: projectId,
       name,
       description,
       problemStatement,
       goal,
       projectCategory,
       orgIds: resolvedOrgIds,
+      linkedProjectIds: linkedProjectsValidation.addedLinkedProjectIds,
       ...(expectedBudget !== undefined && { expectedBudget }),
       ...(expectedTimelineMonths !== undefined && { expectedTimelineMonths }),
       createdBy,
@@ -100,6 +117,31 @@ const createProjectService = async ({
       `Project '${project.name}' (${project._id}) created by ${createdBy}`,
       { newData: project }
     );
+    logWithTime(`[createStakeholderService] Project is in INCEPTION phase, checking for side-effects`);
+
+    // 1. Auto-create InceptionModel doc if not yet present
+    const inceptionExists = await InceptionModel.findOne({ projectId: project._id, isDeleted: false });
+    if (!inceptionExists) {
+      logWithTime(`[createStakeholderService] Creating InceptionModel for project ${projectId}`);
+      const inception = await InceptionModel.create({
+        projectId: project._id,
+        cycleNumber: 0,
+        version: "v1.0",
+        createdBy,
+      });
+      logWithTime(`[createStakeholderService] InceptionModel auto-created for project ${projectId}`);
+
+      logActivityTrackerEvent(
+        admin,
+        device,
+        requestId,
+        ACTIVITY_TRACKER_EVENTS.CREATE_INCEPTION,
+        `InceptionModel for project '${project.name}' (${project._id}) auto-created during project creation by ${createdBy}`,
+        { oldData: null, newData: inception }
+      );
+    } else {
+      logWithTime(`[createStakeholderService] InceptionModel already exists for project ${projectId}`);
+    }
 
     return { success: true, project };
   } catch (error) {
@@ -122,4 +164,3 @@ const createProjectService = async ({
 };
 
 module.exports = { createProjectService };
-
