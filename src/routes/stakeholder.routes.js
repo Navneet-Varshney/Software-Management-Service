@@ -16,6 +16,7 @@ const {
 
 const { stakeholderControllers } = require("@controllers/stakeholders");
 const { stakeholderMiddlewares } = require("@/middlewares/stakeholders");
+const { fetchProjectMiddleware } = require("@/middlewares/projects/fetch-project.middleware");
 
 const {
   CREATE_STAKEHOLDER,
@@ -30,11 +31,12 @@ const {
 //  1. baseAuthAdminMiddlewares     – device check, JWT verify, fetch admin, status checks
 //  2. Rate limiter                 – per-user+device window
 //  3. Role-auth middleware         – admin.role must be in allowedRoles
-//  4. fetchStakeholderMiddleware   – (mutating ops) load stakeholder, guard deleted
-//  5. Presence middleware          – required fields in req.body
-//  6. Validation middleware        – type / length / enum checks
-//  7. Role-guard middleware        – verify userId matches role type (admin vs client)
-//  8. Controller                   – business logic
+//  4. fetchProjectMiddleware       – load project from req.body.projectId (create-stakeholder only)
+//  5. fetchStakeholderMiddleware   – (update/delete ops) load stakeholder, guard deleted
+//  6. Presence middleware          – required fields in req.body
+//  7. Validation middleware        – type / length / enum checks
+//  8. Role-guard middleware        – verify userId matches role type (admin vs client)
+//  9. Controller                   – business logic
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
@@ -48,6 +50,7 @@ stakeholderRouter.post(
     ...baseAuthAdminMiddlewares,
     createStakeholderRateLimiter,
     apiAuthorizationMiddleware.authorizeAdminCreateStakeholder,
+    fetchProjectMiddleware,
     stakeholderMiddlewares.createStakeholderPresenceMiddleware,
     stakeholderMiddlewares.createStakeholderValidationMiddleware,
     stakeholderMiddlewares.createStakeholderRoleGuardMiddleware,
