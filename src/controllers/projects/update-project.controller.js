@@ -4,12 +4,12 @@ const { updateProjectService } = require("@services/projects/update-project.serv
 const { sendProjectUpdatedSuccess } = require("@/responses/success/project.response");
 const {
   throwBadRequestError,
-  throwDBResourceNotFoundError,
   throwInternalServerError,
   throwSpecificInternalServerError,
   getLogIdentifiers,
 } = require("@/responses/common/error-handler.response");
 const { logWithTime } = require("@utils/time-stamps.util");
+const { OK } = require("@/configs/http-status.config");
 
 /**
  * Controller: Update Project
@@ -45,7 +45,8 @@ const updateProjectController = async (req, res) => {
       projectUpdationReasonDescription,
       addedOrgIds,
       removedOrgIds,
-
+      addedLinkedProjectIds,
+      removedLinkedProjectIds
     } = req.body;
 
     const hasUpdate =
@@ -55,15 +56,17 @@ const updateProjectController = async (req, res) => {
       goal ||
       expectedBudget !== undefined ||
       expectedTimelineMonths !== undefined ||
-      addedOrgIds?.length ||
-      removedOrgIds?.length;
+      (Array.isArray(addedOrgIds) && addedOrgIds.length) ||
+      (Array.isArray(removedOrgIds) && removedOrgIds.length) ||
+      (Array.isArray(addedLinkedProjectIds) && addedLinkedProjectIds.length) ||
+      (Array.isArray(removedLinkedProjectIds) && removedLinkedProjectIds.length);
 
     if (!hasUpdate) {
       logWithTime(`❌ [updateProjectController] No updatable fields provided | ${getLogIdentifiers(req)}`);
       return throwBadRequestError(
         res,
         "No updatable fields provided",
-        "Provide at least one of: name, description, problemStatement, goal, expectedBudget, expectedTimelineMonths, addedOrgIds, removedOrgIds."
+        "Provide at least one of: name, description, problemStatement, goal, expectedBudget, expectedTimelineMonths, addedOrgIds, removedOrgIds, addedLinkedProjectIds, removedLinkedProjectIds."
       );
     }
 
@@ -78,6 +81,8 @@ const updateProjectController = async (req, res) => {
       expectedTimelineMonths,
       addedOrgIds: addedOrgIds || [],
       removedOrgIds: removedOrgIds || [],
+      addedLinkedProjectIds: addedLinkedProjectIds || [],
+      removedLinkedProjectIds: removedLinkedProjectIds || [],
       updatedBy,
       projectUpdationReasonType,
       projectUpdationReasonDescription,
@@ -110,8 +115,35 @@ const updateProjectController = async (req, res) => {
         return throwBadRequestError(res, "Validation error", result.error);
       }
 
+      if (result.message?.includes("must retain at least one organisation")) {
+        logWithTime(`❌ [updateProjectController] ${result.message} | ${getLogIdentifiers(req)}`);
+        return throwBadRequestError(res, result.message);
+      }
+
+      if (
+        result.message === "addedLinkedProjectIds must be an array of MongoDB ObjectId strings" ||
+        result.message === "addedLinkedProjectIds contains invalid MongoDB ObjectId values" ||
+        result.message === "removedLinkedProjectIds must be an array of MongoDB ObjectId strings" ||
+        result.message === "removedLinkedProjectIds contains invalid MongoDB ObjectId values" ||
+        result.message === "One or more linked projects do not exist" ||
+        result.message === "Only active, non-archived, non-deleted projects can be linked" ||
+        result.message === "A project cannot be linked to itself" ||
+        result.message === "Linking these projects would create a circular reference"
+      ) {
+        logWithTime(`❌ [updateProjectController] ${result.message} | ${getLogIdentifiers(req)}`);
+        return throwBadRequestError(res, result.message);
+      }
+
       logWithTime(`❌ [updateProjectController] ${result.message} | ${getLogIdentifiers(req)}`);
       return throwSpecificInternalServerError(res, result.message);
+    }
+
+    if (result.success && !result.project) {
+      logWithTime(`ℹ️ [updateProjectController] ${result.message} | ${getLogIdentifiers(req)}`);
+      return res.status(OK).json({
+        success: true,
+        message: result.message,
+      });
     }
 
     // ── Success ───────────────────────────────────────────────────────

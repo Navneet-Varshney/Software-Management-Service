@@ -34,7 +34,8 @@ const createProjectController = async (req, res) => {
       projectCategory,
       expectedBudget,
       expectedTimelineMonths,
-      orgIds
+      orgIds,
+      linkedProjectIds,
     } = req.body;
 
     // ── Derive createdBy from authenticated admin ────────────────────
@@ -48,6 +49,7 @@ const createProjectController = async (req, res) => {
       goal,
       projectCategory,
       orgIds,
+      linkedProjectIds,
       expectedBudget,
       expectedTimelineMonths,
       createdBy,
@@ -61,10 +63,49 @@ const createProjectController = async (req, res) => {
     });
 
     if (!result.success) {
+
       if (result.message === "Validation error") {
         logWithTime(`❌ [createProjectController] Validation error: ${JSON.stringify(result.error)} | ${getLogIdentifiers(req)}`);
         return throwBadRequestError(res, "Validation error", result.error);
       }
+
+      if (result.message === "projectCategory is required") {
+        logWithTime(`❌ [createProjectController] ${result.message} | ${getLogIdentifiers(req)}`);
+        return throwBadRequestError(res, result.message);
+      }
+
+      if (result.message?.includes("projectCategory must be one of")) {
+        logWithTime(`❌ [createProjectController] ${result.message} | ${getLogIdentifiers(req)}`);
+        return throwBadRequestError(res, result.message);
+      }
+
+      if (result.message === "orgIds must be an array with exactly one entry for an organization project") {
+        logWithTime(`❌ [createProjectController] ${result.message} | ${getLogIdentifiers(req)}`);
+        return throwBadRequestError(res, result.message);
+      }
+
+      if (result.message === "orgIds array with at least one entry is required for a multi-organization project") {
+        logWithTime(`❌ [createProjectController] ${result.message} | ${getLogIdentifiers(req)}`);
+        return throwBadRequestError(res, result.message);
+      }
+
+      if (result.message === "Every entry in orgIds must be a valid MongoDB ObjectId string") {
+        logWithTime(`❌ [createProjectController] ${result.message} | ${getLogIdentifiers(req)}`);
+        return throwBadRequestError(res, result.message);
+      }
+
+      if (
+        result.message === "addedLinkedProjectIds must be an array of MongoDB ObjectId strings" ||
+        result.message === "addedLinkedProjectIds contains invalid MongoDB ObjectId values" ||
+        result.message === "One or more linked projects do not exist" ||
+        result.message === "Only active, non-archived, non-deleted projects can be linked" ||
+        result.message === "A project cannot be linked to itself" ||
+        result.message === "Linking these projects would create a circular reference"
+      ) {
+        logWithTime(`❌ [createProjectController] ${result.message} | ${getLogIdentifiers(req)}`);
+        return throwBadRequestError(res, result.message);
+      }
+
       logWithTime(`❌ [createProjectController] ${result.message} | detail: ${result.error || "N/A"} | ${getLogIdentifiers(req)}`);
       return throwSpecificInternalServerError(res, result.message);
     }
