@@ -219,23 +219,11 @@ const FieldDefinitions = {
       required: true,
       validation: null,   // role-guard middleware enforces admin vs client split
       description: "New role to assign — must match the user's entity type"
-    },
-    orgId: {
-      field: "orgId",
-      required: false,
-      validation: validationRules.mongoId,
-      description: "MongoDB ObjectId of the Organization this stakeholder belongs to (derived from req.stakeholder but can be overridden)"
     }
   },
 
   // ── DELETE STAKEHOLDER ────────────────────────────────────────────────
   DELETE_STAKEHOLDER: {
-    orgId: {
-      field: "orgId",
-      required: false,
-      validation: validationRules.mongoId,
-      description: "MongoDB ObjectId of the Organization this stakeholder belongs to (derived from req.stakeholder but can be overridden)"
-    },
     DELETION_REASON_TYPE: {
       field: "deletionReasonType",
       required: true,
