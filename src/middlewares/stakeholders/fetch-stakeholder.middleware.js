@@ -1,80 +1,46 @@
 const { StakeholderModel } = require("@models/stakeholder.model");
-const { ProjectCategoryTypes } = require("@configs/enums.config");
 const { logMiddlewareError } = require("@utils/log-error.util");
 const {
     throwAccessDeniedError,
     throwInternalServerError,
     throwMissingFieldsError,
     throwValidationError,
-    throwDBResourceNotFoundError,
+    throwBadRequestError,
+    throwDBResourceNotFoundError
 } = require("@responses/common/error-handler.response");
 const { logWithTime } = require("@/utils/time-stamps.util");
-const { isValidCustomId } = require("@/utils/id-validators.util");
+const { isValidMongoID } = require("@/utils/id-validators.util");
 
 const fetchStakeholderMiddleware = async (req, res, next) => {
     try {
-        const { userId } = req.params;
-        const project = req.project;
+        const { stakeholderId } = req.params;
 
-        if (!userId) {
-            logMiddlewareError("checkUserIsStakeholder", "Missing userId in request parameters", req);
-            return throwMissingFieldsError(res, "User ID is required to verify stakeholder status.");
+        if (!stakeholderId) {
+            logMiddlewareError("fetchStakeholder", "Missing stakeholderId in request parameters", req);
+            return throwMissingFieldsError(res, "Stakeholder ID is required.");
         }
 
-        if (!isValidCustomId(userId)) {
-            logMiddlewareError("checkUserIsStakeholder", "Invalid userId format", req);
-            return throwValidationError(res, ["Invalid userId format. Must be a valid custom ID string."]);
+        if (!isValidMongoID(stakeholderId)) {
+            logMiddlewareError("fetchStakeholder", "Invalid stakeholderId format", req);
+            return throwValidationError(res, ["Invalid stakeholderId format. Must be a valid MongoDB ID string."]);
         }
 
         const stakeholder = await StakeholderModel.findOne({
-            userId: userId,
-            projectId: project._id,
+            _id: stakeholderId,
             isDeleted: false
         });
 
         if (!stakeholder) {
-            logMiddlewareError("checkUserIsStakeholder", `User ${userId} is not a stakeholder of project ${project._id}`, req);
-            return throwAccessDeniedError(res, "You do not have permission to perform this action on the specified project.");
-        }
-
-        if (project.projectCategory === ProjectCategoryTypes.INDIVIDUAL) {
-        } else {
-            const stakeholderOrgId = stakeholder.organizationId;
-            // For org-based projects verify the stakeholder's org is associated with the project
-            if (project.projectCategory === ProjectCategoryTypes.ORGANIZATION) {
-                const projectOrgId = project.orgIds[0];
-                if (stakeholderOrgId != projectOrgId) {
-                    logMiddlewareError(
-                        "checkUserIsStakeholder",
-                        `User ${userId} org ${stakeholderOrgId} does not match project org ${projectOrgId} for project ${project._id}`,
-                        req
-                    );
-                    return throwAccessDeniedError(res, "Your organisation is not associated with this project.");
-                }
-            }
-            if (
-                project.projectCategory === ProjectCategoryTypes.MULTI_ORGANIZATION
-            ) {
-                const orgMatches = Array.isArray(project.orgIds) &&
-                    project.orgIds.some(id => id.toString() === stakeholderOrgId);
-
-                if (!orgMatches) {
-                    logMiddlewareError(
-                        "checkUserIsStakeholder",
-                        `User ${userId} org ${stakeholderOrgId} is not in project org list for project ${project._id}`,
-                        req
-                    );
-                    return throwAccessDeniedError(res, "Your organisation is not associated with this project.");
-                }
-            }
+            logMiddlewareError("fetchStakeholder", `Stakeholder ${stakeholderId} not found for any Project`, req);
+            return throwDBResourceNotFoundError(res, `Stakeholder with Id ${stakeholderId}`);
         }
 
         req.foundStakeholder = stakeholder; // Attach stakeholder info to request for downstream use
 
-        logWithTime(`✅ User ${userId} is a stakeholder of project ${project._id}`);
+        logWithTime(`✅ User ${stakeholder.userId} is a stakeholder of project: ${stakeholder.projectId} with role ${stakeholder.role}`);
         return next();
     } catch (err) {
-        logMiddlewareError("checkUserIsStakeholder", `Unexpected error: ${err.message}`, req);
+        logMiddlewareError("fetchStakeholder", `Unexpected error: ${err.message}`, req);
         return throwInternalServerError(res, err);
     }
 }

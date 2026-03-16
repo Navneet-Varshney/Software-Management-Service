@@ -9,6 +9,7 @@ const {
   throwInternalServerError,
   logMiddlewareError,
 } = require("@/responses/common/error-handler.response");
+const { logWithTime } = require("@/utils/time-stamps.util");
 
 /**
  * fetchProjectMiddleware
@@ -25,7 +26,7 @@ const {
  */
 const fetchProjectMiddleware = async (req, res, next) => {
   try {
-    const projectId = req?.params?.projectId || req?.body?.projectId;
+    const projectId = req?.params?.projectId || req?.body?.projectId || req?.foundStakeholder?.projectId;
 
     // ── 1. Param presence ────────────────────────────────────────────
     if (!projectId) {
@@ -58,6 +59,7 @@ const fetchProjectMiddleware = async (req, res, next) => {
     }
 
     // ── 5. Attach and continue ───────────────────────────────────────
+    logWithTime(`✅ Project fetched successfully: ${project._id}`);
     req.project = project;
     return next();
 
