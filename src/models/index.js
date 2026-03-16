@@ -5,6 +5,7 @@ const { DeviceModel } = require("./device.model")
 const { ServiceToken } = require("./service-token.model");
 const { ClientModel } = require("./client.model");
 const { ProjectModel } = require("./project.model");
+const { InceptionModel } = require("./inception.model");
 
 const models = {
     ActivityTrackerModel,
@@ -13,7 +14,8 @@ const models = {
     DeviceModel,
     ServiceToken,
     ClientModel,
-    ProjectModel
+    ProjectModel,
+    InceptionModel
 }
 
 module.exports = {
