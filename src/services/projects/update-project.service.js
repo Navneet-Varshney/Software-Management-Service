@@ -1,4 +1,4 @@
-const { ProjectModel } = require("@models/project.model");
+const { ProjectModel, InceptionModel } = require("@models/index");
 const { logActivityTrackerEvent } = require("@services/audit/activity-tracker.service");
 const { prepareAuditData } = require("@utils/audit-data.util");
 const { ACTIVITY_TRACKER_EVENTS } = require("@configs/tracker.config");
@@ -8,6 +8,7 @@ const { isValidMongoID } = require("@/utils/id-validators.util");
 const {
   validateLinkedProjectIds
 } = require("@/services/projects/linked-projects.service");
+const { logWithTime } = require("@/utils/time-stamps.util");
 
 const updateProjectService = async (existingProject, updates) => {
   try {
@@ -179,6 +180,30 @@ const updateProjectService = async (existingProject, updates) => {
 
     if (shouldIncrementVersion) {
       updatePayload.version = generateVersion(1, existingProject.version);
+      // Fetch Inception Document
+      const inceptionDoc = await InceptionModel.findOne({ projectId: existingProject._id });
+      if (inceptionDoc) {
+        // Update Inception Document with new version
+        const version = generateVersion(inceptionDoc.cycleNumber, inceptionDoc.version);
+        await InceptionModel.findByIdAndUpdate(
+          inceptionDoc._id,
+          { $set: { version, updatedBy: updates.updatedBy } },
+          { new: true }
+        );
+        logWithTime(`[updateProjectService] Inception document for project ${existingProject._id} version updated to ${version}`);
+
+        logActivityTrackerEvent(
+          updates.auditContext?.admin,
+          updates.auditContext?.device,
+          updates.auditContext?.requestId,
+          ACTIVITY_TRACKER_EVENTS.UPDATE_INCEPTION,
+          `Inception document version updated to ${version} due to project update for project ${existingProject._id}`,
+          {
+            newData: { version },
+            adminActions: { targetId: inceptionDoc._id.toString() },
+          }
+        );
+      }
     }
 
     updatePayload.updatedBy = updates.updatedBy;

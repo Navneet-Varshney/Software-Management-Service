@@ -7,9 +7,10 @@ const { convertOnHoldToActiveProjectService } = require("@services/projects/on-h
 const { logActivityTrackerEvent } = require("@services/audit/activity-tracker.service");
 const { prepareAuditData } = require("@utils/audit-data.util");
 const { ACTIVITY_TRACKER_EVENTS } = require("@configs/tracker.config");
-const { Phases, ProjectStatus, ProjectCategoryTypes } = require("@configs/enums.config");
+const { Phases, ProjectStatus, ProjectCategoryTypes, ClientRoleTypes } = require("@configs/enums.config");
 const { logWithTime } = require("@utils/time-stamps.util");
 const { errorMessage } = require("@utils/log-error.util");
+const { isValidMongoID } = require("@/utils/id-validators.util");
 
 /**
  * Creates a new stakeholder and handles the side-effects:
@@ -17,19 +18,26 @@ const { errorMessage } = require("@utils/log-error.util");
  *  - Promotes project status from DRAFT → ACTIVE.
  *  - Bumps the current-phase version via versionControlService.
  *
+ * IMPORTANT: organizationId requirement depends on project category:
+ *  - INDIVIDUAL projects: organizationId is NOT used (must be null)
+ *  - ORGANIZATION projects: organizationId is NOT required (auto-determined from project)
+ *  - MULTI_ORGANIZATION projects: organizationId IS REQUIRED and must be validated
+ *
  * @param {Object} params
  * @param {Object} params.project
- * @param {string} params.project._id      - MongoDB ObjectId string of the project
- * @param {string} params.userId          - USR-prefixed custom ID (becomes stakeholderId)
- * @param {string} params.role            - Validated role (admin or client type)
- * @param {string|null} params.organizationId - MongoDB ObjectId string (clients only, else null)
- * @param {string} params.createdBy       - USR-prefixed custom ID of the acting admin
- * @param {Object} params.auditContext    - { admin, device, requestId }
+ * @param {string} params.project._id        - MongoDB ObjectId string of the project
+ * @param {Object} params.user                - User object with clientId/adminId and organizationIds
+ * @param {string} params.role                - Validated role (admin or client type)
+ * @param {string|null} params.organizationId - MongoDB ObjectId string.
+ *                                             REQUIRED: for MULTI_ORGANIZATION projects only
+ *                                             MUST be: in user.organizationIds AND project.orgIds
+ * @param {string} params.createdBy           - USR-prefixed custom ID of the acting admin
+ * @param {Object} params.auditContext        - { admin, device, requestId }
  * @returns {{ success: boolean, stakeholder?: Object, message?: string, error?: string }}
  */
 const createStakeholderService = async ({
   project,
-  userId,
+  user,
   role,
   organizationId = null,
   createdBy,
@@ -38,18 +46,31 @@ const createStakeholderService = async ({
   try {
 
     const projectId = project._id.toString();
-    
+
+    const userId = user.adminId || user.clientId;
+
+    // ── Guard: prevent duplicate stakeholder ──────────────────────────────────
+    const existing = await StakeholderModel.findOne({
+      userId: userId,
+      projectId: projectId,
+      isDeleted: false,
+    });
+    if (existing) {
+      return { success: false, message: "Stakeholder already exists for this project" };
+    }
+
     // ── Guard: individual projects cannot have stakeholders ───────────────────
-    if (project.projectCategory === ProjectCategoryTypes.INDIVIDUAL) {
-      const existingStakeholder = await StakeholderModel.findOne({
+    if (project.projectCategory === ProjectCategoryTypes.INDIVIDUAL && user.clientId) {
+      const existingClient = await StakeholderModel.findOne({
         projectId: project._id,
+        role: { $in: Object.values(ClientRoleTypes) },
         isDeleted: false
       });
 
-      if (existingStakeholder) {
+      if (existingClient) {
         return {
           success: false,
-          message: "Individual projects can only have one stakeholder"
+          message: "Individual projects can only have one client"
         };
       }
     }
@@ -60,6 +81,88 @@ const createStakeholderService = async ({
         success: false,
         message: `Cannot add a stakeholder to a ${project.projectStatus} project`,
       };
+    }
+
+    if (project.projectCategory !== ProjectCategoryTypes.INDIVIDUAL && user.clientId) {
+
+      const clientOrgIds = user.organizationIds || [];
+
+      if (project.projectCategory === ProjectCategoryTypes.ORGANIZATION) {
+
+        organizationId = project.orgIds[0];
+
+        const belongsToOrg = clientOrgIds.some(
+          id => id.toString() === organizationId.toString()
+        );
+
+        if (!belongsToOrg) {
+          logWithTime(
+            `❌ [createStakeholderService] Client ${userId} does not belong to organization ${organizationId} | project ${projectId}`
+          );
+
+          return {
+            success: false,
+            message: "Client does not belong to the required organisation."
+          };
+        }
+      }
+
+      if (project.projectCategory === ProjectCategoryTypes.MULTI_ORGANIZATION) {
+
+        if (!organizationId) {
+          logWithTime(
+            `❌ [createStakeholderService] Missing organizationId for multi-organization project ${projectId} | client ${userId}`
+          );
+
+          return {
+            success: false,
+            message: "organizationId is required for multi-organization projects."
+          };
+        }
+
+        if(!isValidMongoID(organizationId)) {
+          logWithTime(
+            `❌ [createStakeholderService] Invalid organizationId format for multi-organization project ${projectId} | client ${userId}`
+          );
+
+          return {
+            success: false,
+            message: "Invalid organizationId format. Must be a valid MongoDB ObjectId string."
+          };
+        }
+
+        // Verify organizationId belongs to the client
+        const clientHasOrg = clientOrgIds.some(
+          id => id.toString() === organizationId.toString()
+        );
+
+        if (!clientHasOrg) {
+          logWithTime(
+            `❌ [createStakeholderService] Client ${userId} does not belong to organization ${organizationId} | project ${projectId}`
+          );
+
+          return {
+            success: false,
+            message: "The specified organization does not belong to the client."
+          };
+        }
+
+        // Verify organizationId belongs to the project
+        const projectHasOrg = project.orgIds.some(
+          id => id.toString() === organizationId.toString()
+        );
+
+        if (!projectHasOrg) {
+          logWithTime(
+            `❌ [createStakeholderService] Organization ${organizationId} is not associated with project ${projectId} | client ${userId}`
+          );
+
+          return {
+            success: false,
+            message: "The specified organization is not associated with this project."
+          };
+        }
+      }
     }
 
     // ── Auto-convert ON_HOLD → ACTIVE before proceeding ────────────────────────
@@ -74,47 +177,15 @@ const createStakeholderService = async ({
       logWithTime(`✅ [createStakeholderService] Project ${projectId} auto-converted ON_HOLD → ACTIVE`);
     }
 
-    // ── Guard: prevent duplicate stakeholder ──────────────────────────────────
-    const existing = await StakeholderModel.findOne({
-      userId: userId,
-      projectId: projectId,
-      isDeleted: false,
-    });
-    if (existing) {
-      return { success: false, message: "Stakeholder already exists for this project" };
-    }
-
     // ── Create stakeholder ────────────────────────────────────────────────────
     const stakeholderData = {
       userId,
-      projectId: projectId,
+      projectId,
       role,
+      organizationId,
       createdBy,
-      phase: project.currentPhase,
+      phase: project.currentPhase
     };
-    if (project.projectCategory === ProjectCategoryTypes.INDIVIDUAL) {
-    } else {
-      const stakeholderOrgId = organizationId;
-      // For org-based projects verify the stakeholder's org is associated with the project
-      if (project.projectCategory === ProjectCategoryTypes.ORGANIZATION) {
-        const projectOrgId = project.orgIds[0];
-        if (stakeholderOrgId != projectOrgId) {
-          logWithTime(`❌ [createStakeholderService] Cannot add stakeholder with org ${stakeholderOrgId} to organization project with org ${projectOrgId} | project ${projectId}`);
-          return { success: false, message: "Your organisation is not associated with this project." };
-        }
-      }
-      if (
-        project.projectCategory === ProjectCategoryTypes.MULTI_ORGANIZATION
-      ) {
-        const orgMatches = Array.isArray(project.orgIds) &&
-          project.orgIds.some(id => id.toString() === stakeholderOrgId);
-
-        if (!orgMatches) {
-          logWithTime(`❌ [createStakeholderService] User ${userId} org ${stakeholderOrgId} is not in project org list for project ${projectId}`);
-          return { success: false, message: "Your organisation is not associated with this project." };
-        }
-      }
-    }
 
     const stakeholder = await StakeholderModel.create(stakeholderData);
 
@@ -163,12 +234,12 @@ const createStakeholderService = async ({
   } catch (error) {
     logWithTime(`❌ [createStakeholderService] Error caught while creating stakeholder`);
     errorMessage(error);
-    
+
     if (error.name === "ValidationError") {
       logWithTime(`[createStakeholderService] Validation Error Details: ${JSON.stringify(error.errors)}`);
       return { success: false, message: "Validation error", error: error.message };
     }
-    
+
     logWithTime(`[createStakeholderService] Full error: ${error.toString()}`);
     return { success: false, message: "Internal error while creating stakeholder", error: error.message };
   }

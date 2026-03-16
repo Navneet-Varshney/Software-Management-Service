@@ -1,13 +1,13 @@
 // services/common/version.service.js
 
 const { Phases, ValidationPhaseStatus } = require("@configs/enums.config");
-const { InceptionModel }     = require("@models/inception.model");
-const { ElicitationModel }   = require("@models/elicitation.model");
-const { ElaborationModel }   = require("@models/elaboration.model");
-const { NegotiationModel }   = require("@models/negotiation.model");
+const { InceptionModel } = require("@models/inception.model");
+const { ElicitationModel } = require("@models/elicitation.model");
+const { ElaborationModel } = require("@models/elaboration.model");
+const { NegotiationModel } = require("@models/negotiation.model");
 const { SpecificationModel } = require("@models/specification.model");
-const { ValidationModel }    = require("@models/validation.model");
-const { generateVersion }    = require("@utils/version.util");
+const { ValidationModel } = require("@models/validation.model");
+const { generateVersion } = require("@utils/version.util");
 const { logActivityTrackerEvent } = require("@services/audit/activity-tracker.service");
 const { ACTIVITY_TRACKER_EVENTS } = require("@configs/tracker.config");
 const { logWithTime } = require("@utils/time-stamps.util");
@@ -17,13 +17,13 @@ const { logWithTime } = require("@utils/time-stamps.util");
  * MANAGEMENT has no dedicated phase document model.
  */
 const PHASE_MODEL_MAP = {
-  [Phases.INCEPTION]:     InceptionModel,
-  [Phases.ELICITATION]:   ElicitationModel,
-  [Phases.ELABORATION]:   ElaborationModel,
-  [Phases.NEGOTIATION]:   NegotiationModel,
+  [Phases.INCEPTION]: InceptionModel,
+  [Phases.ELICITATION]: ElicitationModel,
+  [Phases.ELABORATION]: ElaborationModel,
+  [Phases.NEGOTIATION]: NegotiationModel,
   [Phases.SPECIFICATION]: SpecificationModel,
-  [Phases.VALIDATION]:    ValidationModel,
-  [Phases.MANAGEMENT]:    null,
+  [Phases.VALIDATION]: ValidationModel,
+  [Phases.MANAGEMENT]: null,
 };
 
 /**
@@ -46,7 +46,7 @@ const PHASE_MODEL_MAP = {
 const versionControlService = async (project, action, performedBy, auditContext) => {
   try {
     const currentPhase = project.currentPhase;
-    const projectId    = project._id;
+    const projectId = project._id;
 
     const PhaseModel = PHASE_MODEL_MAP[currentPhase];
 
@@ -57,13 +57,14 @@ const versionControlService = async (project, action, performedBy, auditContext)
     }
 
     // ── Step 1: Check if last ValidationModel doc is COMPLETED + Approved ────
-    const latestValidation = await ValidationModel.findOne({ projectId, isDeleted: false })
+    const latestValidation = await ValidationModel
+      .findOne({ projectId, isDeleted: false })
       .sort({ cycleNumber: -1 })
       .lean();
 
     const shouldIncrementCycle =
       latestValidation !== null &&
-      latestValidation.status    === ValidationPhaseStatus.COMPLETED &&
+      latestValidation.status === ValidationPhaseStatus.COMPLETED &&
       latestValidation.isApproved === true;
 
     // ── Step 2: Compute new version & update / create phase doc ──────────────
@@ -73,13 +74,13 @@ const versionControlService = async (project, action, performedBy, auditContext)
     if (shouldIncrementCycle) {
       // Full cycle increment → brand-new phase document
       newCycleNumber = latestValidation.cycleNumber + 1;
-      newVersion     = generateVersion(newCycleNumber, null); // "v<N>.0"
+      newVersion = generateVersion(newCycleNumber, null); // "v<N>.0"
 
       await PhaseModel.create({
         projectId,
         cycleNumber: newCycleNumber,
-        version:     newVersion,
-        createdBy:   performedBy,
+        version: newVersion,
+        createdBy: performedBy,
       });
 
       logWithTime(
@@ -88,18 +89,19 @@ const versionControlService = async (project, action, performedBy, auditContext)
 
     } else {
       // Same cycle → find (or bootstrap) existing doc and bump decimal
-      const existingPhaseDoc = await PhaseModel.findOne({ projectId, isDeleted: false })
+      const existingPhaseDoc = await PhaseModel
+        .findOne({ projectId, isDeleted: false })
         .sort({ cycleNumber: -1 })
-        .lean();
+        .select("_id cycleNumber version");
 
       if (existingPhaseDoc) {
         newCycleNumber = existingPhaseDoc.cycleNumber;
-        newVersion     = generateVersion(newCycleNumber, existingPhaseDoc.version); // "v<N>.<M+1>"
+        newVersion = generateVersion(newCycleNumber, existingPhaseDoc.version); // "v<N>.<M+1>"
 
         await PhaseModel.findByIdAndUpdate(
           existingPhaseDoc._id,
           { $set: { version: newVersion, updatedBy: performedBy } },
-          { new: true }
+          { new: true, runValidators: true }
         );
 
         logWithTime(
@@ -108,13 +110,13 @@ const versionControlService = async (project, action, performedBy, auditContext)
       } else {
         // Bootstrap: no existing doc — first version for this phase/cycle
         newCycleNumber = 0;
-        newVersion     = generateVersion(0, null); // "v0.0"
+        newVersion = generateVersion(0, null); // "v0.0"
 
         await PhaseModel.create({
           projectId,
           cycleNumber: newCycleNumber,
-          version:     newVersion,
-          createdBy:   performedBy,
+          version: newVersion,
+          createdBy: performedBy,
         });
 
         logWithTime(
@@ -129,13 +131,13 @@ const versionControlService = async (project, action, performedBy, auditContext)
       admin,
       device,
       requestId,
-      ACTIVITY_TRACKER_EVENTS.VERSION_CHANGE,
+      ACTIVITY_TRACKER_EVENTS.PHASE_VERSION_CHANGE,
       action,
       {
         newData: {
-          phase:       currentPhase,
+          phase: currentPhase,
           cycleNumber: newCycleNumber,
-          version:     newVersion,
+          version: newVersion,
         },
         adminActions: { targetId: projectId?.toString() },
       }
