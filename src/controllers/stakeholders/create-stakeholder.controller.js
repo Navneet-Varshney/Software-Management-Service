@@ -18,15 +18,16 @@ const { errorMessage } = require("@/utils/log-error.util");
 const createStakeholderController = async (req, res) => {
   try {
 
-    const { userId, role, orgId } = req.body;
+    const { role, orgId } = req.body;
     const createdBy = req.admin.adminId;
 
     const project = req.project;
+    const user = req.stakeholderUser.entity
 
     // ── Call service ──────────────────────────────────────
     const result = await createStakeholderService({
       project,
-      userId,
+      user,
       role,
       organizationId: orgId || null,
       createdBy,
@@ -50,6 +51,21 @@ const createStakeholderController = async (req, res) => {
         return throwBadRequestError(res, result.message);
       }
 
+      if (result.message === "organizationId is required for multi-organization projects.") {
+        logWithTime(`❌ [createStakeholderController] Missing organizationId for multi-org project | ${getLogIdentifiers(req)}`);
+        return throwBadRequestError(res, result.message);
+      }
+
+      if (result.message === "The specified organization does not belong to the client.") {
+        logWithTime(`❌ [createStakeholderController] ${result.message} | ${getLogIdentifiers(req)}`);
+        return throwBadRequestError(res, result.message);
+      }
+
+      if (result.message === "The specified organization is not associated with this project.") {
+        logWithTime(`❌ [createStakeholderController] ${result.message} | ${getLogIdentifiers(req)}`);
+        return throwBadRequestError(res, result.message);
+      }
+
       if (result.message === "Individual projects can only have one stakeholder") {
         logWithTime(`❌ [createStakeholderController] ${result.message} | ${getLogIdentifiers(req)}`);
         return throwConflictError(res, result.message);
@@ -60,6 +76,30 @@ const createStakeholderController = async (req, res) => {
         return throwBadRequestError(res, result.message, result.error);
       }
 
+      if (result.message === "Your organisation is not associated with this project.") {
+        logWithTime(`❌ [createStakeholderController] ${result.message} | ${getLogIdentifiers(req)}`);
+        return throwBadRequestError(res, result.message);
+      }
+
+      if (result.message === "Individual projects can only have one client") {
+        logWithTime(`❌ [createStakeholderController] ${result.message} | ${getLogIdentifiers(req)}`);
+        return throwBadRequestError(res, result.message);
+      }
+
+      if (result.message === "Client does not belong to the required organisation.") {
+        logWithTime(`❌ [createStakeholderController] ${result.message} | ${getLogIdentifiers(req)}`);
+        return throwBadRequestError(res, result.message);
+      }
+
+      if (result.message === "Invalid organizationId format. Must be a valid MongoDB ObjectId string.") {
+        logWithTime(`❌ [createStakeholderController] ${result.message} | ${getLogIdentifiers(req)}`);
+        return throwBadRequestError(res, result.message);
+      }
+
+      if (result.message === "Client organisation is not associated with this project.") {
+        logWithTime(`❌ [createStakeholderController] ${result.message} | ${getLogIdentifiers(req)}`);
+        return throwBadRequestError(res, result.message);
+      }
       logWithTime(`❌ [createStakeholderController] ${result.message} | ${getLogIdentifiers(req)}`);
       return throwSpecificInternalServerError(res, result.message);
     }

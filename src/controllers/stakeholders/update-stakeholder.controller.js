@@ -4,12 +4,12 @@ const { updateStakeholderService } = require("@services/stakeholders/update-stak
 const { sendStakeholderUpdatedSuccess } = require("@/responses/success/stakeholder.response");
 const {
   throwBadRequestError,
-  throwDBResourceNotFoundError,
   throwInternalServerError,
   throwSpecificInternalServerError,
   getLogIdentifiers,
 } = require("@/responses/common/error-handler.response");
 const { logWithTime } = require("@utils/time-stamps.util");
+const { OK } = require("@/configs/http-status.config");
 
 /**
  * Controller: Update Stakeholder
@@ -34,6 +34,15 @@ const updateStakeholderController = async (req, res) => {
     const updatedBy  = req.admin.adminId;
     const stakeholder = req.foundStakeholder;
     const project = req.project;
+
+    if (stakeholder.role === role) {
+      logWithTime(`⚠️ [updateStakeholderController] No update needed - role is the same | ${getLogIdentifiers(req)}`);
+      return res.status(OK).json({
+        success: true,
+        message: "Stakeholder role is already set to the specified value. No update performed.",
+        stakeholder: stakeholder.toObject(),
+      });
+    }
 
     const result = await updateStakeholderService(stakeholder, project, {
       role,
