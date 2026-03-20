@@ -46,8 +46,72 @@ const sendAdminPanelServiceHealthSuccess = (res, serviceAuth) => {
     });
 };
 
+/**
+ * Success Response - Delete User
+ * @param {Object} res - Express response object
+ * @param {Object} data - Deleted user/admin data { userId, type }
+ */
+const sendDeleteUserSuccess = (res, data) => {
+    logWithTime("✅ User deleted successfully");
+    return res.status(OK).json({
+        success: true,
+        message: "User deleted successfully",
+        data: {
+            userId: data.userId || data.adminId,
+            type: data.userType || "ADMIN"
+        }
+    });
+};
+
+/**
+ * Success Response - Toggle Active Status
+ * @param {Object} res - Express response object
+ * @param {Object} data - Updated user/admin data with isActive status
+ */
+const sendToggleActiveStatusSuccess = (res, data) => {
+    logWithTime("✅ Active status toggled successfully");
+    return res.status(OK).json({
+        success: true,
+        message: "Active status toggled successfully",
+        data: {
+            userId: data.userId || data.adminId || data.clientId,
+            isActive: data.isActive,
+            type: data.userType || "ADMIN"
+        }
+    });
+};
+
+const sendToggleBlockDeviceStatusSuccess = (res, data) => {
+    logWithTime("✅ Device block status toggled successfully");
+    return res.status(OK).json({
+        success: true,
+        message: "Device block status toggled successfully",
+        data: {
+            deviceUUID: data.deviceUUID,
+            isBlocked: data.isBlocked
+        }
+    });
+};
+
+const sendToggleBlockUserStatusSuccess = (res, data) => {
+    logWithTime("✅ User block status toggled successfully");
+    return res.status(OK).json({
+        success: true,
+        message: "User block status toggled successfully",
+        data: {
+            userId: data.userId || data.adminId || data.clientId,
+            isBlocked: data.isBlocked,
+            type: data.userType || "ADMIN"
+        }
+    });
+};
+
 module.exports = {
     // Health checks
     sendAuthServiceHealthSuccess,
-    sendAdminPanelServiceHealthSuccess
+    sendAdminPanelServiceHealthSuccess,
+    sendDeleteUserSuccess,
+    sendToggleActiveStatusSuccess,
+    sendToggleBlockDeviceStatusSuccess,
+    sendToggleBlockUserStatusSuccess
 };
