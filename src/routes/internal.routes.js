@@ -20,7 +20,8 @@ const { toggleActiveStatus } = require("@/controllers/internals/toggle-active-st
 const { updateUserDetails } = require("@/controllers/internals/update-user-details.controller");
 const { toggleBlockDeviceStatus } = require("@/controllers/internals/toggle-block-status-device.controller");
 const { toggleBlockUserStatus } = require("@/controllers/internals/toggle-block-status-user.controller");
-const { CREATE_SUPER_ADMIN, CREATE_USER, PROVIDE_HEALTH_CHECK_TO_AUTH_SERVICE, PROVIDE_HEALTH_CHECK_TO_ADMIN_PANEL_SERVICE, DELETE_USER, TOGGLE_ACTIVE_STATUS, UPDATE_USER_DETAILS, TOGGLE_BLOCK_DEVICE_STATUS, TOGGLE_BLOCK_USER_STATUS } = INTERNAL_ROUTES;
+const { updateClientOrganizations } = require("@/controllers/internals/update-client-organizations.controller");
+const { CREATE_SUPER_ADMIN, CREATE_USER, PROVIDE_HEALTH_CHECK_TO_AUTH_SERVICE, PROVIDE_HEALTH_CHECK_TO_ADMIN_PANEL_SERVICE, DELETE_USER, TOGGLE_ACTIVE_STATUS, UPDATE_USER_DETAILS, TOGGLE_BLOCK_DEVICE_STATUS, TOGGLE_BLOCK_USER_STATUS, UPDATE_ORGANIZATION_IN_CLIENT } = INTERNAL_ROUTES;
 const internalRouter = express.Router();
 
 // Check if microservice mode is enabled
@@ -90,6 +91,8 @@ if (!microserviceConfig.enabled) {
     internalRouter.patch(TOGGLE_BLOCK_DEVICE_STATUS, adminPanelInternalMiddlewares, toggleBlockDeviceStatus);
 
     internalRouter.patch(TOGGLE_BLOCK_USER_STATUS, adminPanelInternalMiddlewares, toggleBlockUserStatus);
+
+    internalRouter.patch(UPDATE_ORGANIZATION_IN_CLIENT, adminPanelInternalMiddlewares, updateClientOrganizations);
 
     module.exports = {
       internalRouter

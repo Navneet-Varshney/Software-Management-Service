@@ -106,6 +106,23 @@ const sendToggleBlockUserStatusSuccess = (res, data) => {
     });
 };
 
+/**
+ * Success Response - Update Client Organizations
+ * @param {Object} res - Express response object
+ * @param {Object} data - Updated client data with organizations and isBlocked status
+ */
+const sendUpdateClientOrganizationsSuccess = (res, data) => {
+    logWithTime("✅ Client organizations updated successfully");
+    return res.status(OK).json({
+        success: true,
+        message: "Client organizations updated successfully",
+        data: {
+            clientId: data.clientId,
+            organizations: data.organizations || []
+        }
+    });
+};
+
 module.exports = {
     // Health checks
     sendAuthServiceHealthSuccess,
@@ -113,5 +130,6 @@ module.exports = {
     sendDeleteUserSuccess,
     sendToggleActiveStatusSuccess,
     sendToggleBlockDeviceStatusSuccess,
-    sendToggleBlockUserStatusSuccess
+    sendToggleBlockUserStatusSuccess,
+    sendUpdateClientOrganizationsSuccess
 };
