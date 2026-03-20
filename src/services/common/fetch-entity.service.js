@@ -25,9 +25,11 @@ const fetchEntity = async (
   userIdField = "userId"
 ) => {
   try {
+    const activeEntityFilter = { isDeleted: false };
+
     // Priority 1: userId (direct fetch)
     if (userId) {
-      const query = { [userIdField]: userId };
+      const query = { [userIdField]: userId, ...activeEntityFilter };
       const entity = await Model.findOne(query).lean();
       
       if (entity) {
@@ -57,7 +59,8 @@ const fetchEntity = async (
     }
 
     // Query with $or to match any provided identifier
-    const query = conditions.length === 1 ? conditions[0] : { $or: conditions };
+    const identityQuery = conditions.length === 1 ? conditions[0] : { $or: conditions };
+    const query = { ...identityQuery, ...activeEntityFilter };
     const entity = await Model.findOne(query).lean();
 
     if (entity) {
