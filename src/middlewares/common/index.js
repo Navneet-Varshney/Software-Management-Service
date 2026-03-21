@@ -8,6 +8,7 @@ const { verifyDeviceField } = require("./verify-device-field.middleware");
 const { verifyJWTSignatureMiddleware } = require("./verify-jwt-signature.middleware");
 const { apiAuthorizationMiddleware } = require("../admins/admin-api-authorization.middleware");
 const { checkUserIsStakeholder } = require("../stakeholders/check-user-is-stakeholder.middleware");
+const { fetchAuthUserMiddleware } = require("./fetch-auth-user.middleware");
 
 const commonMiddlewares = {
     requestIdMiddleware,
@@ -19,7 +20,8 @@ const commonMiddlewares = {
     isUserAccountBlocked,
     isUserAccountActive,
     apiAuthorizationMiddleware,
-    checkUserIsStakeholder
+    checkUserIsStakeholder,
+    fetchAuthUserMiddleware
 }
 
 module.exports = {
