@@ -128,7 +128,7 @@ const versionControlService = async (project, action, performedBy, auditContext)
     // ── Step 3: Activity tracker (fire-and-forget) ────────────────────────────
     const { admin, device, requestId } = auditContext || {};
     logActivityTrackerEvent(
-      admin,
+      user,
       device,
       requestId,
       ACTIVITY_TRACKER_EVENTS.PHASE_VERSION_CHANGE,

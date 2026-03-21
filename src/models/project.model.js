@@ -3,7 +3,7 @@
 const mongoose = require("mongoose");
 const { DB_COLLECTIONS } = require("@/configs/db-collections.config");
 const { customIdRegex, mongoIdRegex } = require("@configs/regex.config");
-const { ProjectCreationReason, ProjectUpdationReason, ProjectStatus, ProjectOnHoldReason, ProjectResumeReason, ProjectAbortReason, ProjectDeletionReason, Phases, ProjectCategoryTypes, ProjectTypes } = require("@configs/enums.config");
+const { ProjectCreationReason, ProjectUpdationReason, ProjectStatus, ProjectOnHoldReason, ProjectResumeReason, ProjectAbortReason, ProjectDeletionReason, Phases, ProjectCategoryTypes, ProjectTypes, PriorityLevels } = require("@configs/enums.config");
 const {
   projectNameLength,
   descriptionLength,
@@ -70,7 +70,7 @@ const projectSchema = new mongoose.Schema(
       min: [0, "Expected budget cannot be negative."],
     },
 
-    expectedTimelineMonths: {
+    expectedTimelineInDays: {
       type: Number,
       default: null,
       min: [0, "Expected timeline cannot be negative."],
@@ -114,6 +114,24 @@ const projectSchema = new mongoose.Schema(
       type: String,
       enum: Object.values(ProjectCategoryTypes),
       default: ProjectCategoryTypes.INDIVIDUAL
+    },
+
+    projectCriticality: {
+      type: String,
+      enum: Object.values(PriorityLevels),
+      default: PriorityLevels.MEDIUM
+    },
+
+    projectComplexity: {
+      type: String,
+      enum: Object.values(PriorityLevels),
+      default: PriorityLevels.MEDIUM
+    },
+
+    projectPriority: {
+      type: String,
+      enum: Object.values(PriorityLevels),
+      default: PriorityLevels.MEDIUM
     },
 
     orgIds: {
