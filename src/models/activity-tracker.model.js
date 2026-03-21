@@ -1,11 +1,18 @@
 const mongoose = require("mongoose");
 const { ACTIVITY_TRACKER_EVENTS } = require("@configs/tracker.config");
-const { DeviceTypes, AdminTypes, PerformedOnTypes } = require("@configs/enums.config");
+const { DeviceTypes, AdminTypes, ClientTypes } = require("@configs/enums.config");
 const { customIdRegex, UUID_V4_REGEX } = require("@configs/regex.config");
 const { DB_COLLECTIONS } = require("@/configs/db-collections.config");
 
 const activityTrackerSchema = new mongoose.Schema({
-  adminId: {
+
+  userType: {
+    type: String,
+    enum: Object.values(AdminTypes).concat(Object.values(ClientTypes)),
+    default: null
+  },
+
+  userId: {
     type: String,
     required: true,
     match: customIdRegex,
@@ -35,12 +42,6 @@ const activityTrackerSchema = new mongoose.Schema({
     default: null
   },
 
-  performedBy: {
-    type: String,
-    enum: Object.values(AdminTypes),
-    default: AdminTypes.INTERNAL_ADMIN
-  },
-
   description: {
     type: String,
     required: true
@@ -60,17 +61,22 @@ const activityTrackerSchema = new mongoose.Schema({
     type: new mongoose.Schema(
       {
         targetId: {
-          type: String,
-          default: null,
+          type: mongoose.Schema.Types.Mixed,
+          default: null
         },
 
         performedOn: {
           type: String,
-          enum: Object.values(PerformedOnTypes),
+          enum: Object.values(DB_COLLECTIONS),
           default: null,
         },
 
         reason: {
+          type: String,
+          default: null,
+        },
+
+        reasonDescription: {
           type: String,
           default: null,
         },
