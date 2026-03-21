@@ -21,7 +21,10 @@ const {
   StakeholderDeletionReason,
   ProjectRoleTypes,
   ProjectCategoryTypes,
-  ProjectTypes
+  ProjectTypes,
+  PriorityLevels,
+  ApproveProductRequestReasonType,
+  RejectProductRequestReasonType
 } = require("@configs/enums.config");
 
 /**
@@ -71,6 +74,9 @@ const StakeholderDeletionReasonHelper = createEnumHelper(StakeholderDeletionReas
 const ProjectRoleTypesHelper = createEnumHelper(ProjectRoleTypes, "ProjectRoleTypes");
 const ProjectCategoryTypesHelper = createEnumHelper(ProjectCategoryTypes, "ProjectCategoryTypes");
 const ProjectTypesHelper = createEnumHelper(ProjectTypes, "ProjectTypes");
+const PriorityLevelsHelper = createEnumHelper(PriorityLevels, "PriorityLevels");
+const ApproveProductRequestReasonTypeHelper = createEnumHelper(ApproveProductRequestReasonType, "ApproveProductRequestReasonType");
+const RejectProductRequestReasonTypeHelper = createEnumHelper(RejectProductRequestReasonType, "RejectProductRequestReasonType");
 
 module.exports = {
   DeviceTypeHelper,
@@ -91,5 +97,8 @@ module.exports = {
   StakeholderDeletionReasonHelper,
   ProjectRoleTypesHelper,
   ProjectCategoryTypesHelper,
-  ProjectTypesHelper
+  ProjectTypesHelper,
+  PriorityLevelsHelper,
+  ApproveProductRequestReasonTypeHelper,
+  RejectProductRequestReasonTypeHelper
 };

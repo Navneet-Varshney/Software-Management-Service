@@ -28,6 +28,15 @@ const clientListProjectsRateLimiter    = createRateLimiter(perUserAndDevice.clie
 const clientGetStakeholderRateLimiter  = createRateLimiter(perUserAndDevice.clientGetStakeholder);
 const clientListStakeholdersRateLimiter = createRateLimiter(perUserAndDevice.clientListStakeholders);
 
+const createProductRequestRateLimiter = createRateLimiter(perUserAndDevice.createProductRequest);
+const updateProductRequestRateLimiter = createRateLimiter(perUserAndDevice.updateProductRequest);
+const deleteProductRequestRateLimiter = createRateLimiter(perUserAndDevice.deleteProductRequest);
+const getProductRequestRateLimiter    = createRateLimiter(perUserAndDevice.getProductRequest);
+const listProductRequestsRateLimiter   = createRateLimiter(perUserAndDevice.listProductRequests);
+const cancelProductRequestRateLimiter = createRateLimiter(perUserAndDevice.cancelProductRequest);
+const approveProductRequestRateLimiter = createRateLimiter(perUserAndDevice.approveProductRequest);
+const rejectProductRequestRateLimiter = createRateLimiter(perUserAndDevice.rejectProductRequest);
+
 module.exports = {
     welcomeAdminRateLimiter,
     welcomeClientRateLimiter,
@@ -50,4 +59,12 @@ module.exports = {
     clientListProjectsRateLimiter,
     clientGetStakeholderRateLimiter,
     clientListStakeholdersRateLimiter,
+    createProductRequestRateLimiter,
+    updateProductRequestRateLimiter,
+    deleteProductRequestRateLimiter,
+    getProductRequestRateLimiter,
+    listProductRequestsRateLimiter,
+    cancelProductRequestRateLimiter,
+    approveProductRequestRateLimiter,
+    rejectProductRequestRateLimiter
 }

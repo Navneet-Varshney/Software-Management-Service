@@ -42,6 +42,12 @@ const baseAuthClientMiddlewares = [
     ...accountStatusMiddlewares
 ];
 
+const baseAuthClientOrAdminMiddlewares = [
+    ...baseAuthMiddlewares,
+    commonMiddlewares.fetchAuthUserMiddleware, // Fetches either admin or client based on JWT
+    ...accountStatusMiddlewares
+]
+
 const checkClientIsStakeholder = [
     ...baseAuthClientMiddlewares,
     projectMiddlewares.fetchProjectMiddleware,
@@ -65,6 +71,7 @@ module.exports = {
     adminPanelInternalMiddlewares,
     baseAuthAdminMiddlewares,
     baseAuthClientMiddlewares,
+    baseAuthClientOrAdminMiddlewares,
     checkClientIsStakeholder,
     checkAdminIsStakeholder
 };
