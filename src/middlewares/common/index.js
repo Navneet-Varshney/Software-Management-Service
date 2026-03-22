@@ -9,8 +9,10 @@ const { verifyJWTSignatureMiddleware } = require("./verify-jwt-signature.middlew
 const { apiAuthorizationMiddleware } = require("../admins/admin-api-authorization.middleware");
 const { checkUserIsStakeholder } = require("../stakeholders/check-user-is-stakeholder.middleware");
 const { fetchAuthUserMiddleware } = require("./fetch-auth-user.middleware");
+const { corsMiddleware } = require('./cors.middleware');
 
 const commonMiddlewares = {
+    corsMiddleware,
     requestIdMiddleware,
     isDeviceBlocked,
     verifyDeviceField,

@@ -15,6 +15,11 @@ const DB_COLLECTIONS = {
     SPECIFICATIONS: "specifications",
     VALIDATIONS: "validations",
     PRODUCT_REQUESTS: "product_requests",
+    SCOPES: "scopes",
+    COMMENTS: "comments",
+    REQUIREMENTS: "requirements",
+    HIGH_LEVEL_FEATURES: "high_level_features",
+    FEATURE_REQUIREMENT_MAPPINGS: "feature_requirement_mappings"
 }
 
 module.exports = { DB_COLLECTIONS };

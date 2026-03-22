@@ -326,6 +326,35 @@ const ApproveProductRequestReasonType = Object.freeze({
   OTHER: "OTHER"
 });
 
+const ScopeTypes = Object.freeze({
+  IN_SCOPE: "IN_SCOPE",
+  OUT_SCOPE: "OUT_SCOPE",
+  CONSTRAINT: "CONSTRAINT"
+});
+
+const RequirementTypes = Object.freeze({
+  FUNCTIONAL: "FUNCTIONAL",
+  NON_FUNCTIONAL: "NON_FUNCTIONAL",
+  EXCITED: "EXCITED"
+});
+
+const CommentOtherEntityTypes = Object.freeze({
+  PRODUCT_VISION: "PRODUCT_VISION"
+});
+
+const RequirementStatuses = Object.freeze({
+  DRAFT: "DRAFT",
+  ISSUE: "ISSUE",
+  FINAL: "FINAL",
+  DROPPED: "DROPPED"
+});
+
+const RequirementSources = Object.freeze({
+  MANUAL: "MANUAL",
+  CSV_UPLOAD: "CSV_UPLOAD",
+  API: "API"
+});
+
 module.exports = {
   AdminTypes,
   RoleHierarchy,
@@ -369,5 +398,10 @@ module.exports = {
   PriorityLevels,
   RequestStatus,
   ApproveProductRequestReasonType,
-  RejectProductRequestReasonType
+  RejectProductRequestReasonType,
+  ScopeTypes,
+  RequirementTypes,
+  CommentOtherEntityTypes,
+  RequirementStatuses,
+  RequirementSources
 };

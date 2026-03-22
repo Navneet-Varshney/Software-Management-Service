@@ -1,7 +1,8 @@
+
 const { customIdRegex } = require("@/configs/regex.config");
 const { DB_COLLECTIONS } = require("@/configs/db-collections.config");
 const { PhaseDeletionReason } = require("@/configs/enums.config");
-const { descriptionLength } = require("@/configs/fields-length.config");
+const { descriptionLength, titleLength } = require("@/configs/fields-length.config");
 const mongoose = require("mongoose");
 
 const elicitationSchema = new mongoose.Schema({
@@ -11,6 +12,32 @@ const elicitationSchema = new mongoose.Schema({
     ref: DB_COLLECTIONS.PROJECTS,
     required: true,
     index: true
+  },
+
+  isFrozen: {
+    type: Boolean,
+    default: false
+  },
+
+  startedAt: {
+    type: Date,
+    default: null
+  },
+
+  title: {
+    type: String,
+    trim: true,
+    minlength: titleLength.min,
+    maxlength: titleLength.max,
+    default: null
+  },
+
+  description: {
+    type: String,
+    trim: true,
+    minlength: descriptionLength.min,
+    maxlength: descriptionLength.max,
+    default: null
   },
 
   cycleNumber: {
@@ -27,11 +54,13 @@ const elicitationSchema = new mongoose.Schema({
   createdBy: {
     type: String,
     match: customIdRegex,
+    required: true
   },
 
   updatedBy: {
     type: String,
-    match: customIdRegex
+    match: customIdRegex,
+    default: null
   },
 
   isDeleted: {
@@ -64,6 +93,9 @@ const elicitationSchema = new mongoose.Schema({
   }
 
 }, { timestamps: true });
+
+elicitationSchema.index({ projectId: 1, isDeleted: 1 });
+elicitationSchema.index({ projectId: 1, cycleNumber: -1, isDeleted: 1 });
 
 const ElicitationModel = mongoose.model(DB_COLLECTIONS.ELICITATIONS, elicitationSchema);
 

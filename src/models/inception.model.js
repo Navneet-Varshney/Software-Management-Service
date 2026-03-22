@@ -1,7 +1,6 @@
 const { customIdRegex } = require("@/configs/regex.config");
 const { DB_COLLECTIONS } = require("@/configs/db-collections.config");
-const { PhaseDeletionReason } = require("@/configs/enums.config");
-const { descriptionLength } = require("@/configs/fields-length.config");
+const { descriptionLength, productVisionLength } = require("@/configs/fields-length.config");
 const mongoose = require("mongoose");
 
 const inceptionSchema = new mongoose.Schema({
@@ -19,6 +18,14 @@ const inceptionSchema = new mongoose.Schema({
     default: 0
   },
 
+  productVision: {
+    type: String,
+    trim: true,
+    minlength: productVisionLength.min,
+    maxlength: productVisionLength.max,
+    default: null
+  },
+
   version: {
     type: String,
     default: "v1.0"
@@ -27,11 +34,13 @@ const inceptionSchema = new mongoose.Schema({
   createdBy: {
     type: String,
     match: customIdRegex,
+    required: true
   },
 
   updatedBy: {
     type: String,
-    match: customIdRegex
+    match: customIdRegex,
+    default: null
   },
 
   isDeleted: {
@@ -48,22 +57,16 @@ const inceptionSchema = new mongoose.Schema({
     type: String,
     match: customIdRegex,
     default: null
-  },
-
-  deletionReasonType: {
-    type: String,
-    enum: Object.values(PhaseDeletionReason),
-    default: null
-  },
-
-  deletionReasonDescription: {
-    type: String,
-    default: null,
-    minlength: descriptionLength.min,
-    maxlength: descriptionLength.max
   }
 
 }, { timestamps: true });
+
+inceptionSchema.index(
+  { projectId: 1, cycleNumber: 1 },
+  { unique: true, partialFilterExpression: { isDeleted: false } }
+);
+inceptionSchema.index({ projectId: 1, isDeleted: 1 });
+inceptionSchema.index({ projectId: 1, cycleNumber: -1, isDeleted: 1 });
 
 const InceptionModel = mongoose.model(DB_COLLECTIONS.INCEPTIONS, inceptionSchema);
 

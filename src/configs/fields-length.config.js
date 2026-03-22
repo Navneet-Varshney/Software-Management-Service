@@ -3,7 +3,7 @@
 module.exports = {
   phoneNumberLength: {
     min: 10,
-    max: 16 
+    max: 16
   },
   localNumberLength: {
     min: 9,
@@ -11,7 +11,7 @@ module.exports = {
   },
   countryCodeLength: {
     min: 1,
-    max: 4 
+    max: 4
   },
   emailLength: {
     min: 5,
@@ -30,10 +30,10 @@ module.exports = {
     max: 500
   },
   adminIdLength: {
-    min: 10, 
+    min: 10,
     max: 10
   }
-  ,mongoIdLength: {
+  , mongoIdLength: {
     min: 24,
     max: 24
   },
@@ -62,5 +62,13 @@ module.exports = {
   projectGoalLength: {
     min: 10,
     max: 1000
+  },
+  titleLength: {
+    min: 3,
+    max: 200
+  },
+  productVisionLength: {
+    min: 20,
+    max: 5000
   }
 };

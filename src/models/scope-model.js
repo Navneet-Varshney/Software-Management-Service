@@ -1,0 +1,34 @@
+
+const { DB_COLLECTIONS } = require('@/configs/db-collections.config');
+const { ScopeTypes } = require('@/configs/enums.config');
+const { customIdRegex } = require('@/configs/regex.config');
+const { descriptionLength, titleLength } = require('@/configs/fields-length.config');
+const mongoose = require('mongoose');
+
+const ScopeSchema = new mongoose.Schema({
+  inceptionId: { type: mongoose.Schema.Types.ObjectId, ref: DB_COLLECTIONS.INCEPTIONS, required: true },
+  type: { type: String, enum: Object.values(ScopeTypes), default: ScopeTypes.IN_SCOPE },
+  title: { type: String, trim: true, minlength: titleLength.min, maxlength: titleLength.max, required: true },
+  description: { type: String, trim: true, default: null, minlength: descriptionLength.min, maxlength: descriptionLength.max },
+  createdBy: { type: String, required: true, match: customIdRegex },
+  updatedBy: { type: String, match: customIdRegex, default: null  },
+  isDeleted: { type: Boolean, default: false },
+  deletedAt: { type: Date, default: null },
+  deletedBy: { type: String, match: customIdRegex, default: null }
+}, {
+  timestamps: true
+});
+
+ScopeSchema.index(
+  { inceptionId: 1, title: 1 },
+  { unique: true, partialFilterExpression: { isDeleted: false } }
+);
+ScopeSchema.index({ inceptionId: 1, isDeleted: 1 });
+ScopeSchema.index({ inceptionId: 1, type: 1, isDeleted: 1 });
+ScopeSchema.index({ inceptionId: 1, createdAt: -1, isDeleted: 1 });
+
+const ScopeModel = mongoose.model(DB_COLLECTIONS.SCOPES, ScopeSchema);
+
+module.exports = {
+    ScopeModel
+}
