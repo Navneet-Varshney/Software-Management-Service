@@ -205,6 +205,21 @@ const FieldDefinitions = {
     },
   },
 
+  ACTIVATE_PROJECT: {
+    ACTIVATION_REASON_TYPE: {
+      field: "activationReasonType",
+      required: true,
+      validation: validationRules.projectActivationReasonType,
+      description: "Reason category for activating the project (enum)"
+    },
+    ACTIVATION_REASON_DESCRIPTION: {
+      field: "activationReasonDescription",
+      required: false,
+      validation: validationRules.reasonDescription,
+      description: "Optional free-text elaboration on activation reason"
+    },
+  },
+
   // ── DELETE PROJECT ───────────────────────────────────────────────────
   DELETE_PROJECT: {
     DELETION_REASON_TYPE: {
@@ -405,6 +420,132 @@ const FieldDefinitions = {
       required: true,
       validation: validationRules.reasonDescription,
       description: "Rejection description (compulsory)"
+    }
+  },
+
+  // ── CREATE SCOPE ──────────────────────────────────────────────────────
+  CREATE_SCOPE: {
+    TITLE: {
+      field: "title",
+      required: true,
+      validation: validationRules.title,
+      description: "Scope title (required)"
+    },
+    DESCRIPTION: {
+      field: "description",
+      required: false,
+      validation: validationRules.description,
+      description: "Detailed scope description (optional)"
+    },
+    TYPE: {
+      field: "type",
+      required: false,
+      validation: null,
+      description: "Scope type: IN_SCOPE | OUT_SCOPE | CONSTRAINT (optional, defaults to IN_SCOPE)"
+    }
+  },
+
+  // ── UPDATE SCOPE ──────────────────────────────────────────────────────
+  UPDATE_SCOPE: {
+    TITLE: {
+      field: "title",
+      required: false,
+      validation: validationRules.title,
+      description: "Updated scope title (optional)"
+    },
+    DESCRIPTION: {
+      field: "description",
+      required: false,
+      validation: validationRules.description,
+      description: "Updated scope description (optional)"
+    },
+    TYPE: {
+      field: "type",
+      required: false,
+      validation: validationRules.scopeType,
+      description: "Updated scope type: IN_SCOPE | OUT_SCOPE | CONSTRAINT (optional)"
+    }
+  },
+
+  // ── DELETE SCOPE ──────────────────────────────────────────────────────
+  DELETE_SCOPE: {
+    DELETION_REASON_DESCRIPTION: {
+      field: "deletionReasonDescription",
+      required: false,
+      validation: validationRules.reasonDescription,
+      description: "Reason for scope deletion (optional string, added to activity log)"
+    }
+  },
+
+  // ── CREATE HIGH-LEVEL FEATURE ──────────────────────────────────────────────────────
+  CREATE_HLF: {
+    TITLE: {
+      field: "title",
+      required: true,
+      validation: validationRules.title,
+      description: "High-level feature title (required)"
+    },
+    DESCRIPTION: {
+      field: "description",
+      required: false,
+      validation: validationRules.description,
+      description: "Detailed high-level feature description (optional)"
+    }
+  },
+
+  // ── UPDATE HIGH-LEVEL FEATURE ──────────────────────────────────────────────────────
+  UPDATE_HLF: {
+    TITLE: {
+      field: "title",
+      required: false,
+      validation: validationRules.title,
+      description: "Updated high-level feature title (optional)"
+    },
+    DESCRIPTION: {
+      field: "description",
+      required: false,
+      validation: validationRules.description,
+      description: "Updated high-level feature description (optional)"
+    }
+  },
+
+  // ── DELETE HIGH-LEVEL FEATURE ──────────────────────────────────────────────────────
+  DELETE_HLF: {
+    DELETION_REASON_DESCRIPTION: {
+      field: "deletionReasonDescription",
+      required: false,
+      validation: validationRules.reasonDescription,
+      description: "Reason for high-level feature deletion (optional string, added to activity log)"
+    }
+  },
+
+  // ── CREATE PRODUCT VISION ──────────────────────────────────────────────────────
+  CREATE_PRODUCT_VISION: {
+    PRODUCT_VISION: {
+      field: "productVision",
+      required: true,
+      validation: validationRules.productVision,
+      description: "Product vision statement (required)"
+    }
+  },
+
+  // ── UPDATE PRODUCT VISION ──────────────────────────────────────────────────────
+  UPDATE_PRODUCT_VISION: {
+    PRODUCT_VISION: {
+      field: "productVision",
+      required: true,
+      validation: validationRules.productVision,
+      description: "Updated product vision statement (required)"
+    }
+  },
+
+  // ── DELETE PRODUCT VISION ──────────────────────────────────────────────────────
+  DELETE_PRODUCT_VISION: {
+    DELETION_REASON_DESCRIPTION: {
+      field: "deletionReasonDescription",
+      required: false,
+      validation: validationRules.reasonDescription,
+      description: "Reason for product vision deletion (optional string, added to activity log)"
     }
   },
 

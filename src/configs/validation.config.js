@@ -2,7 +2,9 @@ const {
   projectNameLength,
   descriptionLength,
   problemStatementLength,
-  projectGoalLength
+  projectGoalLength,
+  titleLength,
+  productVisionLength
 } = require("./fields-length.config");
 
 const {
@@ -19,8 +21,10 @@ const {
   ProjectCategoryTypesHelper,
   ProjectTypesHelper,
   PriorityLevelsHelper,
+  ProjectActivationReasonHelper,
   ApproveProductRequestReasonTypeHelper,
-  RejectProductRequestReasonTypeHelper
+  RejectProductRequestReasonTypeHelper,
+  ScopeTypesHelper
 } = require("@utils/enum-validators.util");
 
 const { customIdRegex, mongoIdRegex, budgetRegex, timelineRegex } = require("./regex.config");
@@ -113,6 +117,30 @@ const validationRules = {
   },
   rejectProjectRequestReasonType: {
     enum: RejectProductRequestReasonTypeHelper
+  },
+  projectActivationReasonType: {
+    enum: ProjectActivationReasonHelper
+  },
+  scopeType: {
+    enum: ScopeTypesHelper
+  },
+  title: {
+    length: {
+      min: titleLength.min,
+      max: titleLength.max
+    }
+  },
+  description: {
+    length: {
+      min: descriptionLength.min,
+      max: descriptionLength.max
+    }
+  },
+  productVision: {
+    length: {
+      min: productVisionLength.min,
+      max: productVisionLength.max
+    }
   }
 };
 

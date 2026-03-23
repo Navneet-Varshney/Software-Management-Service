@@ -13,6 +13,9 @@ const PROJECT_BASE = `${API_PREFIX}/projects`; // /software-management-service/a
 const STAKEHOLDER_BASE = `${API_PREFIX}/stakeholders`; // /software-management-service/api/v1/stakeholders
 const CLIENT_BASE = `${API_PREFIX}/clients`; // /software-management-service/api/v1/clients
 const PRODUCT_REQUEST_BASE = `${API_PREFIX}/product-requests`; // /software-management-service/api/v1/product-requests
+const SCOPE_BASE = `${API_PREFIX}/scope`; // /software-management-service/api/v1/scope
+const HLF_BASE = `${API_PREFIX}/high-level-features`; // /software-management-service/api/v1/high-level-features
+const PRODUCT_VISION_BASE = `${API_PREFIX}/product-vision`; // /software-management-service/api/v1/product-vision
 
 module.exports = {
     INTERNAL_BASE,
@@ -21,6 +24,9 @@ module.exports = {
     STAKEHOLDER_BASE,
     CLIENT_BASE,
     PRODUCT_REQUEST_BASE,
+    SCOPE_BASE,
+    HLF_BASE,
+    PRODUCT_VISION_BASE,
     INTERNAL_ROUTES: {
         CREATE_SUPER_ADMIN: `/create-super-admin`, // /software-management-service/api/v1/internal/create-super-admin
         CREATE_USER: `/create-user`, // /software-management-service/api/v1/internal/admin-panel/create-user
@@ -48,7 +54,8 @@ module.exports = {
         DELETE_PROJECT:   `/delete/:projectId`,          // DELETE  /api/v1/projects/delete/:projectId
         ARCHIVE_PROJECT: `/archive/:projectId`,           // PATCH   /api/v1/projects/archive/:projectId
         GET_PROJECT:     `/get/:projectId`,               // GET     /api/v1/projects/get/:projectId
-        LIST_PROJECTS:    `/list`                        // GET     /api/v1/projects/list
+        LIST_PROJECTS:    `/list`,                        // GET     /api/v1/projects/list
+        ACTIVATE_PROJECT: `/activate/:projectId`         // PATCH   /api/v1/projects/activate/:projectId
     },
     STAKEHOLDER_ROUTES: {
         CREATE_STAKEHOLDER: `/create`,                     // POST    /api/v1/stakeholders/create
@@ -72,5 +79,25 @@ module.exports = {
         APPROVE_PRODUCT_REQUEST: `/approve/:requestId`,        // PATCH   /api/v1/product-requests/approve/:requestId
         REJECT_PRODUCT_REQUEST: `/reject/:requestId`,           // PATCH   /api/v1/product-requests/reject/:requestId
         CANCEL_PRODUCT_REQUEST: `/cancel/:requestId`            // PATCH   /api/v1/product-requests/cancel/:requestId
+    },
+    SCOPE_ROUTES: {
+        GET_SCOPE:       `/get/:scopeId`,         // GET /software-management-service/api/v1/scope/get/:projectId
+        UPDATE_SCOPE:    `/update/:scopeId`,      // PATCH /software-management-service/api/v1/scope/update/:projectId
+        CREATE_SCOPE:    `/create/:projectId`,      // POST /software-management-service/api/v1/scope/create/:projectId
+        DELETE_SCOPE:    `/delete/:scopeId`,       // DELETE /software-management-service/api/v1/scope/delete/:projectId
+        LIST_SCOPES:     `/list/:projectId`        // GET /software-management-service/api/v1/scope/list/:projectId
+    },
+    HLF_ROUTES: {
+        GET_HLF:       `/get/:hlfId`,         // GET /software-management-service/api/v1/high-level-features/get/:hlfId
+        UPDATE_HLF:    `/update/:hlfId`,      // PATCH /software-management-service/api/v1/high-level-features/update/:hlfId
+        CREATE_HLF:    `/create/:projectId`,      // POST /software-management-service/api/v1/high-level-features/create/:projectId
+        DELETE_HLF:    `/delete/:hlfId`,       // DELETE /software-management-service/api/v1/high-level-features/delete/:hlfId
+        LIST_HLF:     `/list/:projectId`        // GET /software-management-service/api/v1/high-level-features/list/:projectId
+    },
+    PRODUCT_VISION_ROUTES: {
+        GET_PRODUCT_VISION:       `/get/:projectId`,         // GET /software-management-service/api/v1/product-vision/get/:projectId
+        UPDATE_PRODUCT_VISION:    `/update/:projectId`,      // PATCH /software-management-service/api/v1/product-vision/update/:projectId
+        CREATE_PRODUCT_VISION:    `/create/:projectId`,      // POST /software-management-service/api/v1/product-vision/create/:projectId
+        DELETE_PRODUCT_VISION:    `/delete/:projectId`       // DELETE /software-management-service/api/v1/product-vision/delete/:projectId
     }
 };

@@ -1,49 +1,37 @@
-/**
- * CENTRALIZED FIELD DEFINITIONS CONFIG
- * 
- * Single Source of Truth for:
- * - Required fields per endpoint/action
- * - Validation rules mapping
- * - Field-level metadata
- * 
- * Benefits:
- * 1. Ek jagah change karein, sab jagah reflect ho
- * 2. Type-safe through enum-like structure
- * 3. Automatic derivation of required-fields arrays
- * 4. Direct mapping to validation rules
- */
+// middlewares/admins/field-validation.middleware.js
 
-const { validationRules } = require("./validation.config");
+const { FieldDefinitions } = require("@configs/field-definitions.config");
+const { getValidationSet } = require("@utils/field-definition.util");
 
-/**
- * Field Metadata Structure:
- * {
- *   field: 'fieldName',           // Field identifier
- *   required: true/false,         // Is this field required?
- *   validation: validationRule,   // Link to validation.config.js rule
- *   description: 'Field purpose'  // Optional documentation
- * }
- */
+const validationSets = {
+    createProjectValidationSet: getValidationSet(FieldDefinitions.CREATE_PROJECT),
+    updateProjectValidationSet: getValidationSet(FieldDefinitions.UPDATE_PROJECT),
+    onHoldProjectValidationSet: getValidationSet(FieldDefinitions.ON_HOLD_PROJECT),
+    abortProjectValidationSet: getValidationSet(FieldDefinitions.ABORT_PROJECT),
+    completeProjectValidationSet: getValidationSet(FieldDefinitions.COMPLETE_PROJECT),
+    resumeProjectValidationSet: getValidationSet(FieldDefinitions.RESUME_PROJECT),
+    deleteProjectValidationSet: getValidationSet(FieldDefinitions.DELETE_PROJECT),
+    archiveProjectValidationSet: getValidationSet(FieldDefinitions.ARCHIVE_PROJECT),
+    activateProjectValidationSet: getValidationSet(FieldDefinitions.ACTIVATE_PROJECT),
+    createStakeholderValidationSet: getValidationSet(FieldDefinitions.CREATE_STAKEHOLDER),
+    updateStakeholderValidationSet: getValidationSet(FieldDefinitions.UPDATE_STAKEHOLDER),
+    deleteStakeholderValidationSet: getValidationSet(FieldDefinitions.DELETE_STAKEHOLDER),
+    createProductRequestValidationSet: getValidationSet(FieldDefinitions.CREATE_PRODUCT_REQUEST),
+    updateProductRequestValidationSet: getValidationSet(FieldDefinitions.UPDATE_PRODUCT_REQUEST),
+    deleteProductRequestValidationSet: getValidationSet(FieldDefinitions.DELETE_PRODUCT_REQUEST),
+    approveProductRequestValidationSet: getValidationSet(FieldDefinitions.APPROVE_PRODUCT_REQUEST),
+    rejectProductRequestValidationSet: getValidationSet(FieldDefinitions.REJECT_PRODUCT_REQUEST),
+    createScopeValidationSet: getValidationSet(FieldDefinitions.CREATE_SCOPE),
+    updateScopeValidationSet: getValidationSet(FieldDefinitions.UPDATE_SCOPE),
+    deleteScopeValidationSet: getValidationSet(FieldDefinitions.DELETE_SCOPE),
+    createHlfValidationSet: getValidationSet(FieldDefinitions.CREATE_HLF),
+    updateHlfValidationSet: getValidationSet(FieldDefinitions.UPDATE_HLF),
+    deleteHlfValidationSet: getValidationSet(FieldDefinitions.DELETE_HLF),
+    createProductVisionValidationSet: getValidationSet(FieldDefinitions.CREATE_PRODUCT_VISION),
+    updateProductVisionValidationSet: getValidationSet(FieldDefinitions.UPDATE_PRODUCT_VISION),
+    deleteProductVisionValidationSet: getValidationSet(FieldDefinitions.DELETE_PRODUCT_VISION)
 
-// AUTH ENDPOINTS FIELD DEFINITIONS
 
-const FieldDefinitions = {
-    CREATE_ADMIN: {
-        ADMIN_TYPE: {
-            field: "adminType",
-            required: true,
-            validation: validationRules.adminType,
-            description: "Type of admin (SUPER_ADMIN, SUB_ADMIN)"
-        }
-    },
-    CREATE_PROJECT: {
-
-    },
-    UPDATE_PROJECT: {
-
-    }
 };
 
-module.exports = {
-  FieldDefinitions
-};
+module.exports = { validationSets };
