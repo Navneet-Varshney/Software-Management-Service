@@ -2,7 +2,6 @@
 
 const { StakeholderModel } = require("@models/stakeholder.model");
 const { versionControlService } = require("@services/common/version.service");
-const { convertOnHoldToActiveProjectService } = require("@services/projects/on-hold-project.service");
 const { logActivityTrackerEvent } = require("@services/audit/activity-tracker.service");
 const { prepareAuditData } = require("@utils/audit-data.util");
 const { ACTIVITY_TRACKER_EVENTS } = require("@configs/tracker.config");
@@ -29,17 +28,6 @@ const updateStakeholderService = async (stakeholder, project, { role, updatedBy,
         success: false,
         message: `Cannot update a stakeholder on a ${project.projectStatus} project`,
       };
-    }
-
-    // ── Auto-convert ON_HOLD → ACTIVE before proceeding ────────────────────────
-    if (project.projectStatus === ProjectStatus.ON_HOLD) {
-      const converted = await convertOnHoldToActiveProjectService(project, {
-        convertedBy: updatedBy,
-        auditContext,
-      });
-      if (!converted.success) {
-        return { success: false, message: converted.message };
-      }
     }
 
     const oldStakeholder = stakeholder.toObject ? stakeholder.toObject() : { ...stakeholder };

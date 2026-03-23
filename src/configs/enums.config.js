@@ -220,6 +220,15 @@ const ProjectResumeReason = Object.freeze({
   OTHER: "other"
 });
 
+const ProjectActivationReason = Object.freeze({
+  READY_FOR_DEVELOPMENT: "ready_for_development",
+  CLIENT_APPROVAL: "client_approval",
+  RESOURCE_AVAILABILITY: "resource_availability",
+  PRIORITY_REASSESSMENT: "priority_reassessment",
+  TECHNICAL_BREAKTHROUGH: "technical_breakthrough",
+  OTHER: "other"
+});
+
 const ProjectStatus = Object.freeze({
   DRAFT: "DRAFT",
   ACTIVE: "ACTIVE",
@@ -403,5 +412,6 @@ module.exports = {
   RequirementTypes,
   CommentOtherEntityTypes,
   RequirementStatuses,
-  RequirementSources
+  RequirementSources,
+  ProjectActivationReason
 };

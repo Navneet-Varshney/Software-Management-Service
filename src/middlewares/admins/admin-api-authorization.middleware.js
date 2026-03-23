@@ -19,6 +19,7 @@ const authorizeAdminDeleteProject   = createAdminRoleAuthMiddleware(ApiRolePermi
 const authorizeAdminArchiveProject  = createAdminRoleAuthMiddleware(ApiRolePermissions.admin.archiveProject);
 const authorizeAdminGetProject      = createAdminRoleAuthMiddleware(ApiRolePermissions.admin.getProject);
 const authorizeAdminGetProjects     = createAdminRoleAuthMiddleware(ApiRolePermissions.admin.getProjects);
+const authorizeAdminActivateProject = createAdminRoleAuthMiddleware(ApiRolePermissions.admin.activateProject);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Stakeholder role-authorization middlewares
@@ -61,7 +62,8 @@ const adminApiAuthorizationMiddleware = {
   authorizeAdminGetProjectOrStakeholder,
   authorizeAdminGetProjectsOrStakeholder,
   authorizeAdminGetStakeholderOrMember,
-  authorizeAdminGetStakeholdersOrMember
+  authorizeAdminGetStakeholdersOrMember,
+  authorizeAdminActivateProject
 }
 
 module.exports = {

@@ -113,6 +113,14 @@ const sendProjectsListFetchedSuccess = (res, projects, total, page, totalPages) 
   });
 };
 
+const sendProjectActivateSuccess = (res, project) => {
+  return res.status(OK).json({
+    success: true,
+    message: "Project activated successfully.",
+    data: { project },
+  });
+};
+
 module.exports = {
   sendProjectCreatedSuccess,
   sendProjectUpdatedSuccess,
@@ -124,4 +132,5 @@ module.exports = {
   sendProjectArchivedSuccess,
   sendProjectFetchedSuccess,
   sendProjectsListFetchedSuccess,
+  sendProjectActivateSuccess
 };

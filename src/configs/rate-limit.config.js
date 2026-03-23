@@ -84,6 +84,13 @@ module.exports = {
       reason: "Delete project endpoint abuse",
       message: "Too many requests to delete project endpoint. Please try again later."
     },
+    activateProject: {
+      maxRequests: 10,
+      windowMs: 60 * 1000,
+      prefix: "activate_project",
+      reason: "Activate project endpoint abuse",
+      message: "Too many requests to activate project endpoint. Please try again later."
+    },
     archiveProject: {
       maxRequests: 10,
       windowMs: 60 * 1000,

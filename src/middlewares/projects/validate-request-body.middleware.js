@@ -1,26 +1,20 @@
 // middlewares/admins/validate-request-body.middleware.js
 
 const {
-  createProjectField,
-  updateProjectField,
-  onHoldProjectField,
-  abortProjectField,
-  completeProjectField,
-  resumeProjectField,
-  deleteProjectField,
-  archiveProjectField,
+  requiredFields
 } = require("@configs/required-fields.config");
 const { checkBodyPresence } = require("../factory/validate-request-body.middleware-factory");
 
 const presenceMiddlewares = { 
-  createProjectPresenceMiddleware:   checkBodyPresence("createProjectPresence",   createProjectField),
-  updateProjectPresenceMiddleware:   checkBodyPresence("updateProjectPresence",   updateProjectField),
-  onHoldProjectPresenceMiddleware:   checkBodyPresence("onHoldProjectPresence",   onHoldProjectField),
-  abortProjectPresenceMiddleware:    checkBodyPresence("abortProjectPresence",    abortProjectField),
-  completeProjectPresenceMiddleware: checkBodyPresence("completeProjectPresence", completeProjectField),
-  resumeProjectPresenceMiddleware:   checkBodyPresence("resumeProjectPresence",   resumeProjectField),
-  deleteProjectPresenceMiddleware:   checkBodyPresence("deleteProjectPresence",   deleteProjectField),
-  archiveProjectPresenceMiddleware:  checkBodyPresence("archiveProjectPresence",  archiveProjectField),
+  createProjectPresenceMiddleware:   checkBodyPresence("createProjectPresence",   requiredFields.createProjectField),
+  updateProjectPresenceMiddleware:   checkBodyPresence("updateProjectPresence",   requiredFields.updateProjectField),
+  onHoldProjectPresenceMiddleware:   checkBodyPresence("onHoldProjectPresence",   requiredFields.onHoldProjectField),
+  abortProjectPresenceMiddleware:    checkBodyPresence("abortProjectPresence",    requiredFields.abortProjectField),
+  completeProjectPresenceMiddleware: checkBodyPresence("completeProjectPresence", requiredFields.completeProjectField),
+  resumeProjectPresenceMiddleware:   checkBodyPresence("resumeProjectPresence",   requiredFields.resumeProjectField),
+  deleteProjectPresenceMiddleware:   checkBodyPresence("deleteProjectPresence",   requiredFields.deleteProjectField),
+  archiveProjectPresenceMiddleware:  checkBodyPresence("archiveProjectPresence",  requiredFields.archiveProjectField),
+  activateProjectPresenceMiddleware:  checkBodyPresence("activateProjectPresence",  requiredFields.activateProjectField)
 };
 
 module.exports = { presenceMiddlewares };

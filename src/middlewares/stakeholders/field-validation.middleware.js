@@ -1,17 +1,12 @@
 // middlewares/stakeholders/field-validation.middleware.js
 
+const { validationSets } = require("@/configs/validation-sets.config");
 const { validateBody } = require("@middlewares/factory/field-validation.middleware-factory");
-const { FieldDefinitions } = require("@configs/field-definitions.config");
-const { getValidationSet } = require("@utils/field-definition.util");
-
-const createStakeholderValidationSet = getValidationSet(FieldDefinitions.CREATE_STAKEHOLDER);
-const updateStakeholderValidationSet = getValidationSet(FieldDefinitions.UPDATE_STAKEHOLDER);
-const deleteStakeholderValidationSet = getValidationSet(FieldDefinitions.DELETE_STAKEHOLDER);
 
 const validationMiddlewares = {
-  createStakeholderValidationMiddleware: validateBody("createStakeholder", createStakeholderValidationSet),
-  updateStakeholderValidationMiddleware: validateBody("updateStakeholder", updateStakeholderValidationSet),
-  deleteStakeholderValidationMiddleware: validateBody("deleteStakeholder", deleteStakeholderValidationSet),
+  createStakeholderValidationMiddleware: validateBody("createStakeholder", validationSets.createStakeholderValidationSet),
+  updateStakeholderValidationMiddleware: validateBody("updateStakeholder", validationSets.updateStakeholderValidationSet),
+  deleteStakeholderValidationMiddleware: validateBody("deleteStakeholder", validationSets.deleteStakeholderValidationSet)
 };
 
 module.exports = { validationMiddlewares };

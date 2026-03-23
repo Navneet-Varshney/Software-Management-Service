@@ -37,11 +37,11 @@ const resumeProjectService = async (project, params) => {
     }
 
     // ── Guard: must be ON_HOLD or ABORTED ────────────────────────────
-    const resumableStatuses = [ProjectStatus.ON_HOLD, ProjectStatus.ABORTED];
+    const resumableStatuses = [ProjectStatus.ON_HOLD];
     if (!resumableStatuses.includes(project.projectStatus)) {
       return {
         success: false,
-        message: "Only an ON_HOLD or ABORTED project can be resumed",
+        message: "Only an ON_HOLD project can be resumed",
         currentStatus: project.projectStatus,
       };
     }

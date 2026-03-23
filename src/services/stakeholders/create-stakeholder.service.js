@@ -1,13 +1,12 @@
 // services/stakeholders/create-stakeholder.service.js
 
-const { ProjectModel } = require("@models/project.model");
 const { StakeholderModel } = require("@models/stakeholder.model");
 const { versionControlService } = require("@services/common/version.service");
 const { convertOnHoldToActiveProjectService } = require("@services/projects/on-hold-project.service");
 const { logActivityTrackerEvent } = require("@services/audit/activity-tracker.service");
 const { prepareAuditData } = require("@utils/audit-data.util");
 const { ACTIVITY_TRACKER_EVENTS } = require("@configs/tracker.config");
-const { Phases, ProjectStatus, ProjectCategoryTypes, ClientRoleTypes } = require("@configs/enums.config");
+const { ProjectStatus, ProjectCategoryTypes, ClientRoleTypes } = require("@configs/enums.config");
 const { logWithTime } = require("@utils/time-stamps.util");
 const { errorMessage } = require("@utils/log-error.util");
 const { isValidMongoID } = require("@/utils/id-validators.util");
@@ -47,7 +46,7 @@ const createStakeholderService = async ({
 
     const projectId = project._id.toString();
 
-    const userId = user.clientId;
+    const userId = user.adminId || user.clientId;
 
     // ── Guard: prevent duplicate stakeholder ──────────────────────────────────
     const existing = await StakeholderModel.findOne({
@@ -191,21 +190,6 @@ const createStakeholderService = async ({
 
     // ── Inception phase side-effects ──────────────────────────────────────────
     let updatedProject = project;
-
-    if (project.currentPhase === Phases.INCEPTION) {
-
-      // 1. Promote DRAFT → ACTIVE
-      if (project.projectStatus === ProjectStatus.DRAFT) {
-        updatedProject = await ProjectModel.findByIdAndUpdate(
-          project._id,
-          { $set: { projectStatus: ProjectStatus.ACTIVE } },
-          { new: true }
-        );
-        logWithTime(`[createStakeholderService] Project ${projectId} promoted DRAFT → ACTIVE`);
-      } else {
-        logWithTime(`[createStakeholderService] Project status is ${project.projectStatus}, no status change needed`);
-      }
-    }
 
     // ── Version control ───────────────────────────────────────────────────────
     await versionControlService(

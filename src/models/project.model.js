@@ -3,7 +3,7 @@
 const mongoose = require("mongoose");
 const { DB_COLLECTIONS } = require("@/configs/db-collections.config");
 const { customIdRegex, mongoIdRegex } = require("@configs/regex.config");
-const { ProjectCreationReason, ProjectUpdationReason, ProjectStatus, ProjectOnHoldReason, ProjectResumeReason, ProjectAbortReason, ProjectDeletionReason, Phases, ProjectCategoryTypes, ProjectTypes, PriorityLevels } = require("@configs/enums.config");
+const { ProjectCreationReason, ProjectUpdationReason, ProjectStatus, ProjectOnHoldReason, ProjectResumeReason, ProjectAbortReason, ProjectDeletionReason, Phases, ProjectCategoryTypes, ProjectTypes, PriorityLevels, ProjectActivationReason } = require("@configs/enums.config");
 const {
   projectNameLength,
   descriptionLength,
@@ -259,6 +259,34 @@ const projectSchema = new mongoose.Schema(
       trim: true,
       minlength: descriptionLength.min,
       maxlength: descriptionLength.max,
+    },
+
+    activationReasonType: {
+      type: String,
+      default: null,
+      enum: {
+        values: Object.values(ProjectActivationReason),
+        message: `activationReasonType must be one of: ${Object.values(ProjectActivationReason).join(", ")}`
+      },
+    },
+
+    activationReasonDescription: {
+      type: String,
+      default: null,
+      trim: true,
+      minlength: descriptionLength.min,
+      maxlength: descriptionLength.max,
+    },
+
+    activatedAt: {
+      type: Date,
+      default: null,
+    },
+
+    activatedBy: {
+      type: String,
+      default: null,
+      match: [customIdRegex, "activatedBy must be a valid USR ID."],
     },
 
     onHoldAt: {

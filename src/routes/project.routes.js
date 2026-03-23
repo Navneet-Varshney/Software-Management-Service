@@ -17,6 +17,7 @@ const {
   archiveProjectRateLimiter,
   getProjectRateLimiter,
   getProjectsRateLimiter,
+  activateProjectRateLimiter
 } = require("@rate-limiters/general-api.rate-limiter");
 
 const { projectControllers } = require("@controllers/projects");
@@ -31,7 +32,9 @@ const {
   DELETE_PROJECT,
   ARCHIVE_PROJECT,
   GET_PROJECT,
-  LIST_PROJECTS
+  LIST_PROJECTS,
+  ON_HOLD_PROJECT,
+  ACTIVATE_PROJECT
 } = PROJECT_ROUTES;
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -86,7 +89,7 @@ projectRouter.patch(
  * Allowed roles: CEO, Manager
  */
 projectRouter.patch(
-  `/on-hold/:projectId`,
+  ON_HOLD_PROJECT,
   [
     ...baseAuthAdminMiddlewares,
     onHoldProjectRateLimiter,
@@ -150,6 +153,19 @@ projectRouter.patch(
     projectMiddlewares.resumeProjectValidationMiddleware,
   ],
   projectControllers.resumeProjectController
+);
+
+projectRouter.patch(
+  ACTIVATE_PROJECT,
+  [
+    ...baseAuthAdminMiddlewares,
+    activateProjectRateLimiter,
+    apiAuthorizationMiddleware.authorizeAdminActivateProject,
+    projectMiddlewares.fetchProjectMiddleware,
+    projectMiddlewares.activateProjectPresenceMiddleware,
+    projectMiddlewares.activateProjectValidationMiddleware,
+  ],
+  projectControllers.activateProjectController
 );
 
 /**

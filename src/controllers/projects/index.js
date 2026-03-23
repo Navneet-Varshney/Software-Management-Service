@@ -8,6 +8,7 @@ const { abortProjectController } = require("./abort-project.controller");
 const { updateProjectController } = require("./update-project.controller");
 const { archiveProjectController } = require("./archive-project.controller");
 const { onHoldProjectController } = require("./on-hold-project.controller");
+const { activateProjectController } = require("./activate-project.controller");
 
 const projectControllers = {
     createProjectController,
@@ -19,7 +20,8 @@ const projectControllers = {
     resumeProjectController,
     updateProjectController,
     archiveProjectController,
-    onHoldProjectController
+    onHoldProjectController,
+    activateProjectController
 }
 
 module.exports = {

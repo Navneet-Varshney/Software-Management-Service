@@ -14,6 +14,7 @@ const completeProjectRateLimiter = createRateLimiter(perUserAndDevice.completePr
 const resumeProjectRateLimiter   = createRateLimiter(perUserAndDevice.resumeProject);
 const deleteProjectRateLimiter   = createRateLimiter(perUserAndDevice.deleteProject);
 const archiveProjectRateLimiter  = createRateLimiter(perUserAndDevice.archiveProject);
+const activateProjectRateLimiter = createRateLimiter(perUserAndDevice.activateProject);
 const getProjectRateLimiter      = createRateLimiter(perUserAndDevice.getProject);
 const getProjectsRateLimiter     = createRateLimiter(perUserAndDevice.getProjects);
 
@@ -66,5 +67,6 @@ module.exports = {
     listProductRequestsRateLimiter,
     cancelProductRequestRateLimiter,
     approveProductRequestRateLimiter,
-    rejectProductRequestRateLimiter
+    rejectProductRequestRateLimiter,
+    activateProjectRateLimiter
 }

@@ -8,7 +8,7 @@ const mongoose = require('mongoose');
 const ScopeSchema = new mongoose.Schema({
   inceptionId: { type: mongoose.Schema.Types.ObjectId, ref: DB_COLLECTIONS.INCEPTIONS, required: true },
   type: { type: String, enum: Object.values(ScopeTypes), default: ScopeTypes.IN_SCOPE },
-  title: { type: String, trim: true, minlength: titleLength.min, maxlength: titleLength.max, required: true },
+  title: { type: String, trim: true, minlength: titleLength.min, maxlength: titleLength.max, lowercase: false, required: true },
   description: { type: String, trim: true, default: null, minlength: descriptionLength.min, maxlength: descriptionLength.max },
   createdBy: { type: String, required: true, match: customIdRegex },
   updatedBy: { type: String, match: customIdRegex, default: null  },
@@ -20,8 +20,12 @@ const ScopeSchema = new mongoose.Schema({
 });
 
 ScopeSchema.index(
-  { inceptionId: 1, title: 1 },
-  { unique: true, partialFilterExpression: { isDeleted: false } }
+  { inceptionId: 1, title: 1, type: 1 },
+  {
+    unique: true,
+    collation: { locale: "en", strength: 2 },
+    partialFilterExpression: { isDeleted: false }
+  }
 );
 ScopeSchema.index({ inceptionId: 1, isDeleted: 1 });
 ScopeSchema.index({ inceptionId: 1, type: 1, isDeleted: 1 });
