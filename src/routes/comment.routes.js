@@ -8,6 +8,7 @@ const { baseAuthClientOrAdminMiddlewares } = require("./middleware.gateway.route
 const { commentControllers } = require("@controllers/comments");
 const { commentMiddlewares } = require("@/middlewares/comments");
 const { projectMiddlewares } = require("@/middlewares/projects");
+const { getCommentRateLimiter, updateCommentRateLimiter, deleteCommentRateLimiter, createCommentRateLimiter, listCommentsRateLimiter, listHierarchicalCommentsRateLimiter } = require("@/rate-limiters/general-api.rate-limiter");
 
 const {
   CREATE_COMMENT,
@@ -44,6 +45,7 @@ commentRouter.post(
   CREATE_COMMENT,
   [
     ...baseAuthClientOrAdminMiddlewares,
+    createCommentRateLimiter,
     commentMiddlewares.commentEntityPresenceMiddleware,
     commentMiddlewares.commentEntityValidationMiddleware,
     commentMiddlewares.createCommentPresenceMiddleware,
@@ -64,6 +66,7 @@ commentRouter.get(
   GET_COMMENT,
   [
     ...baseAuthClientOrAdminMiddlewares,
+    getCommentRateLimiter,
     commentMiddlewares.fetchCommentMiddleware,
     projectMiddlewares.fetchProjectMiddleware
   ],
@@ -83,6 +86,7 @@ commentRouter.get(
   LIST_COMMENTS,
   [
     ...baseAuthClientOrAdminMiddlewares,
+    listCommentsRateLimiter
   ],
   commentControllers.listCommentsController
 );
@@ -101,6 +105,7 @@ commentRouter.get(
   LIST_HIERARCHICAL_COMMENTS,
   [
     ...baseAuthClientOrAdminMiddlewares,
+    listHierarchicalCommentsRateLimiter
   ],
   commentControllers.listHierarchicalCommentsController
 );
@@ -119,6 +124,7 @@ commentRouter.patch(
   UPDATE_COMMENT,
   [
     ...baseAuthClientOrAdminMiddlewares,
+    updateCommentRateLimiter,
     commentMiddlewares.updateCommentPresenceMiddleware,
     commentMiddlewares.updateCommentValidationMiddleware,
     commentMiddlewares.fetchCommentMiddleware,
@@ -148,6 +154,7 @@ commentRouter.delete(
   DELETE_COMMENT,
   [
     ...baseAuthClientOrAdminMiddlewares,
+    deleteCommentRateLimiter,
     commentMiddlewares.deleteCommentValidationMiddleware,
     commentMiddlewares.fetchCommentMiddleware,
     projectMiddlewares.fetchProjectMiddleware,

@@ -4,7 +4,7 @@ const { getActivityByIdService } = require("@services/activity-trackers/get-acti
 const {
   throwInternalServerError,
   throwSpecificInternalServerError,
-  throwAccessDeniedError,
+  throwBadRequestError,
   throwDBResourceNotFoundError,
   getLogIdentifiers,
 } = require("@/responses/common/error-handler.response");
@@ -25,14 +25,14 @@ const getActivityController = async (req, res) => {
     const result = await getActivityByIdService(activityId, adminId);
 
     if (!result.success) {
-      if (result.message === "Activity not found") {
-        logWithTime(`❌ [getActivityController] Activity not found: ${activityId} | ${getLogIdentifiers(req)}`);
-        return throwDBResourceNotFoundError(res, "Activity");
+      if (result.message === "Invalid activity ID format") {
+        logWithTime(`❌ [getMyActivityController] ${result.message} | ${getLogIdentifiers(req)}`);
+        return throwBadRequestError(res, result.message);
       }
 
-      if (result.isUnauthorized) {
-        logWithTime(`❌ [getActivityController] Unauthorized access attempt | ${getLogIdentifiers(req)}`);
-        return throwAccessDeniedError(res, result.message);
+      if (result.message === "Activity not found") {
+        logWithTime(`❌ [getMyActivityController] ${result.message} | ${getLogIdentifiers(req)}`);
+        return throwDBResourceNotFoundError(res, result.message);
       }
 
       logWithTime(`❌ [getActivityController] ${result.message} | ${getLogIdentifiers(req)}`);

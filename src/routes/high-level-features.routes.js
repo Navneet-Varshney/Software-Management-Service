@@ -9,6 +9,7 @@ const { hlfControllers } = require("@controllers/high-level-features");
 const { hlfMiddlewares } = require("@/middlewares/high-level-features");
 const { projectMiddlewares } = require("@/middlewares/projects");
 const { commonMiddlewares } = require("@/middlewares/common");
+const { createHLFRateLimiter, updateHLFRateLimiter, deleteHLFRateLimiter, getHLFRateLimiter, listHLFsRateLimiter } = require("@/rate-limiters/general-api.rate-limiter");
 
 const {
   CREATE_HLF,
@@ -41,6 +42,7 @@ hlfRouter.post(
   CREATE_HLF,
   [
     ...baseAuthAdminMiddlewares,
+    createHLFRateLimiter,
     projectMiddlewares.fetchProjectMiddleware,
     projectMiddlewares.activeProjectGuardMiddleware,
     hlfMiddlewares.fetchInceptionFromProjectMiddleware,
@@ -61,6 +63,7 @@ hlfRouter.patch(
   UPDATE_HLF,
   [
     ...baseAuthAdminMiddlewares,
+    updateHLFRateLimiter,
     hlfMiddlewares.fetchHlfMiddleware,
     projectMiddlewares.activeProjectGuardMiddleware,
     commonMiddlewares.checkUserIsStakeholder,
@@ -80,6 +83,7 @@ hlfRouter.delete(
   DELETE_HLF,
   [
     ...baseAuthAdminMiddlewares,
+    deleteHLFRateLimiter,
     hlfMiddlewares.fetchHlfMiddleware,
     projectMiddlewares.activeProjectGuardMiddleware,
     commonMiddlewares.checkUserIsStakeholder,
@@ -96,6 +100,7 @@ hlfRouter.get(
   GET_HLF,
   [
     ...baseAuthClientOrAdminMiddlewares,
+    getHLFRateLimiter,
     hlfMiddlewares.fetchHlfMiddleware,
     commonMiddlewares.checkUserIsStakeholder,
   ],
@@ -110,6 +115,7 @@ hlfRouter.get(
   LIST_HLF,
   [
     ...baseAuthClientOrAdminMiddlewares,
+    listHLFsRateLimiter,
     projectMiddlewares.fetchProjectMiddleware,
     hlfMiddlewares.fetchInceptionFromProjectMiddleware,
     commonMiddlewares.checkUserIsStakeholder,

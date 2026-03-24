@@ -30,6 +30,8 @@ const authorizeAdminDeleteStakeholder = createAdminRoleAuthMiddleware(ApiRolePer
 const authorizeAdminGetStakeholder    = createAdminRoleAuthMiddleware(ApiRolePermissions.stakeholder.getStakeholder);
 const authorizeAdminGetStakeholders   = createAdminRoleAuthMiddleware(ApiRolePermissions.stakeholder.getStakeholders);
 
+const authorizeAdminListActivity       = createAdminRoleAuthMiddleware(ApiRolePermissions.activityTracker.listActivity);
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Combined: Role OR Stakeholder — for read/fetch endpoints
 // Admin gets access if their role is authorized OR if they are a stakeholder
@@ -63,7 +65,8 @@ const adminApiAuthorizationMiddleware = {
   authorizeAdminGetProjectsOrStakeholder,
   authorizeAdminGetStakeholderOrMember,
   authorizeAdminGetStakeholdersOrMember,
-  authorizeAdminActivateProject
+  authorizeAdminActivateProject,
+  authorizeAdminListActivity
 }
 
 module.exports = {

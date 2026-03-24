@@ -232,6 +232,168 @@ module.exports = {
       prefix: "reject_product_request",
       reason: "Reject product request endpoint abuse",
       message: "Too many requests to reject product request endpoint. Please try again later."
-    }
+    },
+    createComment: {
+      maxRequests: 20,
+      windowMs: 60 * 1000,
+      prefix: "create_comment",
+      reason: "Create comment endpoint abuse",
+      message: "Too many requests to create comment endpoint. Please try again later."
+    },
+    updateComment: {
+      maxRequests: 20,
+      windowMs: 60 * 1000,
+      prefix: "update_comment",
+      reason: "Update comment endpoint abuse",
+      message: "Too many requests to update comment endpoint. Please try again later."
+    },
+    deleteComment: {
+      maxRequests: 20,
+      windowMs: 60 * 1000,
+      prefix: "delete_comment",
+      reason: "Delete comment endpoint abuse",
+      message: "Too many requests to delete comment endpoint. Please try again later."
+    },
+    getComment: {
+      maxRequests: 30,
+      windowMs: 60 * 1000,
+      prefix: "get_comments",
+      reason: "Get comments endpoint abuse",
+      message: "Too many requests to get comments endpoint. Please try again later."
+    },
+    listComments: {
+      maxRequests: 30,
+      windowMs: 60 * 1000,
+      prefix: "list_comments",
+      reason: "List comments endpoint abuse",
+      message: "Too many requests to list comments endpoint. Please try again later."
+    },
+    listHierarchicalComments: {
+      maxRequests: 30,
+      windowMs: 60 * 1000,
+      prefix: "list_hierarchical_comments",
+      reason: "List hierarchical comments endpoint abuse",
+      message: "Too many requests to list hierarchical comments endpoint. Please try again later."
+    },
+    getMyActivity: {
+      maxRequests: 30,
+      windowMs: 60 * 1000,
+      prefix: "get_my_activity",
+      reason: "Get my activity endpoint abuse",
+      message: "Too many requests to get my activity endpoint. Please try again later."
+    },
+    getActivityById: {
+      maxRequests: 30,
+      windowMs: 60 * 1000,
+      prefix: "get_activity_by_id",
+      reason: "Get activity by ID endpoint abuse",
+      message: "Too many requests to get activity by ID endpoint. Please try again later."
+    },
+    listActivity: {
+      maxRequests: 30,
+      windowMs: 60 * 1000,
+      prefix: "list_activity",
+      reason: "List activity endpoint abuse",
+      message: "Too many requests to list activity endpoint. Please try again later."
+    },
+    createScope: {
+      maxRequests: 10,
+      windowMs: 60 * 1000,
+      prefix: "create_scope",
+      reason: "Create scope endpoint abuse",
+      message: "Too many requests to create scope endpoint. Please try again later."
+    },
+    updateScope: {
+      maxRequests: 10,
+      windowMs: 60 * 1000,
+      prefix: "update_scope",
+      reason: "Update scope endpoint abuse",
+      message: "Too many requests to update scope endpoint. Please try again later."
+    },
+    deleteScope: {
+      maxRequests: 5,
+      windowMs: 60 * 1000,
+      prefix: "delete_scope",
+      reason: "Delete scope endpoint abuse",
+      message: "Too many requests to delete scope endpoint. Please try again later."
+    },
+    getScope: {
+      maxRequests: 30,
+      windowMs: 60 * 1000,
+      prefix: "get_scope",
+      reason: "Get scope endpoint abuse",
+      message: "Too many requests to get scope endpoint. Please try again later."
+    },
+    listScopes: {
+      maxRequests: 30,
+      windowMs: 60 * 1000,
+      prefix: "list_scopes",
+      reason: "List scopes endpoint abuse",
+      message: "Too many requests to list scopes endpoint. Please try again later."
+    },
+    createHLF: {
+      maxRequests: 10,
+      windowMs: 60 * 1000,
+      prefix: "create_hlf",
+      reason: "Create HLF endpoint abuse",
+      message: "Too many requests to create HLF endpoint. Please try again later."
+    },
+    updateHLF: {
+      maxRequests: 10,
+      windowMs: 60 * 1000,
+      prefix: "update_hlf",
+      reason: "Update HLF endpoint abuse",
+      message: "Too many requests to update HLF endpoint. Please try again later."
+    },
+    deleteHLF: {
+      maxRequests: 5,
+      windowMs: 60 * 1000,
+      prefix: "delete_hlf",
+      reason: "Delete HLF endpoint abuse",
+      message: "Too many requests to delete HLF endpoint. Please try again later."
+    },
+    getHLF: {
+      maxRequests: 30,
+      windowMs: 60 * 1000,
+      prefix: "get_hlf",
+      reason: "Get HLF endpoint abuse",
+      message: "Too many requests to get HLF endpoint. Please try again later."
+    },
+    listHLFs: {
+      maxRequests: 30,
+      windowMs: 60 * 1000,
+      prefix: "list_hlfs",
+      reason: "List HLFs endpoint abuse",
+      message: "Too many requests to list HLFs endpoint. Please try again later."
+    },
+    createProductVision: {
+      maxRequests: 10,
+      windowMs: 60 * 1000,
+      prefix: "create_product_vision",
+      reason: "Create product vision endpoint abuse",
+      message: "Too many requests to create product vision endpoint. Please try again later."
+    },
+    updateProductVision: {
+      maxRequests: 10,
+      windowMs: 60 * 1000,
+      prefix: "update_product_vision",
+      reason: "Update product vision endpoint abuse",
+      message: "Too many requests to update product vision endpoint. Please try again later."
+    },
+    deleteProductVision: {
+      maxRequests: 5,
+      windowMs: 60 * 1000,
+      prefix: "delete_product_vision",
+      reason: "Delete product vision endpoint abuse",
+      message: "Too many requests to delete product vision endpoint. Please try again later."
+    },
+    getProductVision: {
+      maxRequests: 30,
+      windowMs: 60 * 1000,
+      prefix: "get_product_vision",
+      reason: "Get product vision endpoint abuse",
+      message: "Too many requests to get product vision endpoint. Please try again later."
+    },
+
   }
 };

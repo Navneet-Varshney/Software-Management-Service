@@ -130,6 +130,15 @@ const ApiRolePermissions = Object.freeze({
     ],
   },
 
+  activityTracker: {
+    listActivity: [
+      AdminRoleTypes.CEO,
+      AdminRoleTypes.BUSINESS_ANALYST,
+      AdminRoleTypes.MANAGER,
+      AdminRoleTypes.ANALYST
+    ]
+  },
+
   client: {
     createProject: [],
     updateProject: [],

@@ -21,7 +21,7 @@ const getMyActivityService = async (userId, pagination = {}) => {
     // Fetch user's activities with limited fields
     const [activities, total] = await Promise.all([
       ActivityTrackerModel.find({ userId })
-        .select('description eventType createdAt')
+        .select('description eventType createdAt _id')
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
@@ -32,6 +32,7 @@ const getMyActivityService = async (userId, pagination = {}) => {
     return {
       success: true,
       activities: activities.map(activity => ({
+        id: activity._id, 
         description: activity.description,
         eventType: activity.eventType,
         timestamp: activity.createdAt

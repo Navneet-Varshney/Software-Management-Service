@@ -9,6 +9,7 @@ const { productVisionControllers } = require("@controllers/product-vision");
 const { productVisionMiddlewares } = require("@/middlewares/product-vision");
 const { projectMiddlewares } = require("@/middlewares/projects");
 const { commonMiddlewares } = require("@/middlewares/common");
+const { createProductVisionRateLimiter, deleteProductVisionRateLimiter, updateProductVisionRateLimiter, getProductVisionRateLimiter } = require("@/rate-limiters/general-api.rate-limiter");
 
 const {
   CREATE_PRODUCT_VISION,
@@ -39,6 +40,7 @@ productVisionRouter.post(
   CREATE_PRODUCT_VISION,
   [
     ...baseAuthAdminMiddlewares,
+    createProductVisionRateLimiter,
     projectMiddlewares.fetchProjectMiddleware,
     projectMiddlewares.activeProjectGuardMiddleware,
     productVisionMiddlewares.fetchInceptionFromProjectMiddleware,
@@ -59,6 +61,7 @@ productVisionRouter.patch(
   UPDATE_PRODUCT_VISION,
   [
     ...baseAuthAdminMiddlewares,
+    updateProductVisionRateLimiter,
     projectMiddlewares.fetchProjectMiddleware,
     projectMiddlewares.activeProjectGuardMiddleware,
     productVisionMiddlewares.fetchInceptionFromProjectMiddleware,
@@ -79,6 +82,7 @@ productVisionRouter.delete(
   DELETE_PRODUCT_VISION,
   [
     ...baseAuthAdminMiddlewares,
+    deleteProductVisionRateLimiter,
     projectMiddlewares.fetchProjectMiddleware,
     projectMiddlewares.activeProjectGuardMiddleware,
     productVisionMiddlewares.fetchInceptionFromProjectMiddleware,
@@ -96,6 +100,7 @@ productVisionRouter.get(
   GET_PRODUCT_VISION,
   [
     ...baseAuthClientOrAdminMiddlewares,
+    getProductVisionRateLimiter,
     projectMiddlewares.fetchProjectMiddleware,
     productVisionMiddlewares.fetchInceptionFromProjectMiddleware,
     commonMiddlewares.checkUserIsStakeholder,

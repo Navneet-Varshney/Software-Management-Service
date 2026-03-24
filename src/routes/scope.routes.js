@@ -8,7 +8,7 @@ const { baseAuthAdminMiddlewares, baseAuthClientOrAdminMiddlewares } = require("
 const { scopeControllers } = require("@controllers/scopes");
 const { scopeMiddlewares } = require("@/middlewares/scopes");
 const { projectMiddlewares } = require("@/middlewares/projects");
-const { stakeholderMiddlewares } = require("@/middlewares/stakeholders");
+const { createScopeRateLimiter, updateScopeRateLimiter, deleteScopeRateLimiter, getScopeRateLimiter, listScopesRateLimiter } = require("@/rate-limiters/general-api.rate-limiter");
 const { commonMiddlewares } = require("@/middlewares/common");
 
 const {
@@ -43,6 +43,7 @@ scopeRouter.post(
   CREATE_SCOPE,
   [
     ...baseAuthAdminMiddlewares,
+    createScopeRateLimiter,
     projectMiddlewares.fetchProjectMiddleware,
     projectMiddlewares.activeProjectGuardMiddleware,
     scopeMiddlewares.fetchInceptionFromProjectMiddleware,
@@ -63,6 +64,7 @@ scopeRouter.patch(
   UPDATE_SCOPE,
   [
     ...baseAuthAdminMiddlewares,
+    updateScopeRateLimiter,
     scopeMiddlewares.fetchScopeMiddleware,
     projectMiddlewares.activeProjectGuardMiddleware,
     commonMiddlewares.checkUserIsStakeholder,
@@ -82,6 +84,7 @@ scopeRouter.delete(
   DELETE_SCOPE,
   [
     ...baseAuthAdminMiddlewares,
+    deleteScopeRateLimiter,
     scopeMiddlewares.fetchScopeMiddleware,
     projectMiddlewares.activeProjectGuardMiddleware,
     commonMiddlewares.checkUserIsStakeholder,
@@ -98,6 +101,7 @@ scopeRouter.get(
   GET_SCOPE,
   [
     ...baseAuthClientOrAdminMiddlewares,
+    getScopeRateLimiter,
     scopeMiddlewares.fetchScopeMiddleware,
     commonMiddlewares.checkUserIsStakeholder,
   ],
@@ -112,6 +116,7 @@ scopeRouter.get(
   LIST_SCOPES,
   [
     ...baseAuthClientOrAdminMiddlewares,
+    listScopesRateLimiter,
     projectMiddlewares.fetchProjectMiddleware,
     scopeMiddlewares.fetchInceptionFromProjectMiddleware,
     commonMiddlewares.checkUserIsStakeholder,

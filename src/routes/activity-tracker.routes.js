@@ -6,6 +6,8 @@ const activityTrackerRouter = express.Router();
 const { ACTIVITY_TRACKER_ROUTES } = require("@/configs/uri.config");
 const { baseAuthClientOrAdminMiddlewares, baseAuthAdminMiddlewares } = require("./middleware.gateway.routes");
 const { activityTrackerControllers } = require("@controllers/activity-trackers");
+const { adminApiAuthorizationMiddleware } = require("@/middlewares/admins/admin-api-authorization.middleware");
+const { getMyActivityRateLimiter, getActivityByIdRateLimiter, listActivityRateLimiter } = require("@/rate-limiters/general-api.rate-limiter");
 
 const {
   GET_MY_ACTIVITY,
@@ -33,6 +35,7 @@ activityTrackerRouter.get(
   GET_MY_ACTIVITY,
   [
     ...baseAuthClientOrAdminMiddlewares,
+    getMyActivityRateLimiter
   ],
   activityTrackerControllers.getMyActivityController
 );
@@ -54,6 +57,8 @@ activityTrackerRouter.get(
   LIST_ACTIVITY,
   [
     ...baseAuthAdminMiddlewares,
+    listActivityRateLimiter,
+    adminApiAuthorizationMiddleware.authorizeAdminListActivity
   ],
   activityTrackerControllers.listActivityController
 );
@@ -71,6 +76,7 @@ activityTrackerRouter.get(
   GET_ACTIVITY,
   [
     ...baseAuthAdminMiddlewares,
+    getActivityByIdRateLimiter
   ],
   activityTrackerControllers.getActivityController
 );
