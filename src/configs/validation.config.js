@@ -24,7 +24,8 @@ const {
   ProjectActivationReasonHelper,
   ApproveProductRequestReasonTypeHelper,
   RejectProductRequestReasonTypeHelper,
-  ScopeTypesHelper
+  ScopeTypesHelper,
+  CommentEntityTypesHelper
 } = require("@utils/enum-validators.util");
 
 const { customIdRegex, mongoIdRegex, budgetRegex, timelineRegex } = require("./regex.config");
@@ -141,6 +142,31 @@ const validationRules = {
       min: productVisionLength.min,
       max: productVisionLength.max
     }
+  },
+
+  // ── Comment fields ──────────────────────────────────
+  commentText: {
+    length: {
+      min: descriptionLength.min,
+      max: descriptionLength.max
+    }
+  },
+  deletedReason: {
+    length: {
+      min: descriptionLength.min,
+      max: descriptionLength.max
+    }
+  },
+  parentCommentId: {
+    regex: mongoIdRegex
+  },
+
+  // ── Comment entity fields ───────────────────────────
+  entityType: {
+    enum: CommentEntityTypesHelper
+  },
+  entityId: {
+    regex: mongoIdRegex
   }
 };
 

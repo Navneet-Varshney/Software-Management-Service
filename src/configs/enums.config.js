@@ -1,5 +1,6 @@
 // configs/enums.config.js
 
+const { DB_COLLECTIONS } = require("./db-collections.config");
 const { service } = require("./security.config");
 
 const AuthModes = Object.freeze({
@@ -351,6 +352,20 @@ const CommentOtherEntityTypes = Object.freeze({
   PRODUCT_VISION: "PRODUCT_VISION"
 });
 
+// Comment Entity Types - allowed entities for comments
+const CommentEntityTypes = Object.freeze({
+  SCOPES: DB_COLLECTIONS.SCOPES,
+  REQUIREMENTS: DB_COLLECTIONS.REQUIREMENTS,
+  INCEPTIONS: DB_COLLECTIONS.INCEPTIONS,
+  HIGH_LEVEL_FEATURES: DB_COLLECTIONS.HIGH_LEVEL_FEATURES
+});
+
+const CommentSpecifiedEntityTypes = {
+  ...ScopeTypes,
+  ...CommentOtherEntityTypes,
+  ...RequirementTypes
+};
+
 const RequirementStatuses = Object.freeze({
   DRAFT: "DRAFT",
   ISSUE: "ISSUE",
@@ -410,8 +425,10 @@ module.exports = {
   RejectProductRequestReasonType,
   ScopeTypes,
   RequirementTypes,
+  CommentEntityTypes,
   CommentOtherEntityTypes,
   RequirementStatuses,
   RequirementSources,
-  ProjectActivationReason
+  ProjectActivationReason,
+  CommentSpecifiedEntityTypes
 };

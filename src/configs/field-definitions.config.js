@@ -549,6 +549,58 @@ const FieldDefinitions = {
     }
   },
 
+  // ── CREATE COMMENT ─────────────────────────────────────────────────────────────
+  CREATE_COMMENT: {
+    COMMENT_TEXT: {
+      field: "commentText",
+      required: true,
+      validation: validationRules.commentText,
+      description: "Comment text content (required, length validated)"
+    },
+    PARENT_COMMENT_ID: {
+      field: "parentCommentId",
+      required: false,
+      validation: validationRules.parentCommentId,
+      description: "Parent comment ID for replies (optional, must be valid MongoDB ObjectId if provided)"
+    }
+  },
+
+  // ── CREATE COMMENT ENTITY (for entity type + id validation only) ──────────────
+  COMMENT_ENTITY: {
+    ENTITY_TYPE: {
+      field: "entityType",
+      required: true,
+      validation: validationRules.entityType,
+      description: "Type of entity being commented on"
+    },
+    ENTITY_ID: {
+      field: "entityId",
+      required: true,
+      validation: validationRules.entityId,
+      description: "ID of the entity being commented on"
+    }
+  },
+
+  // ── UPDATE COMMENT ─────────────────────────────────────────────────────────────
+  UPDATE_COMMENT: {
+    COMMENT_TEXT: {
+      field: "commentText",
+      required: true,
+      validation: validationRules.commentText,
+      description: "Updated comment text (required, length validated)"
+    }
+  },
+
+  // ── DELETE COMMENT ─────────────────────────────────────────────────────────────
+  DELETE_COMMENT: {
+    DELETED_REASON: {
+      field: "deletedReason",
+      required: false,
+      validation: validationRules.deletedReason,
+      description: "Reason for comment deletion (optional, added to activity log for admin actions)"
+    }
+  },
+
 };
 
 module.exports = { FieldDefinitions };

@@ -29,8 +29,11 @@ const validationSets = {
     deleteHlfValidationSet: getValidationSet(FieldDefinitions.DELETE_HLF),
     createProductVisionValidationSet: getValidationSet(FieldDefinitions.CREATE_PRODUCT_VISION),
     updateProductVisionValidationSet: getValidationSet(FieldDefinitions.UPDATE_PRODUCT_VISION),
-    deleteProductVisionValidationSet: getValidationSet(FieldDefinitions.DELETE_PRODUCT_VISION)
-
+    deleteProductVisionValidationSet: getValidationSet(FieldDefinitions.DELETE_PRODUCT_VISION),
+    commentEntityValidationSet: getValidationSet(FieldDefinitions.COMMENT_ENTITY),
+    createCommentValidationSet: getValidationSet(FieldDefinitions.CREATE_COMMENT),
+    updateCommentValidationSet: getValidationSet(FieldDefinitions.UPDATE_COMMENT),
+    deleteCommentValidationSet: getValidationSet(FieldDefinitions.DELETE_COMMENT)
 
 };
 

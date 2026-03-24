@@ -52,7 +52,13 @@ const requiredFields = {
     // ── Product Vision ────────────────────────────────────────────────────────
     createProductVisionField:getRequiredFields(FieldDefinitions.CREATE_PRODUCT_VISION),
     updateProductVisionField:getRequiredFields(FieldDefinitions.UPDATE_PRODUCT_VISION),
-    deleteProductVisionField:getRequiredFields(FieldDefinitions.DELETE_PRODUCT_VISION)
+    deleteProductVisionField:getRequiredFields(FieldDefinitions.DELETE_PRODUCT_VISION),
+
+    // ── Comment ───────────────────────────────────────────────────────────────
+    createCommentField:getRequiredFields(FieldDefinitions.CREATE_COMMENT),
+    updateCommentField:getRequiredFields(FieldDefinitions.UPDATE_COMMENT),
+    deleteCommentField:getRequiredFields(FieldDefinitions.DELETE_COMMENT),
+    commentEntityField:getRequiredFields(FieldDefinitions.COMMENT_ENTITY)
 }
 
 module.exports = {

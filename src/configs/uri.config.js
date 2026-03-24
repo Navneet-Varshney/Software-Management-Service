@@ -16,6 +16,7 @@ const PRODUCT_REQUEST_BASE = `${API_PREFIX}/product-requests`; // /software-mana
 const SCOPE_BASE = `${API_PREFIX}/scope`; // /software-management-service/api/v1/scope
 const HLF_BASE = `${API_PREFIX}/high-level-features`; // /software-management-service/api/v1/high-level-features
 const PRODUCT_VISION_BASE = `${API_PREFIX}/product-vision`; // /software-management-service/api/v1/product-vision
+const COMMENT_BASE = `${API_PREFIX}/comments`; // /software-management-service/api/v1/comments
 
 module.exports = {
     INTERNAL_BASE,
@@ -27,6 +28,7 @@ module.exports = {
     SCOPE_BASE,
     HLF_BASE,
     PRODUCT_VISION_BASE,
+    COMMENT_BASE,
     INTERNAL_ROUTES: {
         CREATE_SUPER_ADMIN: `/create-super-admin`, // /software-management-service/api/v1/internal/create-super-admin
         CREATE_USER: `/create-user`, // /software-management-service/api/v1/internal/admin-panel/create-user
@@ -99,5 +101,13 @@ module.exports = {
         UPDATE_PRODUCT_VISION:    `/update/:projectId`,      // PATCH /software-management-service/api/v1/product-vision/update/:projectId
         CREATE_PRODUCT_VISION:    `/create/:projectId`,      // POST /software-management-service/api/v1/product-vision/create/:projectId
         DELETE_PRODUCT_VISION:    `/delete/:projectId`       // DELETE /software-management-service/api/v1/product-vision/delete/:projectId
+    },
+    COMMENT_ROUTES: {
+        CREATE_COMMENT:              `/create`,                           // POST   /api/v1/comments/create
+        GET_COMMENT:                 `/get/:commentId`,                   // GET    /api/v1/comments/get/:commentId
+        LIST_COMMENTS:               `/list/:entityType/:entityId`,       // GET    /api/v1/comments/list/:entityType/:entityId
+        LIST_HIERARCHICAL_COMMENTS:  `/list-hierarchical/:entityType/:entityId`, // GET /api/v1/comments/list-hierarchical/:entityType/:entityId
+        UPDATE_COMMENT:              `/update/:commentId`,                // PATCH  /api/v1/comments/update/:commentId
+        DELETE_COMMENT:              `/delete/:commentId`                 // DELETE /api/v1/comments/delete/:commentId
     }
 };
