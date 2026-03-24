@@ -13,6 +13,7 @@ const { errorMessage } = require("@utils/log-error.util");
  *
  * @param {Object} params
  * @param {Object} params.inception - The Inception document
+ * @param {string} params.projectId - Project ID (required)
  * @param {string} params.title - Scope title (required)
  * @param {string} params.description - Scope description (optional)
  * @param {string} params.type - Scope type IN_SCOPE | OUT_SCOPE | CONSTRAINT (optional, defaults to IN_SCOPE)
@@ -22,6 +23,7 @@ const { errorMessage } = require("@utils/log-error.util");
  */
 const createScopeService = async ({
   inception,
+  projectId,
   title,
   description = null,
   type = null,
@@ -48,6 +50,7 @@ const createScopeService = async ({
     // ── Create scope ────────────────────────────────────────────────────────
     const scopeData = {
       inceptionId,
+      projectId,
       title: normalizedTitle,
       description: description || null,
       type: type || null,

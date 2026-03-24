@@ -7,6 +7,7 @@ const mongoose = require('mongoose');
 
 const ScopeSchema = new mongoose.Schema({
   inceptionId: { type: mongoose.Schema.Types.ObjectId, ref: DB_COLLECTIONS.INCEPTIONS, required: true },
+  projectId: { type: mongoose.Schema.Types.ObjectId, ref: DB_COLLECTIONS.PROJECTS, required: true },
   type: { type: String, enum: Object.values(ScopeTypes), default: ScopeTypes.IN_SCOPE },
   title: { type: String, trim: true, minlength: titleLength.min, maxlength: titleLength.max, lowercase: false, required: true },
   description: { type: String, trim: true, default: null, minlength: descriptionLength.min, maxlength: descriptionLength.max },
