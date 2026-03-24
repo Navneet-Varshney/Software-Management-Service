@@ -13,6 +13,7 @@ const { errorMessage } = require("@utils/log-error.util");
  *
  * @param {Object} params
  * @param {Object} params.inception - The Inception document
+ * @param {string} params.projectId - Project ID (required)
  * @param {string} params.title - HLF title (required)
  * @param {string} params.description - HLF description (optional)
  * @param {string} params.createdBy - USR-prefixed custom ID of the admin creating the HLF
@@ -21,6 +22,7 @@ const { errorMessage } = require("@utils/log-error.util");
  */
 const createHlfService = async ({
   inception,
+  projectId,
   title,
   description = null,
   createdBy,
@@ -45,6 +47,7 @@ const createHlfService = async ({
     // ── Create HLF ────────────────────────────────────────────────────────
     const hlfData = {
       inceptionId,
+      projectId,
       title: normalizedTitle,
       description: description || null,
       createdBy,

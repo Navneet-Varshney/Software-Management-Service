@@ -20,10 +20,12 @@ const createHlfController = async (req, res) => {
     const createdBy = req.admin.adminId;
 
     const inception = req.inception;
+    const project = req.project;
 
     // ── Call service ──────────────────────────────────────
     const result = await createHlfService({
       inception,
+      projectId: project._id.toString(),
       title,
       description: description || null,
       createdBy,
