@@ -26,7 +26,7 @@ const { logWithTime } = require("@/utils/time-stamps.util");
  */
 const fetchProjectMiddleware = async (req, res, next) => {
   try {
-    const projectId = req?.params?.projectId || req?.body?.projectId || req?.foundStakeholder?.projectId;
+    const projectId = req?.params?.projectId || req?.body?.projectId || req?.foundStakeholder?.projectId || req.projectId;
 
     // ── 1. Param presence ────────────────────────────────────────────
     if (!projectId) {
