@@ -2,7 +2,6 @@
 
 const { StakeholderModel } = require("@models/stakeholder.model");
 const { versionControlService } = require("@services/common/version.service");
-const { convertOnHoldToActiveProjectService } = require("@services/projects/on-hold-project.service");
 const { logActivityTrackerEvent } = require("@services/audit/activity-tracker.service");
 const { prepareAuditData } = require("@utils/audit-data.util");
 const { ACTIVITY_TRACKER_EVENTS } = require("@configs/tracker.config");
@@ -74,7 +73,7 @@ const createStakeholderService = async ({
       }
     }
 
-    const blockedStatuses = [ProjectStatus.COMPLETED, ProjectStatus.ABORTED];
+    const blockedStatuses = [ProjectStatus.COMPLETED, ProjectStatus.ABORTED, ProjectStatus.ON_HOLD];
     if (blockedStatuses.includes(project.projectStatus)) {
       return {
         success: false,
@@ -162,18 +161,6 @@ const createStakeholderService = async ({
           };
         }
       }
-    }
-
-    // ── Auto-convert ON_HOLD → ACTIVE before proceeding ────────────────────────
-    if (project.projectStatus === ProjectStatus.ON_HOLD) {
-      const converted = await convertOnHoldToActiveProjectService(project, {
-        convertedBy: createdBy,
-        auditContext,
-      });
-      if (!converted.success) {
-        return { success: false, message: converted.message };
-      }
-      logWithTime(`✅ [createStakeholderService] Project ${projectId} auto-converted ON_HOLD → ACTIVE`);
     }
 
     // ── Create stakeholder ────────────────────────────────────────────────────
