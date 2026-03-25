@@ -65,6 +65,11 @@ const updateProductVisionRateLimiter = createRateLimiter(perUserAndDevice.update
 const deleteProductVisionRateLimiter = createRateLimiter(perUserAndDevice.deleteProductVision);
 const getProductVisionRateLimiter    = createRateLimiter(perUserAndDevice.getProductVision);
 
+const getInceptionRateLimiter    = createRateLimiter(perUserAndDevice.getInception);
+const listInceptionsRateLimiter  = createRateLimiter(perUserAndDevice.listInceptions);
+const deleteInceptionRateLimiter = createRateLimiter(perUserAndDevice.deleteInception);
+const getLatestInceptionRateLimiter = createRateLimiter(perUserAndDevice.getLatestInception);
+
 module.exports = {
     welcomeAdminRateLimiter,
     welcomeClientRateLimiter,
@@ -118,5 +123,9 @@ module.exports = {
     createProductVisionRateLimiter,
     updateProductVisionRateLimiter,
     deleteProductVisionRateLimiter,
-    getProductVisionRateLimiter
+    getProductVisionRateLimiter,
+    getInceptionRateLimiter,
+    listInceptionsRateLimiter,
+    deleteInceptionRateLimiter,
+    getLatestInceptionRateLimiter
 }
