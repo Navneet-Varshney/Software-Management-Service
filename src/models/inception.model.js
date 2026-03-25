@@ -1,6 +1,7 @@
 const { customIdRegex } = require("@/configs/regex.config");
 const { DB_COLLECTIONS } = require("@/configs/db-collections.config");
 const { descriptionLength, productVisionLength } = require("@/configs/fields-length.config");
+const { InceptionDeletionReason } = require("@/configs/enums.config");
 const mongoose = require("mongoose");
 
 const inceptionSchema = new mongoose.Schema({
@@ -56,6 +57,20 @@ const inceptionSchema = new mongoose.Schema({
   deletedBy: {
     type: String,
     match: customIdRegex,
+    default: null
+  },
+
+  deletionReasonType: {
+    type: String,
+    enum: Object.values(InceptionDeletionReason),
+    default: null
+  },
+
+  deletionReasonDescription: {
+    type: String,
+    trim: true,
+    minlength: descriptionLength.min,
+    maxlength: descriptionLength.max,
     default: null
   }
 
