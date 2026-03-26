@@ -1,12 +1,13 @@
 // services/scopes/delete-scope.service.js
 
 const { ScopeModel } = require("@models/scope-model");
-const { versionControlService } = require("@services/common/version.service");
+const { manualVersionControlService } = require("@services/common/version.service");
 const { logActivityTrackerEvent } = require("@services/audit/activity-tracker.service");
 const { prepareAuditData } = require("@utils/audit-data.util");
 const { ACTIVITY_TRACKER_EVENTS } = require("@configs/tracker.config");
 const { logWithTime } = require("@utils/time-stamps.util");
 const { errorMessage } = require("@utils/log-error.util");
+const { Phases } = require("@/configs/enums.config");
 
 /**
  * Soft-deletes a scope.
@@ -34,19 +35,26 @@ const deleteScopeService = async ({
     const oldScope = scope.toObject ? scope.toObject() : scope;
 
     // ── Soft delete: set isDeleted, deletedAt, deletedBy ────────────────────
-    scope.isDeleted = true;
-    scope.deletedAt = new Date();
-    scope.deletedBy = deletedBy;
-
-    const deletedScope = await scope.save();
+    const deletedScope = await ScopeModel.findByIdAndUpdate(
+      scope._id,
+      {
+        $set: {
+          isDeleted: true,
+          deletedAt: new Date(),
+          deletedBy: deletedBy
+        }
+      },
+      { new: true, runValidators: true }
+    );
 
     // ── Version control ────────────────────────────────────────────────────
-    await versionControlService(
-      inception,
-      `Scope "${deletedScope.title}" deleted — version bump`,
-      deletedBy,
-      auditContext
-    );
+    await manualVersionControlService({
+      projectId: inception.projectId,
+      currentPhase: Phases.INCEPTION,
+      action: `Scope "${deletedScope.title}" deleted — version bump`,
+      performedBy: deletedBy,
+      auditContext: auditContext
+    });
 
     // ── Activity tracker ─────────────────────────────────────────────────────
     const { user: auditUser, device, requestId } = auditContext || {};

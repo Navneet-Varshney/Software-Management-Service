@@ -1,12 +1,13 @@
 // services/scopes/create-scope.service.js
 
 const { ScopeModel } = require("@models/scope-model");
-const { versionControlService } = require("@services/common/version.service");
+const { manualVersionControlService } = require("@services/common/version.service");
 const { logActivityTrackerEvent } = require("@services/audit/activity-tracker.service");
 const { prepareAuditData } = require("@utils/audit-data.util");
 const { ACTIVITY_TRACKER_EVENTS } = require("@configs/tracker.config");
 const { logWithTime } = require("@utils/time-stamps.util");
 const { errorMessage } = require("@utils/log-error.util");
+const { Phases } = require("@/configs/enums.config");
 
 /**
  * Creates a new scope for an inception document.
@@ -60,12 +61,13 @@ const createScopeService = async ({
     const scope = await ScopeModel.create(scopeData);
 
     // ── Version control ────────────────────────────────────────────────────
-    await versionControlService(
-      inception,
-      `Scope "${title}" created — version bump`,
-      createdBy,
-      auditContext
-    );
+    await manualVersionControlService({
+      projectId: inception.projectId,
+      currentPhase: Phases.INCEPTION,
+      action: `Scope "${title}" created — version bump`,
+      performedBy: createdBy,
+      auditContext: auditContext
+    });
 
     // ── Activity tracker ──────────────────────────────────────────────────────
     const { user: auditUser, device, requestId } = auditContext || {};

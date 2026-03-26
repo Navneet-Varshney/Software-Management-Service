@@ -1,12 +1,13 @@
 // services/scopes/update-scope.service.js
 
 const { ScopeModel } = require("@models/scope-model");
-const { versionControlService } = require("@services/common/version.service");
+const { manualVersionControlService } = require("@services/common/version.service");
 const { logActivityTrackerEvent } = require("@services/audit/activity-tracker.service");
 const { prepareAuditData } = require("@utils/audit-data.util");
 const { ACTIVITY_TRACKER_EVENTS } = require("@configs/tracker.config");
 const { logWithTime } = require("@utils/time-stamps.util");
 const { errorMessage } = require("@utils/log-error.util");
+const { Phases } = require("@/configs/enums.config");
 
 /**
  * Updates an existing scope with change detection.
@@ -89,12 +90,13 @@ const updateScopeService = async ({
     const updatedScope = await scope.save();
 
     // ── Version control ────────────────────────────────────────────────────
-    await versionControlService(
-      inception,
-      `Scope "${updatedScope.title}" updated — version bump`,
-      updatedBy,
-      auditContext
-    );
+    await manualVersionControlService({
+      projectId: inception.projectId,
+      currentPhase: Phases.INCEPTION,
+      action: `Scope "${updatedScope.title}" updated — version bump`,
+      performedBy: updatedBy,
+      auditContext: auditContext
+    });
 
     // ── Activity tracker ──────────────────────────────────────────────────────
     const { user: auditUser, device, requestId } = auditContext || {};
