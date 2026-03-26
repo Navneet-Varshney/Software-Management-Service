@@ -378,14 +378,32 @@ const CommentSpecifiedEntityTypes = {
 const RequirementStatuses = Object.freeze({
   DRAFT: "DRAFT",
   ISSUE: "ISSUE",
-  FINAL: "FINAL",
-  DROPPED: "DROPPED"
+  ACCEPTED: "ACCEPTED",
+  DEFERRED: "DEFERRED",
+  REJECTED: "REJECTED"
 });
 
 const RequirementSources = Object.freeze({
   MANUAL: "MANUAL",
   CSV_UPLOAD: "CSV_UPLOAD",
   API: "API"
+});
+
+const ParticipantTypes = Object.freeze({
+  FACILITATOR: "FACILITATOR",
+  PARTICIPANT: "PARTICIPANT"
+});
+
+const ElicitationModes = Object.freeze({
+  OPEN: "OPEN",
+  FAST: "FAST"
+});
+
+const MeetingPlatformTypes = Object.freeze({
+  ZOOM: "ZOOM",
+  TEAMS: "TEAMS",
+  GOOGLE_MEET: "GOOGLE_MEET",
+  OTHER: "OTHER"
 });
 
 module.exports = {
@@ -440,5 +458,8 @@ module.exports = {
   RequirementStatuses,
   RequirementSources,
   ProjectActivationReason,
-  CommentSpecifiedEntityTypes
+  CommentSpecifiedEntityTypes,
+  ParticipantTypes,
+  ElicitationModes,
+  MeetingPlatformTypes
 };

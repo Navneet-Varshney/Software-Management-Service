@@ -19,6 +19,7 @@ const PRODUCT_VISION_BASE = `${API_PREFIX}/product-vision`; // /software-managem
 const COMMENT_BASE = `${API_PREFIX}/comments`; // /software-management-service/api/v1/comments
 const ACTIVITY_TRACKER_BASE = `${API_PREFIX}/activity-trackers`; // /software-management-service/api/v1/activity-trackers
 const ELICITATION_BASE = `${API_PREFIX}/elicitations`; // /software-management-service/api/v1/elicitations
+const FAST_BASE = `${API_PREFIX}/fast`; // /software-management-service/api/v1/fast
 const INCEPTION_BASE = `${API_PREFIX}/inceptions`; // /software-management-service/api/v1/inceptions
 
 module.exports = {
@@ -34,6 +35,7 @@ module.exports = {
     COMMENT_BASE,
     ACTIVITY_TRACKER_BASE,
     ELICITATION_BASE,
+    FAST_BASE,
     INCEPTION_BASE,
     INTERNAL_ROUTES: {
         CREATE_SUPER_ADMIN: `/create-super-admin`, // /software-management-service/api/v1/internal/create-super-admin
@@ -122,11 +124,20 @@ module.exports = {
         GET_ACTIVITY:     `/get/:activityId`    // GET /api/v1/activity-trackers/get/:activityId (admin only)
     },
     ELICITATION_ROUTES: {
-        CREATE_ELICITATION: `/create`,  // POST /api/v1/elicitations/create
-        UPDATE_ELICITATION: `/update/:elicitationId`, // PATCH /api/v1/elicitations/update/:elicitationId
-        DELETE_ELICITATION: `/delete/:elicitationId`, // DELETE /api/v1/elicitations/delete/:elicitationId
-        GET_ELICITATION:    `/get/:elicitationId`,    // GET /api/v1/elicitations/get/:elicitationId
-        LIST_ELICITATIONS:   `/list/:projectId`       // GET /api/v1/elicitations/list/:projectId
+        CREATE_ELICITATION: `/create/:projectId`,  // POST /api/v1/elicitations/create/:projectId
+        UPDATE_ELICITATION: `/update/:projectId/:elicitationId`, // PATCH /api/v1/elicitations/update/:projectId/:elicitationId
+        DELETE_ELICITATION: `/delete/:projectId/:elicitationId`, // DELETE /api/v1/elicitations/delete/:projectId/:elicitationId
+        GET_ELICITATION:    `/get/:projectId/:elicitationId`,    // GET /api/v1/elicitations/get/:projectId/:elicitationId
+        LIST_ELICITATIONS:  `/list/:projectId`       // GET /api/v1/elicitations/list/:projectId
+    },
+    FAST_ROUTES: {
+        CREATE_FAST: `/create/:projectId`, // POST /api/v1/fast/create/:projectId
+        UPDATE_FAST: `/update/:projectId/:fastId`, // PATCH /api/v1/fast/update/:projectId/:fastId
+        DELETE_FAST: `/delete/:projectId/:fastId`, // DELETE /api/v1/fast/delete/:projectId/:fastId
+        GET_FAST: `/get/:projectId/:fastId`, // GET /api/v1/fast/get/:projectId/:fastId
+        LIST_FASTS: `/list/:projectId`, // GET /api/v1/fast/list/:projectId
+        ADD_FAST_MEMBER: `/add-member/:projectId/:fastId`, // PATCH /api/v1/fast/add-member/:projectId/:fastId
+        REMOVE_FAST_MEMBER: `/remove-member/:projectId/:fastId` // PATCH /api/v1/fast/remove-member/:projectId/:fastId
     },
     INCEPTION_ROUTES: {
         GET_LATEST_INCEPTION: `/get-latest/:projectId`,      // GET /software-management-service/api/v1/inceptions/get/:projectId
