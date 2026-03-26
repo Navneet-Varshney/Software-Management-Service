@@ -23,7 +23,7 @@ const fetchInceptionFromProjectMiddleware = async (req, res, next) => {
 const inception = await InceptionModel.findOne({
   projectId: project._id,
   isDeleted: false
-}).sort({ cycleNumber: -1 });
+}).sort({ "version.major": -1 });
 
     if (!inception) {
       logMiddlewareError("fetchInceptionFromProject", `No inception found for project ${project._id}`, req);

@@ -33,14 +33,6 @@ const authorizeAdminGetStakeholders   = createAdminRoleAuthMiddleware(ApiRolePer
 const authorizeAdminListActivity       = createAdminRoleAuthMiddleware(ApiRolePermissions.activityTracker.listActivity);
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Inception role-authorization middlewares
-// ─────────────────────────────────────────────────────────────────────────────
-const authorizeAdminGetInception    = createAdminRoleAuthMiddleware(ApiRolePermissions.inception.getInception);
-const authorizeAdminListInceptions  = createAdminRoleAuthMiddleware(ApiRolePermissions.inception.listInceptions);
-const authorizeAdminDeleteInception = createAdminRoleAuthMiddleware(ApiRolePermissions.inception.deleteInception);
-const authorizeAdminGetLatestInception = createAdminRoleAuthMiddleware(ApiRolePermissions.inception.getLatestInception);
-
-// ─────────────────────────────────────────────────────────────────────────────
 // Combined: Role OR Stakeholder — for read/fetch endpoints
 // Admin gets access if their role is authorized OR if they are a stakeholder
 // of the relevant project (project-specific GET) / any project (list routes).
@@ -74,12 +66,7 @@ const adminApiAuthorizationMiddleware = {
   authorizeAdminGetStakeholderOrMember,
   authorizeAdminGetStakeholdersOrMember,
   authorizeAdminActivateProject,
-  authorizeAdminListActivity,
-  // Inception middlewares
-  authorizeAdminGetInception,
-  authorizeAdminListInceptions,
-  authorizeAdminDeleteInception,
-  authorizeAdminGetLatestInception
+  authorizeAdminListActivity
 }
 
 module.exports = {
