@@ -31,7 +31,6 @@ const getProductVisionClientService = async (inception) => {
       inception: {
         inceptionId: inceptionData._id,
         productVision: inceptionData.productVision,
-        cycleNumber: inceptionData.cycleNumber,
         createdAt: inceptionData.createdAt,
       },
     };

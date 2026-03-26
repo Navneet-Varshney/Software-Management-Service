@@ -1,12 +1,12 @@
 // services/product-vision/create-product-vision.service.js
 
-const { InceptionModel } = require("@models/inception.model");
-const { versionControlService } = require("@services/common/version.service");
+const { manualVersionControlService } = require("@services/common/version.service");
 const { logActivityTrackerEvent } = require("@services/audit/activity-tracker.service");
 const { prepareAuditData } = require("@utils/audit-data.util");
 const { ACTIVITY_TRACKER_EVENTS } = require("@configs/tracker.config");
 const { logWithTime } = require("@utils/time-stamps.util");
 const { errorMessage } = require("@utils/log-error.util");
+const { Phases } = require("@/configs/enums.config");
 
 /**
  * Creates product vision for an inception document.
@@ -40,19 +40,13 @@ const createProductVisionService = async ({
     const updatedInception = await inception.save();
 
     // ── Version control ────────────────────────────────────────────────────
-    const project = await require("@models/project.model").ProjectModel.findOne({
-      _id: inception.projectId,
-      isDeleted: false
+    await manualVersionControlService({
+      projectId: inception.projectId,
+      currentPhase: Phases.INCEPTION,
+      action: `Product vision created — version bump`,
+      performedBy: createdBy,
+      auditContext: auditContext
     });
-
-    if (project) {
-      await versionControlService(
-        inception,
-        `Product vision created — version bump`,
-        createdBy,
-        auditContext
-      );
-    }
 
     // ── Activity tracker ──────────────────────────────────────────────────────
     const { user: auditUser, device, requestId } = auditContext || {};

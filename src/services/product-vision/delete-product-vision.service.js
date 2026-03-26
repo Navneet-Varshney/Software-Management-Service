@@ -1,12 +1,13 @@
 // services/product-vision/delete-product-vision.service.js
 
-const { InceptionModel } = require("@models/inception.model");
-const { versionControlService } = require("@services/common/version.service");
+const { manualVersionControlService } = require("@services/common/version.service");
 const { logActivityTrackerEvent } = require("@services/audit/activity-tracker.service");
 const { prepareAuditData } = require("@utils/audit-data.util");
 const { ACTIVITY_TRACKER_EVENTS } = require("@configs/tracker.config");
 const { logWithTime } = require("@utils/time-stamps.util");
 const { errorMessage } = require("@utils/log-error.util");
+const { Phases } = require("@/configs/enums.config");
+const { InceptionModel } = require("@models/inception.model");
 
 /**
  * Deletes product vision by clearing it.
@@ -29,26 +30,34 @@ const deleteProductVisionService = async ({
 }) => {
   try {
     // ── Store old inception for audit ────────────────────────────────────────────
-    const oldInception = inception.toObject ? inception.toObject() : inception;
+    const oldInception = inception.toObject
+      ? inception.toObject()
+      : JSON.parse(JSON.stringify(inception));
 
     // ── Check if product vision already null ────────────────────────────────────────
     if (!oldInception.productVision) {
       return { success: true, message: "Product vision is already empty" };
     }
 
-    // ── Clear product vision ────────────────────────────────────────────────────────
-    inception.productVision = null;
-    inception.updatedBy = deletedBy;
-
-    const updatedInception = await inception.save();
+    const updatedInception = await InceptionModel.findByIdAndUpdate(
+      inception._id,
+      {
+        $set: {
+          productVision: null,
+          updatedBy: deletedBy
+        }
+      },
+      { new: true, runValidators: true }
+    );
 
     // ── Version control ────────────────────────────────────────────────────
-    await versionControlService(
-      inception,
-      `Product vision deleted — version bump`,
-      deletedBy,
-      auditContext
-    );
+    await manualVersionControlService({
+      projectId: inception.projectId,
+      currentPhase: Phases.INCEPTION,
+      action: `Product vision deleted — version bump`,
+      performedBy: deletedBy,
+      auditContext: auditContext
+    });
 
     // ── Activity tracker ─────────────────────────────────────────────────────
     const { user: auditUser, device, requestId } = auditContext || {};

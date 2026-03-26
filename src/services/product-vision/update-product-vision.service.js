@@ -1,12 +1,13 @@
 // services/product-vision/update-product-vision.service.js
 
 const { InceptionModel } = require("@models/inception.model");
-const { versionControlService } = require("@services/common/version.service");
+const { manualVersionControlService } = require("@services/common/version.service");
 const { logActivityTrackerEvent } = require("@services/audit/activity-tracker.service");
 const { prepareAuditData } = require("@utils/audit-data.util");
 const { ACTIVITY_TRACKER_EVENTS } = require("@configs/tracker.config");
 const { logWithTime } = require("@utils/time-stamps.util");
 const { errorMessage } = require("@utils/log-error.util");
+const { Phases } = require("@/configs/enums.config");
 
 /**
  * Updates product vision with change detection.
@@ -29,7 +30,9 @@ const updateProductVisionService = async ({
 }) => {
   try {
     // ── Store old inception for comparison ────────────────────────────────────────
-    const oldInception = inception.toObject ? inception.toObject() : { ...inception };
+    const oldInception = inception.toObject
+      ? inception.toObject()
+      : JSON.parse(JSON.stringify(inception));
 
     const normalizedProductVision = productVision.trim();
 
@@ -38,19 +41,25 @@ const updateProductVisionService = async ({
       return { success: true, message: "No changes detected", inception };
     }
 
-    // ── Update product vision ──────────────────────────────────────────────────────
-    inception.productVision = normalizedProductVision;
-    inception.updatedBy = updatedBy;
-
-    const updatedInception = await inception.save();
+    const updatedInception = await InceptionModel.findByIdAndUpdate(
+      inception._id,
+      {
+        $set: {
+          productVision: normalizedProductVision,
+          updatedBy: updatedBy
+        }
+      },
+      { new: true, runValidators: true }
+    );
 
     // ── Version control ────────────────────────────────────────────────────
-    await versionControlService(
-      inception,
-      `Product vision updated — version bump`,
-      updatedBy,
-      auditContext
-    );
+    await manualVersionControlService({
+      projectId: inception.projectId,
+      currentPhase: Phases.INCEPTION,
+      action: `Product vision updated — version bump`,
+      performedBy: updatedBy,
+      auditContext: auditContext
+    });
 
     // ── Activity tracker ──────────────────────────────────────────────────────
     const { user: auditUser, device, requestId } = auditContext || {};
