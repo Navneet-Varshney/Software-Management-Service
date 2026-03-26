@@ -1,12 +1,13 @@
 // services/high-level-features/create-hlf.service.js
 
 const { HighLevelFeatureModel } = require("@models/high-level-feature.model");
-const { versionControlService } = require("@services/common/version.service");
+const { manualVersionControlService } = require("@services/common/version.service");
 const { logActivityTrackerEvent } = require("@services/audit/activity-tracker.service");
 const { prepareAuditData } = require("@utils/audit-data.util");
 const { ACTIVITY_TRACKER_EVENTS } = require("@configs/tracker.config");
 const { logWithTime } = require("@utils/time-stamps.util");
 const { errorMessage } = require("@utils/log-error.util");
+const { Phases } = require("@/configs/enums.config");
 
 /**
  * Creates a new high-level feature for an inception document.
@@ -33,6 +34,7 @@ const createHlfService = async ({
 
     // ── Guard: prevent duplicate HLF title per inception ──────────────────
     const normalizedTitle = title.trim();
+    const normalizedDescription = description?.trim() || null;
 
     const existing = await HighLevelFeatureModel.findOne({
       inceptionId,
@@ -49,19 +51,20 @@ const createHlfService = async ({
       inceptionId,
       projectId,
       title: normalizedTitle,
-      description: description || null,
+      description: normalizedDescription,
       createdBy,
     };
 
     const hlf = await HighLevelFeatureModel.create(hlfData);
 
     // ── Version control ────────────────────────────────────────────────────
-    await versionControlService(
-      inception,
-      `High-level feature "${title}" created — version bump`,
-      createdBy,
-      auditContext
-    );
+    await manualVersionControlService({
+      projectId,
+      currentPhase: Phases.INCEPTION,
+      action: `High-level feature "${title}" created — version bump`,
+      performedBy: createdBy,
+      auditContext: auditContext
+    });
 
     // ── Activity tracker ──────────────────────────────────────────────────────
     const { user: auditUser, device, requestId } = auditContext || {};

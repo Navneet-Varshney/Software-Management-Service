@@ -1,12 +1,13 @@
 // services/high-level-features/update-hlf.service.js
 
 const { HighLevelFeatureModel } = require("@models/high-level-feature.model");
-const { versionControlService } = require("@services/common/version.service");
+const { manualVersionControlService } = require("@services/common/version.service");
 const { logActivityTrackerEvent } = require("@services/audit/activity-tracker.service");
 const { prepareAuditData } = require("@utils/audit-data.util");
 const { ACTIVITY_TRACKER_EVENTS } = require("@configs/tracker.config");
 const { logWithTime } = require("@utils/time-stamps.util");
 const { errorMessage } = require("@utils/log-error.util");
+const { Phases } = require("@/configs/enums.config");
 
 /**
  * Updates an existing high-level feature with change detection.
@@ -81,12 +82,13 @@ const updateHlfService = async ({
     const updatedHlf = await hlf.save();
 
     // ── Version control ────────────────────────────────────────────────────
-    await versionControlService(
-      inception,
-      `High-level feature "${updatedHlf.title}" updated — version bump`,
-      updatedBy,
-      auditContext
-    );
+    await manualVersionControlService({
+      projectId: inception.projectId,
+      currentPhase: Phases.INCEPTION,
+      action: `High-level feature "${updatedHlf.title}" updated — version bump`,
+      performedBy: updatedBy,
+      auditContext: auditContext
+    });
 
     // ── Activity tracker ──────────────────────────────────────────────────────
     const { user: auditUser, device, requestId } = auditContext || {};

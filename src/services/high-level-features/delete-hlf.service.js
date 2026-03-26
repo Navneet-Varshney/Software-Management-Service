@@ -1,12 +1,13 @@
 // services/high-level-features/delete-hlf.service.js
 
 const { HighLevelFeatureModel } = require("@models/high-level-feature.model");
-const { versionControlService } = require("@services/common/version.service");
+const { manualVersionControlService } = require("@services/common/version.service");
 const { logActivityTrackerEvent } = require("@services/audit/activity-tracker.service");
 const { prepareAuditData } = require("@utils/audit-data.util");
 const { ACTIVITY_TRACKER_EVENTS } = require("@configs/tracker.config");
 const { logWithTime } = require("@utils/time-stamps.util");
 const { errorMessage } = require("@utils/log-error.util");
+const { Phases } = require("@/configs/enums.config");
 
 /**
  * Soft-deletes a high-level feature.
@@ -33,20 +34,26 @@ const deleteHlfService = async ({
     // ── Store old HLF for audit ────────────────────────────────────────────
     const oldHlf = hlf.toObject ? hlf.toObject() : hlf;
 
-    // ── Soft delete: set isDeleted, deletedAt, deletedBy ────────────────────
-    hlf.isDeleted = true;
-    hlf.deletedAt = new Date();
-    hlf.deletedBy = deletedBy;
-
-    const deletedHlf = await hlf.save();
+    const deletedHlf = await HighLevelFeatureModel.findByIdAndUpdate(
+      hlf._id,
+      {
+        $set: {
+          isDeleted: true,
+          deletedAt: new Date(),
+          deletedBy: deletedBy
+        }
+      },
+      { new: true, runValidators: true }
+    );
 
     // ── Version control ────────────────────────────────────────────────────
-    await versionControlService(
-      inception,
-      `High-level feature "${deletedHlf.title}" deleted — version bump`,
-      deletedBy,
-      auditContext
-    );
+    await manualVersionControlService({
+      projectId: inception.projectId,
+      currentPhase: Phases.INCEPTION,
+      action: `High-level feature "${deletedHlf.title}" deleted — version bump`,
+      performedBy: deletedBy,
+      auditContext: auditContext
+    });
 
     // ── Activity tracker ─────────────────────────────────────────────────────
     const { user: auditUser, device, requestId } = auditContext || {};
