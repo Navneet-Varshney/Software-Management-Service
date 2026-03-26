@@ -6,6 +6,7 @@ const { logActivityTrackerEvent } = require("@services/audit/activity-tracker.se
 const { prepareAuditData } = require("@utils/audit-data.util");
 const { ACTIVITY_TRACKER_EVENTS } = require("@configs/tracker.config");
 const { ProjectCategoryTypes } = require("@configs/enums.config");
+const { errorMessage } = require("@/utils/log-error.util");
 
 /**
  * Soft-deletes a stakeholder and runs version control on the project's current phase.
@@ -46,14 +47,18 @@ const deleteStakeholderService = async (
           deletionReasonDescription: deletionReasonDescription || null,
         },
       },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
+
+    if (!updatedStakeholder) {
+      return { success: false, message: "Stakeholder not found or already deleted" };
+    }
 
     // ── Version control (reuses the project already fetched above) ───────────
     if (project && !project.isDeleted) {
       await versionControlService(
         project,
-        `Stakeholder ${stakeholder.stakeholderId} removed from project — version bump`,
+        `Stakeholder ${stakeholder.userId} removed from project — version bump`,
         deletedBy,
         auditContext
       );
@@ -67,7 +72,7 @@ const deleteStakeholderService = async (
       device,
       requestId,
       ACTIVITY_TRACKER_EVENTS.DELETE_STAKEHOLDER,
-      `Stakeholder ${stakeholder.stakeholderId} deleted from project ${stakeholder.projectId} by ${deletedBy}. Reason: ${deletionReasonType}`,
+      `Stakeholder ${stakeholder.userId} deleted from project ${stakeholder.projectId} by ${deletedBy}. Reason: ${deletionReasonType}`,
       {
         oldData,
         newData,
@@ -81,6 +86,7 @@ const deleteStakeholderService = async (
     return { success: true };
 
   } catch (error) {
+    errorMessage(error);
     if (error.name === "ValidationError") {
       return { success: false, message: "Validation error", error: error.message };
     }

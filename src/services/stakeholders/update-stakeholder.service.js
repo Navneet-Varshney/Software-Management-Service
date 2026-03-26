@@ -36,13 +36,13 @@ const updateStakeholderService = async (stakeholder, project, { role, updatedBy,
     const updatedStakeholder = await StakeholderModel.findByIdAndUpdate(
       stakeholder._id,
       { $set: { role, updatedBy } },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
 
     // ── Version control ───────────────────────────────────────────────────────
     await versionControlService(
       project,
-      `Stakeholder ${stakeholder.stakeholderId} role updated — version bump`,
+      `Stakeholder ${stakeholder.userId} role updated — version bump`,
       updatedBy,
       auditContext
     );
@@ -55,7 +55,7 @@ const updateStakeholderService = async (stakeholder, project, { role, updatedBy,
       device,
       requestId,
       ACTIVITY_TRACKER_EVENTS.UPDATE_STAKEHOLDER,
-      `Stakeholder ${stakeholder.stakeholderId} role changed to "${role}" by ${updatedBy}`,
+      `Stakeholder ${stakeholder.userId} role changed to "${role}" by ${updatedBy}`,
       {
         oldData,
         newData,
