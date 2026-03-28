@@ -72,6 +72,11 @@ const inceptionSchema = new mongoose.Schema({
     minlength: descriptionLength.min,
     maxlength: descriptionLength.max,
     default: null
+  },
+
+  isFrozen: {
+    type: Boolean,
+    default: false
   }
 
 }, { timestamps: true });

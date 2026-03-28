@@ -3,7 +3,7 @@
 const mongoose = require("mongoose");
 const { DB_COLLECTIONS } = require("@/configs/db-collections.config");
 const { customIdRegex, mongoIdRegex } = require("@configs/regex.config");
-const { ProjectCreationReason, ProjectUpdationReason, ProjectStatus, ProjectOnHoldReason, ProjectResumeReason, ProjectAbortReason, ProjectDeletionReason, Phases, ProjectCategoryTypes, ProjectTypes, PriorityLevels, ProjectActivationReason } = require("@configs/enums.config");
+const { ProjectCreationReason, ProjectUpdationReason, ProjectStatus, ProjectOnHoldReason, ProjectResumeReason, ProjectAbortReason, ProjectDeletionReason, Phases, ProjectCategoryTypes, ProjectTypes, PriorityLevels, ProjectActivationReason, ChangeProjectOwnerReasons } = require("@configs/enums.config");
 const {
   projectNameLength,
   descriptionLength,
@@ -163,6 +163,12 @@ const projectSchema = new mongoose.Schema(
       immutable: true,
     },
 
+    ownerId: {
+      type: String,
+      required: [true, "createdBy is required."],
+      match: [customIdRegex, "createdBy must be a valid USR ID (USR followed by 7 digits)."]
+    },
+
     updatedBy: {
       type: String,
       default: null,
@@ -265,6 +271,30 @@ const projectSchema = new mongoose.Schema(
       trim: true,
       minlength: descriptionLength.min,
       maxlength: descriptionLength.max,
+    },
+
+    ownerChangeReasonType: {
+      type: String,
+      enum: Object.values(ChangeProjectOwnerReasons),
+      default: null
+    },
+
+    ownerChangeReasonDescription: {
+      type: String,
+      default: null,
+      minlength: descriptionLength.min,
+      maxlength: descriptionLength.max
+    },
+
+    ownerChangedAt: {
+      type: Date,
+      default: null
+    },
+
+    ownerChangedBy: {
+      type: String,
+      match: customIdRegex,
+      default: null
     },
 
     activationReasonType: {

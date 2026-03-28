@@ -1,6 +1,6 @@
 
 const { DB_COLLECTIONS } = require('@/configs/db-collections.config');
-const { RequirementTypes, RequirementSources, RequirementStatuses, PriorityLevels } = require('@/configs/enums.config');
+const { RequirementTypes, RequirementSources, RequirementStatuses, PriorityLevels, ElicitationModes, RelationTypes, DeferredReasonTypes, RejectedReasonTypes } = require('@/configs/enums.config');
 const { descriptionLength, titleLength } = require('@/configs/fields-length.config');
 const { customIdRegex } = require('@/configs/regex.config');
 const mongoose = require('mongoose');
@@ -24,13 +24,58 @@ const RequirementSchema = new mongoose.Schema({
         enum: Object.values(PriorityLevels),
         default: PriorityLevels.MEDIUM
     },
+    createdInMode: {
+        type: String,
+        enum: Object.values(ElicitationModes),
+        default: ElicitationModes.OPEN
+    },
     issueNote: { type: String, trim: true, default: null, minlength: descriptionLength.min, maxlength: descriptionLength.max },
-    linkedRequirementIds: {
+    linkedRequirements: {
         type: [{
-            type: mongoose.Schema.Types.ObjectId,
-            ref: DB_COLLECTIONS.REQUIREMENTS
+            requirementId: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: DB_COLLECTIONS.REQUIREMENTS,
+                required: true
+            },
+            relationType: {
+                type: String,
+                enum: Object.values(RelationTypes),
+                required: true // e.g. DEPENDS_ON, DUPLICATE_OF, BLOCKS
+            }
         }],
         default: []
+    },
+    decision: {
+
+        reasonType: {
+            type: String,
+            enum: [
+                ...new Set([
+                    ...Object.values(RejectedReasonTypes),
+                    ...Object.values(DeferredReasonTypes)
+                ])
+            ],
+            default: null
+        },
+
+        reasonDescription: {
+            type: String,
+            trim: true,
+            default: null,
+            minlength: descriptionLength.min,
+            maxlength: descriptionLength.max
+        },
+
+        decidedBy: {
+            type: String,
+            match: customIdRegex,
+            default: null
+        },
+
+        decidedAt: {
+            type: Date,
+            default: null
+        }
     },
     timeline: {
         proposedDate: {
