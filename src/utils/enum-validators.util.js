@@ -31,7 +31,11 @@ const {
   ElicitationModes,
   PhaseDeletionReason,
   ScopeTypes,
-  CommentEntityTypes
+  CommentEntityTypes,
+  MeetingPlatformTypes,
+  MeetingGroups,
+  MeetingCancellationReasons,
+  ParticipantTypes
 } = require("@configs/enums.config");
 
 /**
@@ -91,6 +95,10 @@ const ElicitationModesHelper = createEnumHelper(ElicitationModes, "ElicitationMo
 const PhaseDeletionReasonHelper = createEnumHelper(PhaseDeletionReason, "PhaseDeletionReason");
 const ScopeTypesHelper = createEnumHelper(ScopeTypes, "ScopeTypes");
 const CommentEntityTypesHelper = createEnumHelper(CommentEntityTypes, "CommentEntityTypes");
+const MeetingPlatformTypesHelper = createEnumHelper(MeetingPlatformTypes, "MeetingPlatformTypes");
+const MeetingGroupsHelper = createEnumHelper(MeetingGroups, "MeetingGroups");
+const MeetingCancellationReasonsHelper = createEnumHelper(MeetingCancellationReasons, "MeetingCancellationReasons");
+const ParticipantTypesHelper = createEnumHelper(ParticipantTypes, "ParticipantTypes");
 
 module.exports = {
   DeviceTypeHelper,
@@ -121,5 +129,9 @@ module.exports = {
   ElicitationModesHelper,
   PhaseDeletionReasonHelper,
   ScopeTypesHelper,
-  CommentEntityTypesHelper
+  CommentEntityTypesHelper,
+  MeetingPlatformTypesHelper,
+  MeetingGroupsHelper,
+  MeetingCancellationReasonsHelper,
+  ParticipantTypesHelper
 };
