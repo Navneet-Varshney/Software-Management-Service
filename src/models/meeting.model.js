@@ -1,12 +1,12 @@
 const { customIdRegex } = require("@/configs/regex.config");
 const { DB_COLLECTIONS } = require("@/configs/db-collections.config");
 const { descriptionLength, titleLength } = require("@/configs/fields-length.config");
-const { ParticipantTypes, MeetingPlatformTypes, MeetingStatuses, Phases, MeetingGroups } = require("@/configs/enums.config");
+const { ParticipantTypes, MeetingPlatformTypes, MeetingStatuses, MeetingGroups, MeetingCancellationReasons } = require("@/configs/enums.config");
 const mongoose = require("mongoose");
 
-const MeetingEntiityTypes = Object.freeze({
-  ELICITATION: Phases.ELICITATION,
-  NEGOTIATION: Phases.NEGOTIATION
+const MeetingEntityTypes = Object.freeze({
+  [DB_COLLECTIONS.ELICITATIONS]: DB_COLLECTIONS.ELICITATIONS,
+  [DB_COLLECTIONS.NEGOTIATIONS]: DB_COLLECTIONS.NEGOTIATIONS
 });
 
 const participantSchema = new mongoose.Schema({
@@ -35,9 +35,10 @@ const participantSchema = new mongoose.Schema({
     required: true
   },
 
-  addedAt: {
-    type: Date,
-    default: Date.now
+  updatedBy: {
+    type: String,
+    match: customIdRegex,
+    default: null
   },
 
   isDeleted: {
@@ -54,9 +55,14 @@ const participantSchema = new mongoose.Schema({
   removedAt: {
     type: Date,
     default: null
+  },
+
+  removeReason: {
+    type: String,
+    default: null
   }
 
-}, { _id: true });
+}, { _id: true, timestamps: true });
 
 
 const meetingSchema = new mongoose.Schema({
@@ -65,13 +71,23 @@ const meetingSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     refPath: 'entityType',
     required: true,
+    immutable: true,
+    index: true
+  },
+
+  projectId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: DB_COLLECTIONS.PROJECTS,
+    required: true,
+    immutable: true,
     index: true
   },
 
   entityType: {
     type: String,
-    enum: Object.values(MeetingEntiityTypes),
-    default: MeetingEntiityTypes.ELICITATION
+    enum: Object.values(MeetingEntityTypes),
+    immutable: true,
+    default: DB_COLLECTIONS.ELICITATIONS
   },
 
   platform: {
@@ -125,7 +141,16 @@ const meetingSchema = new mongoose.Schema({
 
   participants: {
     type: [participantSchema],
-    default: []
+    default: [],
+    validate: {
+      validator: function (participants) {
+        const activeIds = participants
+          .filter(p => !p.isDeleted)
+          .map(p => p.userId);
+        return activeIds.length === new Set(activeIds).size;
+      },
+      message: "Duplicate participants not allowed"
+    }
   },
 
   title: {
@@ -133,7 +158,7 @@ const meetingSchema = new mongoose.Schema({
     trim: true,
     minlength: titleLength.min,
     maxlength: titleLength.max,
-    default: null
+    required: true
   },
 
   description: {
@@ -156,28 +181,53 @@ const meetingSchema = new mongoose.Schema({
     default: null
   },
 
-  isDeleted: {
-    type: Boolean,
-    default: false
-  },
-
   isScheduleFrozen: {
     type: Boolean,
     default: false
   },
 
-  deletedAt: {
+  cancelledAt: {
     type: Date,
     default: null
   },
 
-  deletedBy: {
+  cancelledBy: {
     type: String,
     match: customIdRegex,
     default: null
   },
 
+  cancelReason: {
+    type: String,
+    enum: Object.values(MeetingCancellationReasons),
+    default: null
+  },
+
+  cancelDescription: {
+    type: String,
+    default: null
+  },
+
 }, { timestamps: true });
+
+meetingSchema.index(
+  { entityId: 1, entityType: 1 },
+  { partialFilterExpression: { status: { $ne: MeetingStatuses.CANCELLED } } }
+);
+meetingSchema.index(
+  { facilitatorId: 1 },
+  { partialFilterExpression: { status: { $ne: MeetingStatuses.CANCELLED } } }
+);
+meetingSchema.index(
+  { scheduledAt: 1 },
+  { partialFilterExpression: { status: { $ne: MeetingStatuses.CANCELLED }, scheduledAt: { $ne: null } } }
+);
+meetingSchema.index(
+  { entityId: 1, entityType: 1, status: 1 }
+);
+meetingSchema.index(
+  { 'participants.userId': 1, status: 1 }
+);
 
 const MeetingModel = mongoose.model(DB_COLLECTIONS.MEETINGS, meetingSchema);
 

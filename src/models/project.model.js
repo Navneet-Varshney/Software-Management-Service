@@ -165,8 +165,8 @@ const projectSchema = new mongoose.Schema(
 
     ownerId: {
       type: String,
-      required: [true, "createdBy is required."],
-      match: [customIdRegex, "createdBy must be a valid USR ID (USR followed by 7 digits)."]
+      required: [true, "ownerId is required."],
+      match: [customIdRegex, "ownerId must be a valid USR ID (USR followed by 7 digits)."]
     },
 
     updatedBy: {
