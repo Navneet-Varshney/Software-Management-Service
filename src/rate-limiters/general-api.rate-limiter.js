@@ -72,6 +72,7 @@ const listInceptionsRateLimiter  = createRateLimiter(perUserAndDevice.listIncept
 const deleteInceptionRateLimiter = createRateLimiter(perUserAndDevice.deleteInception);
 const freezeInceptionRateLimiter = createRateLimiter(perUserAndDevice.freezeInception);
 const getLatestInceptionRateLimiter = createRateLimiter(perUserAndDevice.getLatestInception);
+const updateInceptionRateLimiter = createRateLimiter(perUserAndDevice.updateInception);
 
 const createElicitationRateLimiter = createRateLimiter(perUserAndDevice.createElicitation);
 const updateElicitationRateLimiter = createRateLimiter(perUserAndDevice.updateElicitation);
@@ -180,6 +181,7 @@ module.exports = {
     deleteInceptionRateLimiter,
     freezeInceptionRateLimiter,
     getLatestInceptionRateLimiter,
+    updateInceptionRateLimiter,
     createElicitationRateLimiter,
     updateElicitationRateLimiter,
     deleteElicitationRateLimiter,
