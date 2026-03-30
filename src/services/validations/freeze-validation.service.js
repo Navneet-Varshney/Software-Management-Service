@@ -1,6 +1,5 @@
 // services/validations/freeze-validation.service.js
 
-const { ProjectModel } = require("../../models");
 const { ValidationModel } = require("../../models");
 const {
   logActivityTrackerEvent,
@@ -14,34 +13,18 @@ const freezeValidationService = async ({
   auditContext,
 }) => {
   try {
-    // Check project exists
-    const project = await ProjectModel.findById(projectId);
-    if (!project) {
-      return {
-        success: false,
-        message: "Project not found",
-        errorCode: NOT_FOUND,
-      };
-    }
 
     // Check validation exists and is not already frozen
     const validation = await ValidationModel.findOne({
       projectId,
       isDeleted: false,
+      isFrozen: false
     });
     if (!validation) {
       return {
         success: false,
         message: "Validation not found",
         errorCode: NOT_FOUND,
-      };
-    }
-
-    if (validation.isFrozen) {
-      return {
-        success: false,
-        message: "Validation is already frozen",
-        errorCode: CONFLICT,
       };
     }
 
