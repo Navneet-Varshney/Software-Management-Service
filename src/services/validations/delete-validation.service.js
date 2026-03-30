@@ -5,9 +5,8 @@ const { ValidationModel } = require("../../models");
 const {
   logActivityTrackerEvent,
 } = require("@services/audit/activity-tracker.service");
-const { ACTIVITY_TRACKER_EVENTS } = require("../../configs/system-log-events.config");
+const { ACTIVITY_TRACKER_EVENTS } = require("@configs/tracker.config");
 const { NOT_FOUND, INTERNAL_ERROR } = require("@configs/http-status.config");
-const { DELETION_REASON_TYPES } = require("../../configs/enums.config");
 
 const deleteValidationService = async ({
   projectId,
@@ -31,6 +30,7 @@ const deleteValidationService = async ({
     const validation = await ValidationModel.findOne({
       projectId,
       isDeleted: false,
+      isFrozen: false // Ensure we only delete if not frozen
     });
     if (!validation) {
       return {
@@ -44,18 +44,21 @@ const deleteValidationService = async ({
     validation.isDeleted = true;
     validation.deletedAt = new Date();
     validation.deletedBy = deletedBy;
-    validation.deletionReasonType = deletionReasonType || DELETION_REASON_TYPES.OTHER;
-    validation.deletionReasonDescription = deletionReasonDescription || "";
+    validation.deletionReasonType = deletionReasonType;
+    validation.deletionReasonDescription = deletionReasonDescription;
 
     await validation.save();
 
     // Log activity
-    await logActivityTrackerEvent({
-      projectId,
-      event: ACTIVITY_TRACKER_EVENTS.DELETE_VALIDATION,
-      createdBy: deletedBy,
-      auditContext,
-    });
+    const { user, device, requestId } = auditContext || {};
+    logActivityTrackerEvent(
+      user,
+      device,
+      requestId,
+      ACTIVITY_TRACKER_EVENTS.DELETE_VALIDATION,
+      `Validation deleted - Reason: ${deletionReasonType}`,
+      { adminActions: { targetId: projectId } }
+    );
 
     return {
       success: true,

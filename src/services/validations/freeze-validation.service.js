@@ -5,7 +5,7 @@ const { ValidationModel } = require("../../models");
 const {
   logActivityTrackerEvent,
 } = require("@services/audit/activity-tracker.service");
-const { ACTIVITY_TRACKER_EVENTS } = require("../../configs/system-log-events.config");
+const { ACTIVITY_TRACKER_EVENTS } = require("@configs/tracker.config");
 const { NOT_FOUND, CONFLICT, INTERNAL_ERROR } = require("@configs/http-status.config");
 
 const freezeValidationService = async ({
@@ -53,12 +53,15 @@ const freezeValidationService = async ({
     await validation.save();
 
     // Log activity
-    await logActivityTrackerEvent({
-      projectId,
-      event: ACTIVITY_TRACKER_EVENTS.FREEZE_VALIDATION,
-      createdBy: frozenBy,
-      auditContext,
-    });
+    const { user, device, requestId } = auditContext || {};
+    logActivityTrackerEvent(
+      user,
+      device,
+      requestId,
+      ACTIVITY_TRACKER_EVENTS.FREEZE_VALIDATION,
+      `Validation frozen - version ${validation.version.major}.${validation.version.minor}`,
+      { adminActions: { targetId: projectId } }
+    );
 
     return {
       success: true,
