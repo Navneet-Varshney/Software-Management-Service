@@ -17,7 +17,11 @@ const freezeValidationController = async (req, res) => {
   const result = await freezeValidationService({
     projectId,
     frozenBy: req.admin.adminId,
-    auditContext: req.auditContext,
+    auditContext: {
+      user: req.admin,
+      device: req.device,
+      requestId: req.requestId
+    },
   });
 
   if (!result.success) {
