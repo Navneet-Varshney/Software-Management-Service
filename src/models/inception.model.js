@@ -12,6 +12,16 @@ const inceptionSchema = new mongoose.Schema({
     required: true,
     index: true
   },
+  
+  meetingIds: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: DB_COLLECTIONS.MEETINGS
+  }],
+
+  allowParallelMeetings: {
+    type: Boolean,
+    default: false
+  },
 
   productVision: {
     type: String,

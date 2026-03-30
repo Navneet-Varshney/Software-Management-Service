@@ -13,6 +13,16 @@ const specificationSchema = new mongoose.Schema({
     index: true
   },
 
+  meetingIds: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: DB_COLLECTIONS.MEETINGS
+  }],
+
+  allowParallelMeetings: {
+    type: Boolean,
+    default: false
+  },
+  
   version: {
     major: {
       type: Number, // equivalent to cycleNumber
