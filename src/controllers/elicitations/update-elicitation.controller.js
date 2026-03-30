@@ -45,6 +45,7 @@ const updateElicitationController = async (req, res) => {
     }
 
     if (result.message === "No changes detected") {
+      
       return res.status(OK).json({
         success: true,
         message: "No changes detected. Elicitation mode remains unchanged."
