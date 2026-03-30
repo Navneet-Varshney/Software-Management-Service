@@ -5,9 +5,8 @@ const { ElaborationModel } = require("../../models");
 const {
   logActivityTrackerEvent,
 } = require("@services/audit/activity-tracker.service");
-const { ACTIVITY_TRACKER_EVENTS } = require("../../configs/system-log-events.config");
+const { ACTIVITY_TRACKER_EVENTS } = require("@configs/tracker.config");
 const { NOT_FOUND, INTERNAL_ERROR } = require("@configs/http-status.config");
-const { DELETION_REASON_TYPES } = require("../../configs/enums.config");
 
 const deleteElaborationService = async ({
   projectId,
@@ -31,6 +30,7 @@ const deleteElaborationService = async ({
     const elaboration = await ElaborationModel.findOne({
       projectId,
       isDeleted: false,
+      isFrozen: false // Ensure we only delete if not frozen
     });
     if (!elaboration) {
       return {
@@ -44,18 +44,21 @@ const deleteElaborationService = async ({
     elaboration.isDeleted = true;
     elaboration.deletedAt = new Date();
     elaboration.deletedBy = deletedBy;
-    elaboration.deletionReasonType = deletionReasonType || DELETION_REASON_TYPES.OTHER;
-    elaboration.deletionReasonDescription = deletionReasonDescription || "";
+    elaboration.deletionReasonType = deletionReasonType;
+    elaboration.deletionReasonDescription = deletionReasonDescription;
 
     await elaboration.save();
 
     // Log activity
-    await logActivityTrackerEvent({
-      projectId,
-      event: ACTIVITY_TRACKER_EVENTS.DELETE_ELABORATION,
-      createdBy: deletedBy,
-      auditContext,
-    });
+    const { user, device, requestId } = auditContext || {};
+    logActivityTrackerEvent(
+      user,
+      device,
+      requestId,
+      ACTIVITY_TRACKER_EVENTS.DELETE_ELABORATION,
+      `Elaboration deleted - Reason: ${deletionReasonType}`,
+      { adminActions: { targetId: projectId } }
+    );
 
     return {
       success: true,

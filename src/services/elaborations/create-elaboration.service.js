@@ -1,6 +1,5 @@
 // services/elaborations/create-elaboration.service.js
 
-const mongoose = require("mongoose");
 const { ProjectModel } = require("@models/project.model");
 const { ElaborationModel } = require("@models/elaboration.model");
 const { Phases } = require("@configs/enums.config");
@@ -65,15 +64,6 @@ const createElaborationService = async ({
       logWithTime(`❌ [createElaborationService] Failed to update project phase`);
       return { success: false, message: "Failed to update project phase", errorCode: INTERNAL_ERROR };
     }
-
-    // Log project update activity
-    const { user, device, requestId } = auditContext || {};
-    const { oldData, newData } = prepareAuditData(oldProjectData, updatedProject);
-    logActivityTrackerEvent(
-      user, device, requestId, ACTIVITY_TRACKER_EVENTS.UPDATE_PROJECT,
-      `Project phase transitioned to ELABORATION`,
-      { oldData, newData, adminActions: { targetId: projectId } }
-    );
 
     // ── Step 4: Create phase WITH version management AND additional data ─
     logWithTime(`[createElaborationService] Creating ELABORATION phase document`);

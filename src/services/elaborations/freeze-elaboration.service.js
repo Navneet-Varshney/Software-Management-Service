@@ -5,7 +5,7 @@ const { ElaborationModel } = require("../../models");
 const {
   logActivityTrackerEvent,
 } = require("@services/audit/activity-tracker.service");
-const { ACTIVITY_TRACKER_EVENTS } = require("../../configs/system-log-events.config");
+const { ACTIVITY_TRACKER_EVENTS } = require("@configs/tracker.config");
 const { NOT_FOUND, CONFLICT, INTERNAL_ERROR } = require("@configs/http-status.config");
 
 const freezeElaborationService = async ({
@@ -53,12 +53,15 @@ const freezeElaborationService = async ({
     await elaboration.save();
 
     // Log activity
-    await logActivityTrackerEvent({
-      projectId,
-      event: ACTIVITY_TRACKER_EVENTS.FREEZE_ELABORATION,
-      createdBy: frozenBy,
-      auditContext,
-    });
+    const { user, device, requestId } = auditContext || {};
+    logActivityTrackerEvent(
+      user,
+      device,
+      requestId,
+      ACTIVITY_TRACKER_EVENTS.FREEZE_ELABORATION,
+      `Elaboration frozen - version ${elaboration.version.major}.${elaboration.version.minor}`,
+      { adminActions: { targetId: projectId } }
+    );
 
     return {
       success: true,

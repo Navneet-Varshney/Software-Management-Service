@@ -5,12 +5,12 @@ const { ElaborationModel } = require("../../models");
 const {
   logActivityTrackerEvent,
 } = require("@services/audit/activity-tracker.service");
-const { ACTIVITY_TRACKER_EVENTS } = require("../../configs/system-log-events.config");
+const { ACTIVITY_TRACKER_EVENTS } = require("@configs/tracker.config");
 const { NOT_FOUND, CONFLICT, INTERNAL_ERROR } = require("@configs/http-status.config");
 
 const updateElaborationService = async ({
   projectId,
-  updateData,
+  allowParallelMeetings,
   updatedBy,
   auditContext,
 }) => {
@@ -38,20 +38,62 @@ const updateElaborationService = async ({
       };
     }
 
-    // Update elaboration
-    Object.assign(elaboration, updateData);
+    // ── 1. Check if any changes are being made ────────────────────────
+    const allowParallelChanged = allowParallelMeetings !== undefined && elaboration.allowParallelMeetings !== allowParallelMeetings;
+
+    if (!allowParallelChanged) {
+      return {
+        success: true,
+        message: "No changes detected",
+        elaboration,
+      };
+    }
+
+    // ── 2. If toggling allowParallelMeetings from true to false, validate meetings ────────
+    if (allowParallelChanged && elaboration.allowParallelMeetings === true && allowParallelMeetings === false) {
+      const { MeetingModel } = require("@models/meeting.model");
+      const { MeetingStatuses } = require("@configs/enums.config");
+
+      // Check if there are any meetings
+      if (elaboration.meetingIds && elaboration.meetingIds.length > 0) {
+        // Fetch all meetings to check their status
+        const meetings = await MeetingModel.find(
+          { _id: { $in: elaboration.meetingIds }, isDeleted: false },
+          { status: 1 }
+        ).lean();
+
+        // Check if any meeting is not COMPLETED or CANCELLED
+        const ongoingMeetings = meetings.filter(m => 
+          m.status !== MeetingStatuses.COMPLETED && m.status !== MeetingStatuses.CANCELLED
+        );
+
+        if (ongoingMeetings.length > 0) {
+          return {
+            success: false,
+            message: "Cannot disable parallel meetings while there are ongoing/scheduled meetings. Please complete or cancel all meetings before disabling this option.",
+            errorCode: CONFLICT,
+          };
+        }
+      }
+    }
+
+    // ── 3. Update elaboration with allowParallelMeetings toggle ────────
+    elaboration.allowParallelMeetings = allowParallelMeetings;
     elaboration.updatedBy = updatedBy;
     elaboration.updatedAt = new Date();
 
     await elaboration.save();
 
     // Log activity
-    await logActivityTrackerEvent({
-      projectId,
-      event: ACTIVITY_TRACKER_EVENTS.UPDATE_ELABORATION,
-      createdBy: updatedBy,
-      auditContext,
-    });
+    const { user, device, requestId } = auditContext || {};
+    logActivityTrackerEvent(
+      user,
+      device,
+      requestId,
+      ACTIVITY_TRACKER_EVENTS.UPDATE_ELABORATION,
+      `Elaboration updated - allowParallelMeetings toggled`,
+      { adminActions: { targetId: projectId } }
+    );
 
     return {
       success: true,
