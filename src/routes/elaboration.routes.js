@@ -165,12 +165,12 @@ elaborationRouter.patch(
   [
     ...baseAuthAdminMiddlewares,
     freezeElaborationRateLimiter,
+    elaborationMiddlewares.fetchLatestElaborationMiddleware,
+    commonMiddlewares.checkElaborationNotFrozen,
     projectMiddlewares.fetchProjectMiddleware,
     checkUserIsStakeholder,
     stakeholderRoleAccessMiddlewares.freezeElaborationStakeholderRoleAccessMiddleware,
-    projectMiddlewares.activeProjectGuardMiddleware,
-    elaborationMiddlewares.fetchLatestElaborationMiddleware,
-    commonMiddlewares.checkElaborationNotFrozen
+    projectMiddlewares.activeProjectGuardMiddleware
   ],
   elaborationControllers.freezeElaborationController
 );

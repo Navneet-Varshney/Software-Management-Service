@@ -7,6 +7,7 @@ const { INCEPTION_ROUTES } = require("@/configs/uri.config");
 const { baseAuthAdminMiddlewares } = require("./middleware.gateway.routes");
 const {
   createInceptionRateLimiter,
+  updateInceptionRateLimiter,
   deleteInceptionRateLimiter,
   freezeInceptionRateLimiter,
   getInceptionRateLimiter,
@@ -23,6 +24,7 @@ const { stakeholderRoleAccessMiddlewares } = require("@/middlewares/stakeholders
 
 const {
   CREATE_INCEPTION,
+  UPDATE_INCEPTION,
   DELETE_INCEPTION,
   FREEZE_INCEPTION,
   GET_INCEPTION,
@@ -70,7 +72,7 @@ inceptionRouter.get(
 /**
  * GET /software-management-service/api/v1/inceptions/get/:inceptionId
  * Fetch a specific inception by ID.
- * Allowed
+ * Allowed roles: All admin roles (CEO, Business Analyst, Manager, Analyst, Developer, Other)
 
 /**
  * GET /software-management-service/api/v1/inceptions/list/:projectId
@@ -154,6 +156,21 @@ inceptionRouter.patch(
     commonMiddlewares.checkInceptionNotFrozen
   ],
   inceptionControllers.freezeInceptionController
+);
+
+inceptionRouter.patch(
+  UPDATE_INCEPTION,
+  [
+    ...baseAuthAdminMiddlewares,
+    updateInceptionRateLimiter,
+    projectMiddlewares.fetchProjectMiddleware,
+    checkUserIsStakeholder,
+    stakeholderRoleAccessMiddlewares.updateInceptionStakeholderRoleAccessMiddleware,
+    projectMiddlewares.activeProjectGuardMiddleware,
+    inceptionMiddlewares.fetchLatestInceptionMiddleware,
+    commonMiddlewares.checkInceptionNotFrozen
+  ],
+  inceptionControllers.updateInceptionController
 );
 
 module.exports = {
