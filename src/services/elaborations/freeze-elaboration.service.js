@@ -1,6 +1,5 @@
 // services/elaborations/freeze-elaboration.service.js
 
-const { ProjectModel } = require("../../models");
 const { ElaborationModel } = require("../../models");
 const {
   logActivityTrackerEvent,
@@ -14,34 +13,18 @@ const freezeElaborationService = async ({
   auditContext,
 }) => {
   try {
-    // Check project exists
-    const project = await ProjectModel.findById(projectId);
-    if (!project) {
-      return {
-        success: false,
-        message: "Project not found",
-        errorCode: NOT_FOUND,
-      };
-    }
 
     // Check elaboration exists and is not already frozen
     const elaboration = await ElaborationModel.findOne({
       projectId,
       isDeleted: false,
+      isFrozen: false
     });
     if (!elaboration) {
       return {
         success: false,
         message: "Elaboration not found",
         errorCode: NOT_FOUND,
-      };
-    }
-
-    if (elaboration.isFrozen) {
-      return {
-        success: false,
-        message: "Elaboration is already frozen",
-        errorCode: CONFLICT,
       };
     }
 

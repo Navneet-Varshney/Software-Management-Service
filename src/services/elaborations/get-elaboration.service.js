@@ -4,23 +4,8 @@ const { ProjectModel } = require("../../models");
 const { ElaborationModel } = require("../../models");
 const { NOT_FOUND, INTERNAL_ERROR } = require("@configs/http-status.config");
 
-const getElaborationService = async ({ projectId }) => {
+const getElaborationService = async (elaboration) => {
   try {
-    // Check project exists
-    const project = await ProjectModel.findById(projectId);
-    if (!project) {
-      return {
-        success: false,
-        message: "Project not found",
-        errorCode: NOT_FOUND,
-      };
-    }
-
-    // Get elaboration
-    const elaboration = await ElaborationModel.findOne({
-      projectId,
-      isDeleted: false,
-    });
 
     if (!elaboration) {
       return {
