@@ -4,6 +4,7 @@ const { freezeInceptionController } = require("./freeze-inception.controller");
 const { getInceptionController } = require("./get-inception.controller");
 const { getLatestInceptionController } = require("./get-latest-inception.controller");
 const { listInceptionsController } = require("./list-inceptions.controller");
+const { updateInceptionController } = require("./update-inception.controller");
 
 const inceptionControllers = {
     createInceptionController,
@@ -11,7 +12,8 @@ const inceptionControllers = {
     freezeInceptionController,
     getInceptionController,
     getLatestInceptionController,
-    listInceptionsController
+    listInceptionsController,
+    updateInceptionController
 }
 
 module.exports = {
