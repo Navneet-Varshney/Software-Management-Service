@@ -7,6 +7,7 @@ const stakeholderRoleAccessMiddlewares = {
     deleteElicitationStakeholderRoleAccessMiddleware: checkUserRoleFactory([ProjectRoleTypes.OWNER]),
     createInceptionStakeholderRoleAccessMiddleware: checkUserRoleFactory([ProjectRoleTypes.OWNER]),
     deleteInceptionStakeholderRoleAccessMiddleware: checkUserRoleFactory([ProjectRoleTypes.OWNER]),
+    updateInceptionStakeholderRoleAccessMiddleware: checkUserRoleFactory([ProjectRoleTypes.OWNER]),
     freezeInceptionStakeholderRoleAccessMiddleware: checkUserRoleFactory([ProjectRoleTypes.OWNER]),
     freezeElicitationStakeholderRoleAccessMiddleware: checkUserRoleFactory([ProjectRoleTypes.OWNER]),
     createMeetingStakeholderRoleAccessMiddleware: checkUserRoleFactory([ProjectRoleTypes.OWNER]),
