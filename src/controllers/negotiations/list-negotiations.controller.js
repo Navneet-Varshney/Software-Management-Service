@@ -2,7 +2,7 @@
 
 const { listNegotiationsService } = require("../../services/negotiations/list-negotiations.service");
 const {
-  sendNegotiationListSuccess,
+  sendNegotiationsListSuccess,
 } = require("../../responses/success/negotiation.response");
 const {
   throwInternalServerError,
@@ -27,7 +27,7 @@ const listNegotiationsController = async (req, res) => {
     return throwInternalServerError(res, new Error(result.message));
   }
 
-  return sendNegotiationListSuccess(res, result.negotiations, result.pagination);
+  return sendNegotiationsListSuccess(res, result.negotiations, result.pagination);
 };
 
 module.exports = { listNegotiationsController };

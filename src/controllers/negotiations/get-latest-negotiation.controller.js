@@ -2,7 +2,7 @@
 
 const { getLatestNegotiationService } = require("../../services/negotiations/get-latest-negotiation.service");
 const {
-  sendNegotiationLatestRetrievedSuccess,
+  sendLatestNegotiationRetrievedSuccess,
 } = require("../../responses/success/negotiation.response");
 const {
   throwInternalServerError,
@@ -23,7 +23,7 @@ const getLatestNegotiationController = async (req, res) => {
     return throwInternalServerError(res, new Error(result.message));
   }
 
-  return sendNegotiationLatestRetrievedSuccess(res, result.negotiation);
+  return sendLatestNegotiationRetrievedSuccess(res, result.negotiation);
 };
 
 module.exports = { getLatestNegotiationController };
