@@ -27,6 +27,15 @@ const PHASE_ORDER = Object.freeze({
   [Phases.VALIDATION]: 6
 });
 
+const PHASE_FREEZE_EVENT_MAP = {
+  [Phases.INCEPTION]: ACTIVITY_TRACKER_EVENTS.FREEZE_INCEPTION,
+  [Phases.ELICITATION]: ACTIVITY_TRACKER_EVENTS.FREEZE_ELICITATION,
+  [Phases.ELABORATION]: ACTIVITY_TRACKER_EVENTS.FREEZE_ELABORATION,
+  [Phases.NEGOTIATION]: ACTIVITY_TRACKER_EVENTS.FREEZE_NEGOTIATION,
+  [Phases.SPECIFICATION]: ACTIVITY_TRACKER_EVENTS.FREEZE_SPECIFICATION,
+  [Phases.VALIDATION]: ACTIVITY_TRACKER_EVENTS.FREEZE_VALIDATION
+};
+
 /**
  * MODEL MAPPING
  * Maps phase names to their corresponding Mongoose models
@@ -130,7 +139,7 @@ const freezePhase = async (phaseDocument, phase, params = {}) => {
         user,
         device,
         requestId,
-        PHASE_EVENT_MAP[phase],
+        PHASE_FREEZE_EVENT_MAP[phase],
         `${phase} phase frozen (majorVersion: ${phaseDocument.version.major}) - transitioning to next phase`,
         {
           oldData,
