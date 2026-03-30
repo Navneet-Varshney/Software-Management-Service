@@ -5,9 +5,8 @@ const { SpecificationModel } = require("../../models");
 const {
   logActivityTrackerEvent,
 } = require("@services/audit/activity-tracker.service");
-const { ACTIVITY_TRACKER_EVENTS } = require("../../configs/system-log-events.config");
+const { ACTIVITY_TRACKER_EVENTS } = require("@configs/tracker.config");
 const { NOT_FOUND, INTERNAL_ERROR } = require("@configs/http-status.config");
-const { DELETION_REASON_TYPES } = require("../../configs/enums.config");
 
 const deleteSpecificationService = async ({
   projectId,
@@ -31,6 +30,7 @@ const deleteSpecificationService = async ({
     const specification = await SpecificationModel.findOne({
       projectId,
       isDeleted: false,
+      isFrozen: false // Ensure we only delete if not frozen
     });
     if (!specification) {
       return {
@@ -44,18 +44,21 @@ const deleteSpecificationService = async ({
     specification.isDeleted = true;
     specification.deletedAt = new Date();
     specification.deletedBy = deletedBy;
-    specification.deletionReasonType = deletionReasonType || DELETION_REASON_TYPES.OTHER;
-    specification.deletionReasonDescription = deletionReasonDescription || "";
+    specification.deletionReasonType = deletionReasonType;
+    specification.deletionReasonDescription = deletionReasonDescription;
 
     await specification.save();
 
     // Log activity
-    await logActivityTrackerEvent({
-      projectId,
-      event: ACTIVITY_TRACKER_EVENTS.DELETE_SPECIFICATION,
-      createdBy: deletedBy,
-      auditContext,
-    });
+    const { user, device, requestId } = auditContext || {};
+    logActivityTrackerEvent(
+      user,
+      device,
+      requestId,
+      ACTIVITY_TRACKER_EVENTS.DELETE_SPECIFICATION,
+      `Specification deleted - Reason: ${deletionReasonType}`,
+      { adminActions: { targetId: projectId } }
+    );
 
     return {
       success: true,

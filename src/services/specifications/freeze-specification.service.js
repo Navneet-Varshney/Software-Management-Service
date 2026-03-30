@@ -5,7 +5,7 @@ const { SpecificationModel } = require("../../models");
 const {
   logActivityTrackerEvent,
 } = require("@services/audit/activity-tracker.service");
-const { ACTIVITY_TRACKER_EVENTS } = require("../../configs/system-log-events.config");
+const { ACTIVITY_TRACKER_EVENTS } = require("@configs/tracker.config");
 const { NOT_FOUND, CONFLICT, INTERNAL_ERROR } = require("@configs/http-status.config");
 
 const freezeSpecificationService = async ({
@@ -53,12 +53,15 @@ const freezeSpecificationService = async ({
     await specification.save();
 
     // Log activity
-    await logActivityTrackerEvent({
-      projectId,
-      event: ACTIVITY_TRACKER_EVENTS.FREEZE_SPECIFICATION,
-      createdBy: frozenBy,
-      auditContext,
-    });
+    const { user, device, requestId } = auditContext || {};
+    logActivityTrackerEvent(
+      user,
+      device,
+      requestId,
+      ACTIVITY_TRACKER_EVENTS.FREEZE_SPECIFICATION,
+      `Specification frozen - version ${specification.version.major}.${specification.version.minor}`,
+      { adminActions: { targetId: projectId } }
+    );
 
     return {
       success: true,
