@@ -11,15 +11,22 @@ const {
 } = require("@/responses/common/error-handler.response");
 const { CONFLICT, NOT_FOUND, INTERNAL_ERROR } = require("@configs/http-status.config");
 
+const { OK } = require("@configs/http-status.config");
+const { logWithTime } = require("@/utils/time-stamps.util");
+
 const updateNegotiationController = async (req, res) => {
   const { projectId } = req.params;
-  const updateData = req.body;
+  const { allowParallelMeetings } = req.body;
 
   const result = await updateNegotiationService({
     projectId,
-    updateData,
+    allowParallelMeetings: typeof allowParallelMeetings === 'boolean' ? allowParallelMeetings : undefined,
     updatedBy: req.admin.adminId,
-    auditContext: req.auditContext,
+    auditContext: {
+      user: req.admin,
+      device: req.device,
+      requestId: req.requestId
+    },
   });
 
   if (!result.success) {
@@ -31,6 +38,14 @@ const updateNegotiationController = async (req, res) => {
       return throwDBResourceNotFoundError(res, resource);
     }
     return throwInternalServerError(res, new Error(result.message));
+  }
+
+  if (result.message === "No changes detected") {
+    logWithTime(`⚠️ No changes detected for Negotiation update in project ${projectId}`);
+    return res.status(OK).json({
+      success: true,
+      message: "No changes detected. Negotiation remains unchanged."
+    });
   }
 
   return sendNegotiationUpdatedSuccess(res, result.negotiation);
