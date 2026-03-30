@@ -30,8 +30,7 @@ const fetchLatestInceptionMiddleware = async (req, res, next) => {
     // ── 1. Query latest by version.major DESC ─────────────────────────
     const latestInception = await InceptionModel.findOne({
       projectId,
-      isDeleted: false,
-      isFrozen: false // Ensure we only delete if not frozen
+      isDeleted: false
     })
       .sort({ "version.major": -1 })
       .lean();
