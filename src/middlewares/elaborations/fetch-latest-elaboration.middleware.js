@@ -1,6 +1,6 @@
 // middlewares/elaborations/fetch-latest-elaboration.middleware.js
 
-const { ElaborationModel } = require("@models");
+const { ElaborationModel } = require("@models/elaboration.model");
 const { isValidMongoID } = require("@utils/id-validators.util");
 const {
   throwBadRequestError,
@@ -23,6 +23,7 @@ const fetchLatestElaborationMiddleware = async (req, res, next) => {
     const elaboration = await ElaborationModel.findOne({
       projectId,
       isDeleted: false,
+      isFrozen: false // Ensure we only delete if not frozen
     })
       .sort({ "version.major": -1, "version.minor": -1 })
       .lean();

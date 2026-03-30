@@ -1,6 +1,6 @@
 // middlewares/elaborations/fetch-elaboration.middleware.js
 
-const { ElaborationModel } = require("@models");
+const { ElaborationModel } = require("@models/elaboration.model");
 const { isValidMongoID } = require("@utils/id-validators.util");
 const {
   throwBadRequestError,
