@@ -1,6 +1,6 @@
 // middlewares/negotiations/fetch-latest-negotiation.middleware.js
 
-const { NegotiationModel } = require("@models");
+const { NegotiationModel } = require("@models/negotiation.model");
 const { isValidMongoID } = require("@utils/id-validators.util");
 const {
   throwBadRequestError,
@@ -30,6 +30,7 @@ const fetchLatestNegotiationMiddleware = async (req, res, next) => {
     const negotiation = await NegotiationModel.findOne({
       projectId,
       isDeleted: false,
+      isFrozen: false // Ensure we only delete if not frozen
     })
       .sort({ "version.major": -1, "version.minor": -1 })
       .lean();

@@ -1,6 +1,6 @@
 // middlewares/negotiations/fetch-negotiation.middleware.js
 
-const { NegotiationModel } = require("@models");
+const { NegotiationModel } = require("@models/negotiation.model");
 const { isValidMongoID } = require("@utils/id-validators.util");
 const {
   throwBadRequestError,
