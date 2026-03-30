@@ -22,8 +22,7 @@ const fetchLatestSpecificationMiddleware = async (req, res, next) => {
     }
     const specification = await SpecificationModel.findOne({
       projectId,
-      isDeleted: false,
-      isFrozen: false // Ensure we only delete if not frozen
+      isDeleted: false
     })
       .sort({ "version.major": -1, "version.minor": -1 })
       .lean();

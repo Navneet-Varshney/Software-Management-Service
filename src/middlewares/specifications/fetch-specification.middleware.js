@@ -30,6 +30,7 @@ const fetchSpecificationMiddleware = async (req, res, next) => {
       return throwBadRequestError(res, "Specification is deleted");
     }
     req.specification = specification;
+    req.projectId = specification.projectId; // Attach projectId for downstream middlewares
     logWithTime(`✅ [fetchSpecificationMiddleware] Specification fetched: ${specificationId}`);
     return next();
   } catch (error) {
