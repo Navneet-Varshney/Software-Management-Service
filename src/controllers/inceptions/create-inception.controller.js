@@ -17,6 +17,7 @@ const { CONFLICT } = require("@configs/http-status.config");
 const createInceptionController = async (req, res) => {
   try {
     const { projectId } = req.params;
+    const { allowParallelMeetings } = req.body;
 
     logWithTime(
       `📍 [createInceptionController] Creating inception for project: ${projectId} | ${getLogIdentifiers(req)}`
@@ -25,6 +26,7 @@ const createInceptionController = async (req, res) => {
     // ── Call service ──────────────────────────────────────────────────
     const result = await inceptionServices.createInceptionService({
       projectId,
+      allowParallelMeetings: typeof allowParallelMeetings === 'boolean' ? allowParallelMeetings : false,
       createdBy: req.admin.adminId,
       auditContext: {
         user: req.admin,
