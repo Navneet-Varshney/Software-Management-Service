@@ -5,9 +5,8 @@ const { NegotiationModel } = require("../../models");
 const {
   logActivityTrackerEvent,
 } = require("@services/audit/activity-tracker.service");
-const { ACTIVITY_TRACKER_EVENTS } = require("../../configs/system-log-events.config");
-const { NOT_FOUND, CONFLICT, INTERNAL_ERROR } = require("@configs/http-status.config");
-const { DELETION_REASON_TYPES } = require("../../configs/enums.config");
+const { ACTIVITY_TRACKER_EVENTS } = require("@configs/tracker.config");
+const { NOT_FOUND, INTERNAL_ERROR } = require("@configs/http-status.config");
 
 const deleteNegotiationService = async ({
   projectId,
@@ -31,6 +30,7 @@ const deleteNegotiationService = async ({
     const negotiation = await NegotiationModel.findOne({
       projectId,
       isDeleted: false,
+      isFrozen: false // Ensure we only delete if not frozen
     });
     if (!negotiation) {
       return {
@@ -44,18 +44,21 @@ const deleteNegotiationService = async ({
     negotiation.isDeleted = true;
     negotiation.deletedAt = new Date();
     negotiation.deletedBy = deletedBy;
-    negotiation.deletionReasonType = deletionReasonType || DELETION_REASON_TYPES.OTHER;
-    negotiation.deletionReasonDescription = deletionReasonDescription || "";
+    negotiation.deletionReasonType = deletionReasonType;
+    negotiation.deletionReasonDescription = deletionReasonDescription;
 
     await negotiation.save();
 
     // Log activity
-    await logActivityTrackerEvent({
-      projectId,
-      event: ACTIVITY_TRACKER_EVENTS.DELETE_NEGOTIATION,
-      createdBy: deletedBy,
-      auditContext,
-    });
+    const { user, device, requestId } = auditContext || {};
+    logActivityTrackerEvent(
+      user,
+      device,
+      requestId,
+      ACTIVITY_TRACKER_EVENTS.DELETE_NEGOTIATION,
+      `Negotiation deleted - Reason: ${deletionReasonType}`,
+      { adminActions: { targetId: projectId } }
+    );
 
     return {
       success: true,

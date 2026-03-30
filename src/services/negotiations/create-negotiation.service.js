@@ -4,9 +4,6 @@ const { ProjectModel } = require("@models/project.model");
 const { NegotiationModel } = require("@models/negotiation.model");
 const { Phases } = require("@configs/enums.config");
 const { createPhaseWithVersionManagement } = require("@services/common/phase-management.service");
-const { logActivityTrackerEvent } = require("@services/audit/activity-tracker.service");
-const { ACTIVITY_TRACKER_EVENTS } = require("@configs/tracker.config");
-const { prepareAuditData } = require("@utils/audit-data.util");
 const { logWithTime } = require("@utils/time-stamps.util");
 const { CONFLICT, NOT_FOUND, INTERNAL_ERROR } = require("@configs/http-status.config");
 
@@ -64,15 +61,6 @@ const createNegotiationService = async ({
       logWithTime(`❌ [createNegotiationService] Failed to update project phase`);
       return { success: false, message: "Failed to update project phase", errorCode: INTERNAL_ERROR };
     }
-
-    // Log project update activity
-    const { user, device, requestId } = auditContext || {};
-    const { oldData, newData } = prepareAuditData(oldProjectData, updatedProject);
-    logActivityTrackerEvent(
-      user, device, requestId, ACTIVITY_TRACKER_EVENTS.UPDATE_PROJECT,
-      `Project phase transitioned to NEGOTIATION`,
-      { oldData, newData, adminActions: { targetId: projectId } }
-    );
 
     // ── Step 4: Create phase WITH version management AND additional data ─
     logWithTime(`[createNegotiationService] Creating NEGOTIATION phase document`);
