@@ -14,34 +14,18 @@ const freezeNegotiationService = async ({
   auditContext,
 }) => {
   try {
-    // Check project exists
-    const project = await ProjectModel.findById(projectId);
-    if (!project) {
-      return {
-        success: false,
-        message: "Project not found",
-        errorCode: NOT_FOUND,
-      };
-    }
 
     // Check negotiation exists and is not already frozen
     const negotiation = await NegotiationModel.findOne({
       projectId,
       isDeleted: false,
+      isFrozen: false
     });
     if (!negotiation) {
       return {
         success: false,
         message: "Negotiation not found",
         errorCode: NOT_FOUND,
-      };
-    }
-
-    if (negotiation.isFrozen) {
-      return {
-        success: false,
-        message: "Negotiation is already frozen",
-        errorCode: CONFLICT,
       };
     }
 
