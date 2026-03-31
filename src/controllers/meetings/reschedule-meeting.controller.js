@@ -2,10 +2,10 @@
 
 const { rescheduleMeetingService } = require("@services/meetings");
 const {
-  throwBadRequestError,
-  throwInternalServerError,
-  throwAccessDeniedError,
-  getLogIdentifiers
+    throwBadRequestError,
+    throwInternalServerError,
+    throwAccessDeniedError,
+    getLogIdentifiers
 } = require("@/responses/common/error-handler.response");
 const { sendMeetingUpdatedSuccess } = require("@/responses/success/meeting.response");
 const { logWithTime } = require("@utils/time-stamps.util");
@@ -27,66 +27,84 @@ const { ParticipantTypes, ProjectRoleTypes } = require("@configs/enums.config");
  * - req.body: { scheduledAt?, meetingLink?, meetingPassword?, platform? }
  */
 const rescheduleMeetingController = async (req, res) => {
-  try {
-    const { scheduledAt, meetingLink, meetingPassword, platform } = req.body;
-    const { meeting, project, participant, stakeholder } = req;
+    try {
+        const { scheduledAt, meetingLink, meetingPassword, platform, expectedDuration } = req.body;
+        const { meeting, project, participant, stakeholder } = req;
 
-    logWithTime(
-      `📍 [rescheduleMeetingController] Rescheduling meeting: ${meeting._id} | ${getLogIdentifiers(req)}`
-    );
+        logWithTime(
+            `📍 [rescheduleMeetingController] Rescheduling meeting: ${meeting._id} | ${getLogIdentifiers(req)}`
+        );
 
-    // ── Authorization check ────────────────────────────────────────────
-    const isFacilitator = participant?.role === ParticipantTypes.FACILITATOR;
-    const isAllowedProjectRole = stakeholder?.role === ProjectRoleTypes.OWNER || stakeholder?.role === ProjectRoleTypes.MANAGER;
+        // ── Authorization check ────────────────────────────────────────────
+        const isFacilitator = participant?.role === ParticipantTypes.FACILITATOR;
+        const isAllowedProjectRole = stakeholder?.role === ProjectRoleTypes.OWNER || stakeholder?.role === ProjectRoleTypes.MANAGER;
 
-    if (!isFacilitator && !isAllowedProjectRole) {
-      logWithTime(
-        `⛔ [rescheduleMeetingController] Unauthorized: Not facilitator or project owner | ${getLogIdentifiers(req)}`
-      );
-      return throwAccessDeniedError(res, "You don't have permission to reschedule this meeting");
+        if (!isFacilitator && !isAllowedProjectRole) {
+            logWithTime(
+                `⛔ [rescheduleMeetingController] Unauthorized: Not facilitator or project OWNER/MANAGER | ${getLogIdentifiers(req)}`
+            );
+            return throwAccessDeniedError(res, "You don't have permission to reschedule this meeting");
+        }
+
+        // ── Expected Duration Validation ────────────────────────────
+        if (expectedDuration !== undefined) {
+            if (
+                typeof expectedDuration !== "number" ||
+                expectedDuration < 15 ||
+                expectedDuration > 480
+            ) {
+                logWithTime(
+                    `⛔ [rescheduleMeetingController] Invalid expectedDuration: ${expectedDuration} | ${getLogIdentifiers(req)}`
+                );
+                return throwBadRequestError(
+                    res,
+                    "expectedDuration must be a number between 15 and 480 minutes"
+                );
+            }
+        }
+
+        // ── Call service ───────────────────────────────────────────────────
+        const result = await rescheduleMeetingService(
+            meeting,
+            project,
+            {
+                scheduledAt,
+                meetingLink,
+                meetingPassword,
+                platform,
+                expectedDuration
+            },
+            req.admin.adminId,
+            {
+                user: req.admin,
+                device: req.device,
+                requestId: req.requestId
+            }
+        );
+
+        // ── Handle error response ──────────────────────────────────────────
+        if (!result.success) {
+            logWithTime(`❌ [rescheduleMeetingController] ${result.message} | ${getLogIdentifiers(req)}`);
+
+            if (result.errorCode === CONFLICT) {
+                return throwBadRequestError(res, result.message);
+            }
+
+            return throwBadRequestError(res, result.message);
+        }
+
+        // ── Return success response ────────────────────────────────────────
+        logWithTime(
+            `✅ [rescheduleMeetingController] Meeting rescheduled successfully | ${getLogIdentifiers(req)}`
+        );
+        return sendMeetingUpdatedSuccess(res, result.meeting);
+
+    } catch (error) {
+        logWithTime(
+            `❌ [rescheduleMeetingController] Unexpected error: ${error.message} | ${getLogIdentifiers(req)}`
+        );
+        return throwInternalServerError(res, error);
     }
-
-    // ── Call service ───────────────────────────────────────────────────
-    const result = await rescheduleMeetingService(
-      meeting,
-      project,
-      {
-        scheduledAt,
-        meetingLink,
-        meetingPassword,
-        platform
-      },
-      req.admin.adminId,
-      {
-        user: req.admin,
-        device: req.device,
-        requestId: req.requestId
-      }
-    );
-
-    // ── Handle error response ──────────────────────────────────────────
-    if (!result.success) {
-      logWithTime(`❌ [rescheduleMeetingController] ${result.message} | ${getLogIdentifiers(req)}`);
-
-      if (result.errorCode === CONFLICT) {
-        return throwBadRequestError(res, result.message);
-      }
-
-      return throwBadRequestError(res, result.message);
-    }
-
-    // ── Return success response ────────────────────────────────────────
-    logWithTime(
-      `✅ [rescheduleMeetingController] Meeting rescheduled successfully | ${getLogIdentifiers(req)}`
-    );
-    return sendMeetingUpdatedSuccess(res, result.meeting);
-
-  } catch (error) {
-    logWithTime(
-      `❌ [rescheduleMeetingController] Unexpected error: ${error.message} | ${getLogIdentifiers(req)}`
-    );
-    return throwInternalServerError(res, error);
-  }
 };
 
 module.exports = { rescheduleMeetingController };
