@@ -36,7 +36,7 @@ const {
   ParticipantTypesHelper
 } = require("@utils/enum-validators.util");
 
-const { customIdRegex, mongoIdRegex, budgetRegex, timelineRegex } = require("./regex.config");
+const { customIdRegex, mongoIdRegex, budgetRegex, timelineRegex, isoDateRegex } = require("./regex.config");
 
 /**
  * Validation rules – single source of truth for field-level constraints.
@@ -221,6 +221,9 @@ const validationRules = {
   },
   phaseDeletionReasonType: {
     enum: PhaseDeletionReasonHelper
+  },
+  isoDate: {
+    regex: isoDateRegex
   }
 };
 

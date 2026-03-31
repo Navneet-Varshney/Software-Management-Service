@@ -166,7 +166,12 @@ module.exports = {
         UPDATE_MEETING: `/update/:entityType/:meetingId`,              // PATCH /api/v1/meetings/update/:meetingId
         CANCEL_MEETING: `/cancel/:entityType/:meetingId`,               // PATCH /api/v1/meetings/cancel/:meetingId
         GET_MEETING:    `/get/:entityType/:meetingId`,                  // GET /api/v1/meetings/get/:meetingId
-        LIST_MEETINGS:  `/list/:entityType/:projectId`                  // GET /api/v1/meetings/list/:projectId
+        LIST_MEETINGS:  `/list/:entityType/:projectId`,                  // GET /api/v1/meetings/list/:projectId
+        SCHEDULE_MEETING: `/schedule/:entityType/:meetingId`,          // POST /api/v1/meetings/schedule/:entityType/:projectId
+        RESHEDULE_MEETING: `/reschedule/:entityType/:meetingId`,      // PATCH /api/v1/meetings/reschedule/:entityType/:meetingId
+        START_MEETING: `/start/:entityType/:meetingId`,                // POST /api/v1/meetings/start/:entityType/:meetingId
+        END_MEETING: `/end/:entityType/:meetingId`,                    // POST /api/v1/meetings/end/:entityType/:meetingId
+        FREEZE_MEETING: `/freeze/:entityType/:meetingId`               // POST /api/v1/meetings/freeze/:entityType/:meetingId
     },
     PARTICIPANT_ROUTES: {
         ADD_PARTICIPANT: `/add/:entityType/:meetingId`, // PATCH /api/v1/participants/add/:meetingId

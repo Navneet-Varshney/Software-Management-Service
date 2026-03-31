@@ -84,6 +84,8 @@ const requiredFields = {
     createMeetingField: getRequiredFields(FieldDefinitions.CREATE_MEETING),
     updateMeetingField: getRequiredFields(FieldDefinitions.UPDATE_MEETING),
     cancelMeetingField: getRequiredFields(FieldDefinitions.CANCEL_MEETING),
+    scheduleMeetingField: getRequiredFields(FieldDefinitions.SCHEDULE_MEETING),
+    rescheduleMeetingField: getRequiredFields(FieldDefinitions.RESCHEDULE_MEETING),
     addParticipantField: getRequiredFields(FieldDefinitions.ADD_PARTICIPANT),
     updateParticipantField: getRequiredFields(FieldDefinitions.UPDATE_PARTICIPANT),
     removeParticipantField: getRequiredFields(FieldDefinitions.REMOVE_PARTICIPANT)

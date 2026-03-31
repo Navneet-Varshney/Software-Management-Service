@@ -11,5 +11,9 @@ module.exports = {
     customIdRegex: /^USR[0-9]{7}$/,
     requestIdRegex: /^REQ[0-9]{10}$/,
     timelineRegex: /^(?:[1-9]|[1-9]\d|1[01]\d|120)$/,
-    budgetRegex: /^\d{1,12}$/
+    budgetRegex: /^\d{1,12}$/,
+    googleMeetRegex: /^https:\/\/meet\.google\.com\/[a-z]{3}-[a-z]{4}-[a-z]{3}$/,
+    zoomMeetRegex: /^https:\/\/([a-z0-9-]+\.)?zoom\.us\/j\/\d+(\?pwd=[\w-]+)?$/,
+    teamsRegex: /^https:\/\/teams\.microsoft\.com\/l\/meetup-join\/.+$/,
+    isoDateRegex: /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?Z$/
 }

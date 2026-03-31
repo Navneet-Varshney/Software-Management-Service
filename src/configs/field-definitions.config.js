@@ -827,6 +827,69 @@ const FieldDefinitions = {
       description: "Cancellation description (optional)"
     }
   },
+
+  // ── SCHEDULE MEETING ─────────────────────────────
+  SCHEDULE_MEETING: {
+    SCHEDULED_AT: {
+      field: "scheduledAt",
+      required: true,
+      validation: validationRules.isoDate,
+      description: "When meeting is scheduled (required, ISO date)"
+    },
+    MEETING_LINK: {
+      field: "meetingLink",
+      required: true,
+      validation: null,
+      description: "Meeting link/URL (required, format validated by service)"
+    },
+    MEETING_PASSWORD: {
+      field: "meetingPassword",
+      required: false,
+      validation: null,
+      description: "Meeting password/access code (optional)"
+    },
+    PLATFORM: {
+      field: "platform",
+      required: false,
+      validation: validationRules.meetingPlatform,
+      description: "Meeting platform type (optional, enum, defaults to existing)"
+    },
+    EXPECTED_DURATION: {
+      field: "expectedDuration",
+      required: false,
+      validation: null,
+      description: "Expected meeting duration in minutes (optional, 15-480, defaults to 60)"
+    }
+  },
+
+  // ── RESCHEDULE MEETING ───────────────────────────
+  RESCHEDULE_MEETING: {
+    SCHEDULED_AT: {
+      field: "scheduledAt",
+      required: false,
+      validation: validationRules.isoDate,
+      description: "New scheduled time (optional, ISO date)"
+    },
+    MEETING_LINK: {
+      field: "meetingLink",
+      required: false,
+      validation: null,
+      description: "New meeting link/URL (optional, format validated by service)"
+    },
+    PLATFORM: {
+      field: "platform",
+      required: false,
+      validation: validationRules.meetingPlatform,
+      description: "New platform type (optional, enum)"
+    },
+    MEETING_PASSWORD: {
+      field: "meetingPassword",
+      required: false,
+      validation: null,
+      description: "New meeting password (optional)"
+    }
+  },
+
   // ── ADD PARTICIPANT ──────────────────────────────
   ADD_PARTICIPANT: {
     USER_ID: {

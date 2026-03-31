@@ -46,6 +46,8 @@ const validationSets = {
     createMeetingValidationSet: getValidationSet(FieldDefinitions.CREATE_MEETING),
     updateMeetingValidationSet: getValidationSet(FieldDefinitions.UPDATE_MEETING),
     cancelMeetingValidationSet: getValidationSet(FieldDefinitions.CANCEL_MEETING),
+    scheduleMeetingValidationSet: getValidationSet(FieldDefinitions.SCHEDULE_MEETING),
+    rescheduleMeetingValidationSet: getValidationSet(FieldDefinitions.RESCHEDULE_MEETING),
     addParticipantValidationSet: getValidationSet(FieldDefinitions.ADD_PARTICIPANT),
     updateParticipantValidationSet: getValidationSet(FieldDefinitions.UPDATE_PARTICIPANT),
     removeParticipantValidationSet: getValidationSet(FieldDefinitions.REMOVE_PARTICIPANT)
