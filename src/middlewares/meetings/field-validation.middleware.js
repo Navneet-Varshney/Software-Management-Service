@@ -18,6 +18,8 @@ const validationMiddlewares = {
   createMeetingValidationMiddleware: validateBody("createMeeting", validationSets.createMeetingValidationSet),
   updateMeetingValidationMiddleware: validateBody("updateMeeting", validationSets.updateMeetingValidationSet),
   cancelMeetingValidationMiddleware: validateBody("cancelMeeting", validationSets.cancelMeetingValidationSet),
+  scheduleMeetingValidationMiddleware: validateBody("scheduleMeeting", validationSets.scheduleMeetingValidationSet),
+  rescheduleMeetingValidationMiddleware: validateBody("rescheduleMeeting", validationSets.rescheduleMeetingValidationSet),
   addParticipantValidationMiddleware: validateBody("addParticipant", validationSets.addParticipantValidationSet),
   updateParticipantValidationMiddleware: validateBody("updateParticipant", validationSets.updateParticipantValidationSet)
 };

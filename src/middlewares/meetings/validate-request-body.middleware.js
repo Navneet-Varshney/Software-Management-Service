@@ -5,6 +5,8 @@ const presenceMiddlewares = {
   createMeetingPresenceMiddleware: checkBodyPresence("createMeetingPresence", requiredFields.createMeetingField),
   updateMeetingPresenceMiddleware: checkBodyPresence("updateMeetingPresence", requiredFields.updateMeetingField),
   cancelMeetingPresenceMiddleware: checkBodyPresence("cancelMeetingPresence", requiredFields.cancelMeetingField),
+  scheduleMeetingPresenceMiddleware: checkBodyPresence("scheduleMeetingPresence", requiredFields.scheduleMeetingField),
+  rescheduleMeetingPresenceMiddleware: checkBodyPresence("rescheduleMeetingPresence", requiredFields.rescheduleMeetingField),
   addParticipantPresenceMiddleware: checkBodyPresence("addParticipantPresence", requiredFields.addParticipantField),
   updateParticipantPresenceMiddleware: checkBodyPresence("updateParticipantPresence", requiredFields.updateParticipantField)
 };
