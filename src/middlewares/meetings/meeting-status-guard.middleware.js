@@ -15,7 +15,7 @@ const meetingStatusGuardMiddleware = (req, res, next) => {
 
     const currentStatus = req.foundMeeting.status;
 
-    // Only allow modifications (UPDATE/DELETE) if status is DRAFT
+    // Only allow modifications (UPDATE) if status is DRAFT
     if (currentStatus !== MeetingStatuses.DRAFT) {
       logMiddlewareError("meetingStatusGuard", `Cannot modify meeting ${req.foundMeeting._id} with status ${currentStatus}`, req);
       return throwConflictError(
@@ -34,6 +34,49 @@ const meetingStatusGuardMiddleware = (req, res, next) => {
   }
 };
 
+/**
+ * Guard: Prevent any action if meeting is already finalized
+ * (COMPLETED or CANCELLED)
+ *
+ * Must run AFTER fetchMeetingMiddleware
+ */
+const meetingFinalizedGuardMiddleware = (req, res, next) => {
+  try {
+    if (!req.foundMeeting) {
+      logMiddlewareError("meetingFinalizedGuard", "Meeting not found in request context", req);
+      return throwSpecificInternalServerError(res, "Meeting not found in request context");
+    }
+
+    const { status, _id } = req.foundMeeting;
+
+    if (
+      status === MeetingStatuses.COMPLETED ||
+      status === MeetingStatuses.CANCELLED
+    ) {
+      logMiddlewareError(
+        "meetingFinalizedGuard",
+        `Blocked action on finalized meeting ${_id} with status ${status}`,
+        req
+      );
+
+      return throwConflictError(
+        res,
+        `Meeting is already finalized`,
+        `Cannot perform this action. Meeting status is ${status}.`
+      );
+    }
+
+    logWithTime(`✅ Meeting finalized guard passed for ${_id}`);
+    return next();
+
+  } catch (error) {
+    logMiddlewareError("meetingFinalizedGuard", `Internal error: ${error.message}`, req);
+    return throwInternalServerError(res, error);
+  }
+};
+
+
 module.exports = {
-  meetingStatusGuardMiddleware
+  meetingStatusGuardMiddleware,
+  meetingFinalizedGuardMiddleware
 };
