@@ -181,20 +181,30 @@ const rescheduleMeetingService = async (meeting, project, payload, userId, audit
 
             if (activeParticipants.length > 0) {
                 // Query for any conflicting meetings
-                const conflictingMeetings = await MeetingModel.find(
-                    {
-                        _id: { $ne: meeting._id },
-                        status: { $in: [MeetingStatuses.SCHEDULED, MeetingStatuses.ONGOING] },
-                        scheduledAt: { $lt: newEnd },
-                        $or: [
-                            { endedAt: { $exists: true, $gt: newStart } },
-                            { endedAt: { $exists: false } }
-                        ],
-                        "participants.userId": { $in: activeParticipants },
-                        "participants.isDeleted": false
-                    },
-                    { participants: 1, scheduledAt: 1, endedAt: 1, expectedDuration: 1, title: 1 }
-                ).lean();
+const lowerBoundTime = new Date(newStart.getTime() - 24 * 60 * 60 * 1000);
+
+const conflictingMeetings = await MeetingModel.find(
+    {
+        _id: { $ne: meeting._id },
+        status: { $in: [MeetingStatuses.SCHEDULED, MeetingStatuses.ONGOING] },
+        scheduledAt: { 
+            $lt: newEnd,
+            $gte: lowerBoundTime // FIX: Prevents Memory/RAM crash from historical data
+        },
+        $or: [
+            { endedAt: { $gt: newStart } },
+            { endedAt: null }, // FIX: MongoDB null trap
+            { endedAt: { $exists: false } }
+        ],
+        "participants": {
+            $elemMatch: {
+                userId: { $in: activeParticipants },
+                isDeleted: { $ne: true } // FIX: Safely checks default boolean missing values
+            }
+        }
+    },
+    { participants: 1, scheduledAt: 1, endedAt: 1, expectedDuration: 1, title: 1 }
+).lean();
 
                 logWithTime(
                     `[rescheduleMeetingService] Found ${conflictingMeetings.length} potentially conflicting meetings`
