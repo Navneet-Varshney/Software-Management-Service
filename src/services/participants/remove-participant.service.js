@@ -41,6 +41,17 @@ const removeParticipantService = async (
     try {
         logWithTime(`[removeParticipantService] Removing participant ${userId} from meeting ${meeting._id}`);
 
+        if (meeting.isScheduleFrozen) {
+            logWithTime(
+                `⛔ [removeParticipantService] Cannot remove participant from frozen meeting ${meeting._id}`
+            );
+            return {
+                success: false,
+                message: `Cannot remove participant from a frozen meeting`,
+                errorCode: BAD_REQUEST
+            };
+        }
+
         // ── 1. Find the participant ────────────────────────────────────────
         const participantIndex = meeting.participants.findIndex(
             p => p.userId === userId

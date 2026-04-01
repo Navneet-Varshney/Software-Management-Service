@@ -42,6 +42,17 @@ const updateParticipantService = async (
     try {
         logWithTime(`[updateParticipantService] Updating participant ${userId} in meeting ${meeting._id}`);
 
+        if (meeting.isScheduleFrozen) {
+            logWithTime(
+                `⛔ [updateParticipantService] Cannot update participant in frozen meeting ${meeting._id}`
+            );
+            return {
+                success: false,
+                message: `Cannot update participant in a frozen meeting`,
+                errorCode: BAD_REQUEST
+            };
+        }
+        
         // ── 1. Find the participant ────────────────────────────────────────
         const participantIndex = meeting.participants.findIndex(
             p => p.userId === userId
