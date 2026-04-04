@@ -20,7 +20,10 @@ const DB_COLLECTIONS = {
     REQUIREMENTS: "requirements",
     HIGH_LEVEL_FEATURES: "high_level_features",
     FEATURE_REQUIREMENT_MAPPINGS: "feature_requirement_mappings",
-    MEETINGS: "meetings"
+    MEETINGS: "meetings",
+    EXTERNAL_INTERFACES: "external_interfaces",
+    IDEAS: "ideas",
+    EXTERNAL_INTERFACE_REQUIREMENT_MAPPINGS: "external_interface_requirement_mappings"
 }
 
 module.exports = { DB_COLLECTIONS };
