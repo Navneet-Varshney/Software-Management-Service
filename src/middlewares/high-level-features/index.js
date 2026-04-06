@@ -6,7 +6,7 @@ const { validationMiddlewares } = require("./field-validation.middleware");
 const { presenceMiddlewares } = require("./validate-request-body.middleware");
 
 const hlfMiddlewares = {
-  fetchHlfMiddleware,
+  fetchHlfMiddleware, 
   fetchInceptionFromProjectMiddleware,
   ...validationMiddlewares,
   ...presenceMiddlewares,
