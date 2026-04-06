@@ -16,7 +16,7 @@ const { errorMessage } = require("@/utils/log-error.util");
 
 const createScopeController = async (req, res) => {
   try {
-    const { title, description, type } = req.body;
+    const { title, description, type, linkedHlfId } = req.body;
     const createdBy = req.admin.adminId;
 
     const inception = req.inception;
@@ -29,6 +29,7 @@ const createScopeController = async (req, res) => {
       title,
       description: description || null,
       type: type || null,
+      linkFeatureId: linkedHlfId || null,
       createdBy,
       auditContext: {
         user: req.admin,

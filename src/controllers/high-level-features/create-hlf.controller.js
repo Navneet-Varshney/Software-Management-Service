@@ -9,6 +9,7 @@ const {
   throwInternalServerError,
   throwSpecificInternalServerError,
   getLogIdentifiers,
+  throwDBResourceNotFoundError,
 } = require("@/responses/common/error-handler.response");
 
 const { logWithTime } = require("@/utils/time-stamps.util");
@@ -16,7 +17,7 @@ const { errorMessage } = require("@/utils/log-error.util");
 
 const createHlfController = async (req, res) => {
   try {
-    const { title, description } = req.body;
+    const { title, description, linkedIdeaId } = req.body;
     const createdBy = req.admin.adminId;
 
     const inception = req.inception;
@@ -28,6 +29,7 @@ const createHlfController = async (req, res) => {
       projectId: project._id.toString(),
       title,
       description: description || null,
+      linkedIdeaId: linkedIdeaId || null,
       createdBy,
       auditContext: {
         user: req.admin,
@@ -40,6 +42,11 @@ const createHlfController = async (req, res) => {
       if (result.message === "High-level feature with this title already exists in this inception.") {
         logWithTime(`❌ [createHlfController] Duplicate HLF title | ${getLogIdentifiers(req)}`);
         return throwConflictError(res, result.message);
+      }
+
+      if (result.message === "Idea with the provided ID does not exist or is deleted.") {
+        logWithTime(`❌ [createHlfController] Idea not found | ${getLogIdentifiers(req)}`);
+        return throwDBResourceNotFoundError(res, result.message);
       }
 
       if (result.message === "Validation error") {

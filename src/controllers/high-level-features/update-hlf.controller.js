@@ -8,7 +8,8 @@ const {
   throwInternalServerError,
   throwSpecificInternalServerError,
   getLogIdentifiers,
-  throwConflictError
+  throwConflictError,
+  throwDBResourceNotFoundError
 } = require("@/responses/common/error-handler.response");
 
 const { logWithTime } = require("@/utils/time-stamps.util");
@@ -17,7 +18,7 @@ const { OK } = require("@/configs/http-status.config");
 
 const updateHlfController = async (req, res) => {
   try {
-    const { title, description } = req.body;
+    const { title, description, linkedIdeaId } = req.body;
     const updatedBy = req.admin.adminId;
 
     const hlf = req.hlf;
@@ -31,6 +32,7 @@ const updateHlfController = async (req, res) => {
       project,
       title: title || null,
       description: description || null,
+      linkedIdeaId: linkedIdeaId || null,
       updatedBy,
       auditContext: {
         user: req.admin,
@@ -43,6 +45,10 @@ const updateHlfController = async (req, res) => {
       if (result.message === "High-level feature with this title already exists in this inception.") {
         logWithTime(`❌ [updateHlfController] Duplicate HLF title | ${getLogIdentifiers(req)}`);
         return throwConflictError(res, result.message);
+      }
+      if (result.message === "Idea with the provided ID does not exist or is deleted.") {
+        logWithTime(`❌ [updateHlfController] Idea not found | ${getLogIdentifiers(req)}`);
+        return throwDBResourceNotFoundError(res, result.message);
       }
       if (result.message === "No changes detected") {
         logWithTime(`⚠️ [updateHlfController] No changes detected | ${getLogIdentifiers(req)}`);

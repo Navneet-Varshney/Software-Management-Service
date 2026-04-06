@@ -5,13 +5,15 @@ const { deleteScopeController } = require("./delete-scope.controller");
 const { getScopeController } = require("./get-scope.controller");
 const { listScopesController } = require("./list-scopes.controller");
 const { updateScopeController } = require("./update-scope.controller");
+const { linkScopeToHlfController } = require("./link-scope-to-hlf.controller");
 
 const scopeControllers = {
     createScopeController,
     updateScopeController,
     getScopeController,
     listScopesController,
-    deleteScopeController
+    deleteScopeController,
+    linkScopeToHlfController
 }
 
 module.exports = { scopeControllers };
