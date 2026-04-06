@@ -26,6 +26,8 @@ const {
   PriorityLevels,
   ApproveProductRequestReasonType,
   RejectProductRequestReasonType,
+  ApproveOrgProjectRequestReasonType,
+  RejectOrgProjectRequestReasonType,
   ProjectActivationReason,
   ChangeProjectOwnerReasons,
   ElicitationModes,
@@ -35,7 +37,10 @@ const {
   MeetingPlatformTypes,
   MeetingGroups,
   MeetingCancellationReasons,
-  ParticipantTypes
+  ParticipantTypes,
+  IdeaStatuses,
+  RejectedIdeaReasonTypes,
+  DeferredIdeaReasonTypes
 } = require("@configs/enums.config");
 
 /**
@@ -89,6 +94,8 @@ const ProjectTypesHelper = createEnumHelper(ProjectTypes, "ProjectTypes");
 const PriorityLevelsHelper = createEnumHelper(PriorityLevels, "PriorityLevels");
 const ApproveProductRequestReasonTypeHelper = createEnumHelper(ApproveProductRequestReasonType, "ApproveProductRequestReasonType");
 const RejectProductRequestReasonTypeHelper = createEnumHelper(RejectProductRequestReasonType, "RejectProductRequestReasonType");
+const ApproveOrgProjectRequestReasonTypeHelper = createEnumHelper(ApproveOrgProjectRequestReasonType, "ApproveOrgProjectRequestReasonType");
+const RejectOrgProjectRequestReasonTypeHelper = createEnumHelper(RejectOrgProjectRequestReasonType, "RejectOrgProjectRequestReasonType");
 const ProjectActivationReasonHelper = createEnumHelper(ProjectActivationReason, "ProjectActivationReason");
 const ChangeProjectOwnerReasonsHelper = createEnumHelper(ChangeProjectOwnerReasons, "ChangeProjectOwnerReasons");
 const ElicitationModesHelper = createEnumHelper(ElicitationModes, "ElicitationModes");
@@ -99,6 +106,9 @@ const MeetingPlatformTypesHelper = createEnumHelper(MeetingPlatformTypes, "Meeti
 const MeetingGroupsHelper = createEnumHelper(MeetingGroups, "MeetingGroups");
 const MeetingCancellationReasonsHelper = createEnumHelper(MeetingCancellationReasons, "MeetingCancellationReasons");
 const ParticipantTypesHelper = createEnumHelper(ParticipantTypes, "ParticipantTypes");
+const IdeaStatusesHelper = createEnumHelper(IdeaStatuses, "IdeaStatuses");
+const RejectedIdeaReasonTypesHelper = createEnumHelper(RejectedIdeaReasonTypes, "RejectedIdeaReasonTypes");
+const DeferredIdeaReasonTypesHelper = createEnumHelper(DeferredIdeaReasonTypes, "DeferredIdeaReasonTypes");
 
 module.exports = {
   DeviceTypeHelper,
@@ -124,6 +134,8 @@ module.exports = {
   PriorityLevelsHelper,
   ApproveProductRequestReasonTypeHelper,
   RejectProductRequestReasonTypeHelper,
+  ApproveOrgProjectRequestReasonTypeHelper,
+  RejectOrgProjectRequestReasonTypeHelper,
   ProjectActivationReasonHelper,
   ChangeProjectOwnerReasonsHelper,
   ElicitationModesHelper,
@@ -133,5 +145,8 @@ module.exports = {
   MeetingPlatformTypesHelper,
   MeetingGroupsHelper,
   MeetingCancellationReasonsHelper,
-  ParticipantTypesHelper
+  ParticipantTypesHelper,
+  IdeaStatusesHelper,
+  RejectedIdeaReasonTypesHelper,
+  DeferredIdeaReasonTypesHelper
 };
