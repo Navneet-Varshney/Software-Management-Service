@@ -1,6 +1,7 @@
 // services/high-level-features/update-hlf.service.js
 
 const { HighLevelFeatureModel } = require("@models/high-level-feature.model");
+const { IdeaModel } = require("@models/idea.model");
 const { manualVersionControlService } = require("@services/common/version.service");
 const { logActivityTrackerEvent } = require("@services/audit/activity-tracker.service");
 const { prepareAuditData } = require("@utils/audit-data.util");
@@ -19,6 +20,7 @@ const { Phases } = require("@/configs/enums.config");
  * @param {Object} params.project - The Project document (for version control)
  * @param {string} params.title - Updated title (optional)
  * @param {string} params.description - Updated description (optional)
+ * @param {string} params.linkedIdeaId - Idea ID to link to (optional)
  * @param {string} params.updatedBy - USR-prefixed custom ID of the admin updating
  * @param {Object} params.auditContext - { admin, device, requestId }
  * @returns {{ success: boolean, hlf?: Object, message?: string, error?: string }}
@@ -29,6 +31,7 @@ const updateHlfService = async ({
   project,
   title = null,
   description = null,
+  linkedIdeaId = null,
   updatedBy,
   auditContext,
 }) => {
@@ -68,6 +71,24 @@ const updateHlfService = async ({
         }
 
         hlf.title = normalizedTitle;
+        hasChanges = true;
+      }
+    }
+
+    // ── Validate and update linkedIdeaId if provided ──────────────────────────
+    if (linkedIdeaId !== null) {
+      const idea = await IdeaModel.findOne({
+        _id: linkedIdeaId,
+        isDeleted: false
+      });
+
+      if (!idea) {
+        return { success: false, message: "Idea with the provided ID does not exist or is deleted." };
+      }
+
+      const hlfCurrentIdeaId = hlf.ideaId?.toString();
+      if (hlfCurrentIdeaId !== linkedIdeaId) {
+        hlf.ideaId = idea._id;
         hasChanges = true;
       }
     }

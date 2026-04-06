@@ -1,13 +1,14 @@
 // services/scopes/create-scope.service.js
 
 const { ScopeModel } = require("@models/scope-model");
+const { HighLevelFeatureModel } = require("@models/high-level-feature.model");
 const { manualVersionControlService } = require("@services/common/version.service");
 const { logActivityTrackerEvent } = require("@services/audit/activity-tracker.service");
 const { prepareAuditData } = require("@utils/audit-data.util");
 const { ACTIVITY_TRACKER_EVENTS } = require("@configs/tracker.config");
 const { logWithTime } = require("@utils/time-stamps.util");
 const { errorMessage } = require("@utils/log-error.util");
-const { Phases } = require("@/configs/enums.config");
+const { Phases, ScopeCategoryTypes } = require("@/configs/enums.config");
 
 /**
  * Creates a new scope for an inception document.
@@ -18,6 +19,7 @@ const { Phases } = require("@/configs/enums.config");
  * @param {string} params.title - Scope title (required)
  * @param {string} params.description - Scope description (optional)
  * @param {string} params.type - Scope type IN_SCOPE | OUT_SCOPE | CONSTRAINT (optional, defaults to IN_SCOPE)
+ * @param {string} params.linkFeatureId - HLF feature ID to link scope to (optional)
  * @param {string} params.createdBy - USR-prefixed custom ID of the admin creating the scope
  * @param {Object} params.auditContext - { admin, device, requestId }
  * @returns {{ success: boolean, scope?: Object, message?: string, error?: string }}
@@ -28,6 +30,7 @@ const createScopeService = async ({
   title,
   description = null,
   type = null,
+  linkFeatureId = null,
   createdBy,
   auditContext,
 }) => {
@@ -48,6 +51,20 @@ const createScopeService = async ({
       return { success: false, message: "Scope with this title already exists in this inception." };
     }
 
+    // ── Determine category based on linkFeatureId ────────────────────────────
+    let category = ScopeCategoryTypes.GLOBAL;
+    let featureId = null;
+
+    if (linkFeatureId) {
+      // Check if HLF feature exists
+      const feature = await HighLevelFeatureModel.findById(linkFeatureId);
+      if (!feature || feature.isDeleted) {
+        return { success: false, message: "The specified HLF feature does not exist or is deleted." };
+      }
+      category = ScopeCategoryTypes.LOCAL;
+      featureId = feature._id;
+    }
+
     // ── Create scope ────────────────────────────────────────────────────────
     const scopeData = {
       inceptionId,
@@ -55,6 +72,8 @@ const createScopeService = async ({
       title: normalizedTitle,
       description: description || null,
       type: type || null,
+      category,
+      featureId,
       createdBy,
     };
 
@@ -64,7 +83,7 @@ const createScopeService = async ({
     await manualVersionControlService({
       projectId: inception.projectId,
       currentPhase: Phases.INCEPTION,
-      action: `Scope "${title}" created — version bump`,
+      action: `Scope "${title}" created with category ${category} — version bump`,
       performedBy: createdBy,
       auditContext: auditContext
     });
@@ -76,7 +95,7 @@ const createScopeService = async ({
       device,
       requestId,
       ACTIVITY_TRACKER_EVENTS.CREATE_SCOPE,
-      `Scope "${title}" created for inception ${inceptionId} by ${createdBy}`,
+      `Scope "${title}" created for inception ${inceptionId} with category ${category} by ${createdBy}`,
       {
         newData: prepareAuditData(null, scope).newData,
         adminActions: { targetId: scope._id?.toString() },

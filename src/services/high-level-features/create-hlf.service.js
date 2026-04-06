@@ -1,6 +1,7 @@
 // services/high-level-features/create-hlf.service.js
 
 const { HighLevelFeatureModel } = require("@models/high-level-feature.model");
+const { IdeaModel } = require("@models/idea.model");
 const { manualVersionControlService } = require("@services/common/version.service");
 const { logActivityTrackerEvent } = require("@services/audit/activity-tracker.service");
 const { prepareAuditData } = require("@utils/audit-data.util");
@@ -17,6 +18,7 @@ const { Phases } = require("@/configs/enums.config");
  * @param {string} params.projectId - Project ID (required)
  * @param {string} params.title - HLF title (required)
  * @param {string} params.description - HLF description (optional)
+ * @param {string} params.linkedIdeaId - Idea ID to link to (optional)
  * @param {string} params.createdBy - USR-prefixed custom ID of the admin creating the HLF
  * @param {Object} params.auditContext - { admin, device, requestId }
  * @returns {{ success: boolean, hlf?: Object, message?: string, error?: string }}
@@ -26,6 +28,7 @@ const createHlfService = async ({
   projectId,
   title,
   description = null,
+  linkedIdeaId = null,
   createdBy,
   auditContext,
 }) => {
@@ -46,12 +49,28 @@ const createHlfService = async ({
       return { success: false, message: "High-level feature with this title already exists in this inception." };
     }
 
+    // ── Validate linkedIdeaId if provided ────────────────────────────────────
+    let ideaId = null;
+    if (linkedIdeaId) {
+      const idea = await IdeaModel.findOne({
+        _id: linkedIdeaId,
+        isDeleted: false
+      });
+
+      if (!idea) {
+        return { success: false, message: "Idea with the provided ID does not exist or is deleted." };
+      }
+
+      ideaId = linkedIdeaId;
+    }
+
     // ── Create HLF ────────────────────────────────────────────────────────
     const hlfData = {
       inceptionId,
       projectId,
       title: normalizedTitle,
       description: normalizedDescription,
+      ideaId,
       createdBy,
     };
 
