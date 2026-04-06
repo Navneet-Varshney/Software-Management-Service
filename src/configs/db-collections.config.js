@@ -15,6 +15,7 @@ const DB_COLLECTIONS = {
     SPECIFICATIONS: "specifications",
     VALIDATIONS: "validations",
     PRODUCT_REQUESTS: "product_requests",
+    ORG_PROJECT_REQUESTS: "org_project_requests",
     SCOPES: "scopes",
     COMMENTS: "comments",
     REQUIREMENTS: "requirements",

@@ -61,6 +61,15 @@ const requiredFields = {
     deleteCommentField:getRequiredFields(FieldDefinitions.DELETE_COMMENT),
     commentEntityField:getRequiredFields(FieldDefinitions.COMMENT_ENTITY),
 
+    // ── Idea ──────────────────────────────────────────────────────────────
+    createIdeaField:getRequiredFields(FieldDefinitions.CREATE_IDEA),
+    updateIdeaField:getRequiredFields(FieldDefinitions.UPDATE_IDEA),
+    deleteIdeaField:getRequiredFields(FieldDefinitions.DELETE_IDEA),
+    acceptIdeaField:getRequiredFields(FieldDefinitions.ACCEPT_IDEA),
+    rejectIdeaField:getRequiredFields(FieldDefinitions.REJECT_IDEA),
+    deferIdeaField:getRequiredFields(FieldDefinitions.DEFER_IDEA),
+    reopenIdeaField:getRequiredFields(FieldDefinitions.REOPEN_IDEA),
+
     // ── Inception ────────────────────────────────────────────────────────────────
     deleteInceptionField:getRequiredFields(FieldDefinitions.DELETE_INCEPTION),
 
@@ -88,7 +97,13 @@ const requiredFields = {
     rescheduleMeetingField: getRequiredFields(FieldDefinitions.RESCHEDULE_MEETING),
     addParticipantField: getRequiredFields(FieldDefinitions.ADD_PARTICIPANT),
     updateParticipantField: getRequiredFields(FieldDefinitions.UPDATE_PARTICIPANT),
-    removeParticipantField: getRequiredFields(FieldDefinitions.REMOVE_PARTICIPANT)
+    removeParticipantField: getRequiredFields(FieldDefinitions.REMOVE_PARTICIPANT),
+
+    // ── Org Project Request ───────────────────────────────────────────────────────
+    createOrgProjectRequestField: getRequiredFields(FieldDefinitions.CREATE_ORG_PROJECT_REQUEST),
+    updateOrgProjectRequestField: getRequiredFields(FieldDefinitions.UPDATE_ORG_PROJECT_REQUEST),
+    approveOrgProjectRequestField: getRequiredFields(FieldDefinitions.APPROVE_ORG_PROJECT_REQUEST),
+    rejectOrgProjectRequestField: getRequiredFields(FieldDefinitions.REJECT_ORG_PROJECT_REQUEST)
 }
 
 module.exports = {

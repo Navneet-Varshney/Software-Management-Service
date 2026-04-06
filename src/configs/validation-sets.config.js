@@ -28,6 +28,13 @@ const validationSets = {
     createHlfValidationSet: getValidationSet(FieldDefinitions.CREATE_HLF),
     updateHlfValidationSet: getValidationSet(FieldDefinitions.UPDATE_HLF),
     deleteHlfValidationSet: getValidationSet(FieldDefinitions.DELETE_HLF),
+    createIdeaValidationSet: getValidationSet(FieldDefinitions.CREATE_IDEA),
+    updateIdeaValidationSet: getValidationSet(FieldDefinitions.UPDATE_IDEA),
+    deleteIdeaValidationSet: getValidationSet(FieldDefinitions.DELETE_IDEA),
+    acceptIdeaValidationSet: getValidationSet(FieldDefinitions.ACCEPT_IDEA),
+    rejectIdeaValidationSet: getValidationSet(FieldDefinitions.REJECT_IDEA),
+    deferIdeaValidationSet: getValidationSet(FieldDefinitions.DEFER_IDEA),
+    reopenIdeaValidationSet: getValidationSet(FieldDefinitions.REOPEN_IDEA),
     createProductVisionValidationSet: getValidationSet(FieldDefinitions.CREATE_PRODUCT_VISION),
     updateProductVisionValidationSet: getValidationSet(FieldDefinitions.UPDATE_PRODUCT_VISION),
     deleteProductVisionValidationSet: getValidationSet(FieldDefinitions.DELETE_PRODUCT_VISION),
@@ -50,7 +57,11 @@ const validationSets = {
     rescheduleMeetingValidationSet: getValidationSet(FieldDefinitions.RESCHEDULE_MEETING),
     addParticipantValidationSet: getValidationSet(FieldDefinitions.ADD_PARTICIPANT),
     updateParticipantValidationSet: getValidationSet(FieldDefinitions.UPDATE_PARTICIPANT),
-    removeParticipantValidationSet: getValidationSet(FieldDefinitions.REMOVE_PARTICIPANT)
+    removeParticipantValidationSet: getValidationSet(FieldDefinitions.REMOVE_PARTICIPANT),
+    createOrgProjectRequestValidationSet: getValidationSet(FieldDefinitions.CREATE_ORG_PROJECT_REQUEST),
+    approveOrgProjectRequestValidationSet: getValidationSet(FieldDefinitions.APPROVE_ORG_PROJECT_REQUEST),
+    rejectOrgProjectRequestValidationSet: getValidationSet(FieldDefinitions.REJECT_ORG_PROJECT_REQUEST),
+    updateOrgProjectRequestValidationSet: getValidationSet(FieldDefinitions.UPDATE_ORG_PROJECT_REQUEST)
 };
 
 module.exports = { validationSets };

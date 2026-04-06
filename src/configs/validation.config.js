@@ -28,12 +28,17 @@ const {
   PhaseDeletionReasonHelper,
   ApproveProductRequestReasonTypeHelper,
   RejectProductRequestReasonTypeHelper,
+  ApproveOrgProjectRequestReasonTypeHelper,
+  RejectOrgProjectRequestReasonTypeHelper,
   ScopeTypesHelper,
   CommentEntityTypesHelper,
   MeetingPlatformTypesHelper,
   MeetingGroupsHelper,
   MeetingCancellationReasonsHelper,
-  ParticipantTypesHelper
+  ParticipantTypesHelper,
+  IdeaStatusesHelper,
+  RejectedIdeaReasonTypesHelper,
+  DeferredIdeaReasonTypesHelper
 } = require("@utils/enum-validators.util");
 
 const { customIdRegex, mongoIdRegex, budgetRegex, timelineRegex, isoDateRegex } = require("./regex.config");
@@ -131,6 +136,12 @@ const validationRules = {
   rejectProjectRequestReasonType: {
     enum: RejectProductRequestReasonTypeHelper
   },
+  approveOrgProjectRequestReasonType: {
+    enum: ApproveOrgProjectRequestReasonTypeHelper
+  },
+  rejectOrgProjectRequestReasonType: {
+    enum: RejectOrgProjectRequestReasonTypeHelper
+  },
   projectActivationReasonType: {
     enum: ProjectActivationReasonHelper
   },
@@ -224,6 +235,17 @@ const validationRules = {
   },
   isoDate: {
     regex: isoDateRegex
+  },
+
+  // ── Idea fields ──────────────────────────────────────
+  ideaStatus: {
+    enum: IdeaStatusesHelper
+  },
+  rejectedIdeaReasonType: {
+    enum: RejectedIdeaReasonTypesHelper
+  },
+  deferredIdeaReasonType: {
+    enum: DeferredIdeaReasonTypesHelper
   }
 };
 

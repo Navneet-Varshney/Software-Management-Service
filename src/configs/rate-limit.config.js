@@ -240,6 +240,62 @@ module.exports = {
       reason: "Reject product request endpoint abuse",
       message: "Too many requests to reject product request endpoint. Please try again later."
     },
+    createOrgProjectRequest: {
+      maxRequests: 10,
+      windowMs: 60 * 1000,
+      prefix: "create_org_project_request",
+      reason: "Create org project request endpoint abuse",
+      message: "Too many org project join requests. Please try again later."
+    },
+    getOrgProjectRequest: {
+      maxRequests: 30,
+      windowMs: 60 * 1000,
+      prefix: "get_org_project_request",
+      reason: "Get org project request endpoint abuse",
+      message: "Too many requests to get org project request. Please try again later."
+    },
+    listMyOrgProjectRequests: {
+      maxRequests: 30,
+      windowMs: 60 * 1000,
+      prefix: "list_my_org_project_requests",
+      reason: "List my org project requests endpoint abuse",
+      message: "Too many requests to list your org project requests. Please try again later."
+    },
+    listProjectOrgRequests: {
+      maxRequests: 30,
+      windowMs: 60 * 1000,
+      prefix: "list_project_org_requests",
+      reason: "List project org requests endpoint abuse",
+      message: "Too many requests to list project's org requests. Please try again later."
+    },
+    updateOrgProjectRequest: {
+      maxRequests: 10,
+      windowMs: 60 * 1000,
+      prefix: "update_org_project_request",
+      reason: "Update org project request endpoint abuse",
+      message: "Too many requests to update org project request. Please try again later."
+    },
+    withdrawOrgProjectRequest: {
+      maxRequests: 10,
+      windowMs: 60 * 1000,
+      prefix: "withdraw_org_project_request",
+      reason: "Withdraw org project request endpoint abuse",
+      message: "Too many requests to withdraw org project request. Please try again later."
+    },
+    approveOrgProjectRequest: {
+      maxRequests: 10,
+      windowMs: 60 * 1000,
+      prefix: "approve_org_project_request",
+      reason: "Approve org project request endpoint abuse",
+      message: "Too many requests to approve org project requests. Please try again later."
+    },
+    rejectOrgProjectRequest: {
+      maxRequests: 10,
+      windowMs: 60 * 1000,
+      prefix: "reject_org_project_request",
+      reason: "Reject org project request endpoint abuse",
+      message: "Too many requests to reject org project requests. Please try again later."
+    },
     createComment: {
       maxRequests: 20,
       windowMs: 60 * 1000,
@@ -338,6 +394,13 @@ module.exports = {
       reason: "List scopes endpoint abuse",
       message: "Too many requests to list scopes endpoint. Please try again later."
     },
+    linkScopeToHLF: {
+      maxRequests: 10,
+      windowMs: 60 * 1000,
+      prefix: "link_scope_to_hlf",
+      reason: "Link scope to HLF endpoint abuse",
+      message: "Too many requests to link scope to HLF endpoint. Please try again later."
+    },
     createHLF: {
       maxRequests: 10,
       windowMs: 60 * 1000,
@@ -372,6 +435,76 @@ module.exports = {
       prefix: "list_hlfs",
       reason: "List HLFs endpoint abuse",
       message: "Too many requests to list HLFs endpoint. Please try again later."
+    },
+    linkHLFtoIdea: {
+      maxRequests: 10,
+      windowMs: 60 * 1000,
+      prefix: "link_hlf_to_idea",
+      reason: "Link HLF to idea endpoint abuse",
+      message: "Too many requests to link HLF to idea endpoint. Please try again later."
+    },
+    createIdea: {
+      maxRequests: 10,
+      windowMs: 60 * 1000,
+      prefix: "create_idea",
+      reason: "Create idea endpoint abuse",
+      message: "Too many requests to create idea endpoint. Please try again later."
+    },
+    updateIdea: {
+      maxRequests: 15,
+      windowMs: 60 * 1000,
+      prefix: "update_idea",
+      reason: "Update idea endpoint abuse",
+      message: "Too many requests to update idea endpoint. Please try again later."
+    },
+    deleteIdea: {
+      maxRequests: 5,
+      windowMs: 60 * 1000,
+      prefix: "delete_idea",
+      reason: "Delete idea endpoint abuse",
+      message: "Too many requests to delete idea endpoint. Please try again later."
+    },
+    getIdea: {
+      maxRequests: 30,
+      windowMs: 60 * 1000,
+      prefix: "get_idea",
+      reason: "Get idea endpoint abuse",
+      message: "Too many requests to get idea endpoint. Please try again later."
+    },
+    listIdeas: {
+      maxRequests: 20,
+      windowMs: 60 * 1000,
+      prefix: "list_ideas",
+      reason: "List ideas endpoint abuse",
+      message: "Too many requests to list ideas endpoint. Please try again later."
+    },
+    acceptIdea: {
+      maxRequests: 10,
+      windowMs: 60 * 1000,
+      prefix: "accept_idea",
+      reason: "Accept idea endpoint abuse",
+      message: "Too many requests to accept idea endpoint. Please try again later."
+    },
+    rejectIdea: {
+      maxRequests: 10,
+      windowMs: 60 * 1000,
+      prefix: "reject_idea",
+      reason: "Reject idea endpoint abuse",
+      message: "Too many requests to reject idea endpoint. Please try again later."
+    },
+    deferIdea: {
+      maxRequests: 10,
+      windowMs: 60 * 1000,
+      prefix: "defer_idea",
+      reason: "Defer idea endpoint abuse",
+      message: "Too many requests to defer idea endpoint. Please try again later."
+    },
+    reopenIdea: {
+      maxRequests: 10,
+      windowMs: 60 * 1000,
+      prefix: "reopen_idea",
+      reason: "Reopen idea endpoint abuse",
+      message: "Too many requests to reopen idea endpoint. Please try again later."
     },
     createProductVision: {
       maxRequests: 10,

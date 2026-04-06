@@ -346,6 +346,21 @@ const ApproveProductRequestReasonType = Object.freeze({
   OTHER: "OTHER"
 });
 
+const ApproveOrgProjectRequestReasonType = Object.freeze({
+  VERIFIED_CREDIBILITY: "VERIFIED_CREDIBILITY",
+  STRATEGIC_FIT: "STRATEGIC_FIT",
+  HIGH_VALUE_CLIENT: "HIGH_VALUE_CLIENT",
+  OTHER: "OTHER"
+});
+
+const RejectOrgProjectRequestReasonType = Object.freeze({
+  UNVERIFIED_CLIENT: "UNVERIFIED_CLIENT",
+  NOT_TRUSTED: "NOT_TRUSTED",
+  RESOURCE_LIMITED: "RESOURCE_LIMITED",
+  SCOPE_MISMATCH: "SCOPE_MISMATCH",
+  OTHER: "OTHER"
+});
+
 const ScopeTypes = Object.freeze({
   IN_SCOPE: "IN_SCOPE",
   OUT_SCOPE: "OUT_SCOPE",
@@ -613,6 +628,8 @@ module.exports = {
   RequestStatus,
   ApproveProductRequestReasonType,
   RejectProductRequestReasonType,
+  ApproveOrgProjectRequestReasonType,
+  RejectOrgProjectRequestReasonType,
   ScopeTypes,
   RequirementTypes,
   CommentEntityTypes,

@@ -470,6 +470,12 @@ const FieldDefinitions = {
       required: false,
       validation: null,
       description: "Scope type: IN_SCOPE | OUT_SCOPE | CONSTRAINT (optional, defaults to IN_SCOPE)"
+    },
+    LINKED_HLF_ID: {
+      field: "linkedHlfId",
+      required: false,
+      validation: validationRules.mongoId,
+      description: "Linked high-level feature ID (optional, must be valid MongoDB ObjectId if provided)"
     }
   },
 
@@ -492,6 +498,12 @@ const FieldDefinitions = {
       required: false,
       validation: validationRules.scopeType,
       description: "Updated scope type: IN_SCOPE | OUT_SCOPE | CONSTRAINT (optional)"
+    },
+    LINKED_HLF_ID: {
+      field: "linkedHlfId",
+      required: false,
+      validation: validationRules.mongoId,
+      description: "Linked high-level feature ID (optional, must be valid MongoDB ObjectId if provided)"
     }
   },
 
@@ -518,6 +530,12 @@ const FieldDefinitions = {
       required: false,
       validation: validationRules.description,
       description: "Detailed high-level feature description (optional)"
+    },
+    LINKED_IDEA_ID: {
+      field: "linkedIdeaId",
+      required: false,
+      validation: validationRules.mongoId,
+      description: "Linked idea ID (optional, must be valid MongoDB ObjectId if provided)"
     }
   },
 
@@ -534,6 +552,12 @@ const FieldDefinitions = {
       required: false,
       validation: validationRules.description,
       description: "Updated high-level feature description (optional)"
+    },
+    LINKED_IDEA_ID: {
+      field: "linkedIdeaId",
+      required: false,
+      validation: validationRules.mongoId,
+      description: "Linked idea ID (optional, must be valid MongoDB ObjectId if provided)"
     }
   },
 
@@ -544,6 +568,87 @@ const FieldDefinitions = {
       required: false,
       validation: validationRules.reasonDescription,
       description: "Reason for high-level feature deletion (optional string, added to activity log)"
+    }
+  },
+  // ── CREATE IDEA ────────────────────────────────────────────────────────────────────────
+  CREATE_IDEA: {
+    TITLE: {
+      field: "title",
+      required: true,
+      validation: validationRules.title,
+      description: "Idea title (required)"
+    },
+    DESCRIPTION: {
+      field: "description",
+      required: true,
+      validation: validationRules.description,
+      description: "Detailed idea description (required)"
+    }
+  },
+
+  // ── UPDATE IDEA ────────────────────────────────────────────────────────────────────────
+  UPDATE_IDEA: {
+    TITLE: {
+      field: "title",
+      required: false,
+      validation: validationRules.title,
+      description: "Updated idea title (optional)"
+    },
+    DESCRIPTION: {
+      field: "description",
+      required: false,
+      validation: validationRules.description,
+      description: "Updated idea description (optional)"
+    }
+  },
+
+  // ── ACCEPT/REJECT/DEFER IDEA ──────────────────────────────────────────────────────────
+  ACCEPT_IDEA: {
+    // No extra fields needed - just status change
+  },
+
+  REJECT_IDEA: {
+    REJECTED_REASON_TYPE: {
+      field: "rejectedReasonType",
+      required: true,
+      validation: validationRules.rejectedIdeaReasonType,
+      description: "Reason type for rejection (required enum)"
+    },
+    NOT_ACCEPTED_REASON_DESCRIPTION: {
+      field: "notAcceptedReasonDescription",
+      required: true,
+      validation: validationRules.reasonDescription,
+      description: "Detailed reason for rejection (required)"
+    }
+  },
+
+  DEFER_IDEA: {
+    DEFERRED_REASON_TYPE: {
+      field: "deferredReasonType",
+      required: true,
+      validation: validationRules.deferredIdeaReasonType,
+      description: "Reason type for deferral (required enum)"
+    },
+    NOT_ACCEPTED_REASON_DESCRIPTION: {
+      field: "notAcceptedReasonDescription",
+      required: true,
+      validation: validationRules.reasonDescription,
+      description: "Detailed reason for deferral (required)"
+    }
+  },
+
+  // ── REOPEN IDEA ────────────────────────────────────────────────────────────────────────
+  REOPEN_IDEA: {
+    // No extra fields needed - just status change
+  },
+
+  // ── DELETE IDEA ────────────────────────────────────────────────────────────────────────
+  DELETE_IDEA: {
+    DELETION_REASON_DESCRIPTION: {
+      field: "deletionReasonDescription",
+      required: false,
+      validation: validationRules.reasonDescription,
+      description: "Reason for idea deletion (optional string, added to activity log)"
     }
   },
 
@@ -933,6 +1038,82 @@ const FieldDefinitions = {
       required: false,
       validation: validationRules.description,
       description: "Reason for participant removal (optional, required for HIGH/CRITICAL criticality)"
+    }
+  },
+
+  // ── CREATE ORG PROJECT REQUEST ──────────────────────────
+  CREATE_ORG_PROJECT_REQUEST: {
+    PROJECT_ID: {
+      field: "projectId",
+      required: true,
+      validation: validationRules.mongoId,
+      description: "ID of the org project to request access to (required)"
+    },
+    ORGANIZATION_ID: {
+      field: "organizationId",
+      required: true,
+      validation: validationRules.mongoId,
+      description: "ID of the organization (required)"
+    },
+    reason: {
+      field: "reason",
+      required: true,
+      validation: validationRules.reasonDescription,
+      description: "Reason for requesting access to the org project (required)"
+    }
+  },
+
+  // ── APPROVE ORG PROJECT REQUEST ──────────────────────────
+  APPROVE_ORG_PROJECT_REQUEST: {
+    REASON_TYPE: {
+      field: "approveReasonType",
+      required: true,
+      validation: validationRules.approveOrgProjectRequestReasonType,
+      description: "Reason for approval (required enum)"
+    },
+    REASON_DESCRIPTION: {
+      field: "approveReasonDescription",
+      required: true,
+      validation: validationRules.reasonDescription,
+      description: "Detailed reason for approval (required)"
+    }
+  },
+
+  // ── REJECT ORG PROJECT REQUEST ──────────────────────────
+  REJECT_ORG_PROJECT_REQUEST: {
+    REASON_TYPE: {
+      field: "rejectReasonType",
+      required: true,
+      validation: validationRules.rejectOrgProjectRequestReasonType,
+      description: "Reason for rejection (required enum)"
+    },
+    REASON_DESCRIPTION: {
+      field: "rejectReasonDescription",
+      required: true,
+      validation: validationRules.reasonDescription,
+      description: "Detailed reason for rejection (required)"
+    }
+  },
+
+  // ── UPDATE ORG PROJECT REQUEST ──────────────────────────
+  UPDATE_ORG_PROJECT_REQUEST: {
+    PROJECT_ID: {
+      field: "projectId",
+      required: true,
+      validation: validationRules.mongoId,
+      description: "ID of the org project to request access to (required)"
+    },
+    ORGANIZATION_ID: {
+      field: "organizationId",
+      required: true,
+      validation: validationRules.mongoId,
+      description: "ID of the organization (required)"
+    },
+    reason: {
+      field: "reason",
+      required: true,
+      validation: validationRules.reasonDescription,
+      description: "Reason for requesting access to the org project (required)"
     }
   }
 };

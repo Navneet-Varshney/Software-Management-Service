@@ -1,4 +1,3 @@
-// Base path of all APIs (can be changed in one place if needed)
 const BASE_PATH = "/software-management-service";
 
 // API versioning (helps us move from /v1 to /v2 easily)
@@ -13,8 +12,10 @@ const PROJECT_BASE = `${API_PREFIX}/projects`; // /software-management-service/a
 const STAKEHOLDER_BASE = `${API_PREFIX}/stakeholders`; // /software-management-service/api/v1/stakeholders
 const CLIENT_BASE = `${API_PREFIX}/clients`; // /software-management-service/api/v1/clients
 const PRODUCT_REQUEST_BASE = `${API_PREFIX}/product-requests`; // /software-management-service/api/v1/product-requests
+const ORG_PROJECT_REQUEST_BASE = `${API_PREFIX}/org-project-requests`; // /software-management-service/api/v1/org-project-requests
 const SCOPE_BASE = `${API_PREFIX}/scope`; // /software-management-service/api/v1/scope
 const HLF_BASE = `${API_PREFIX}/high-level-features`; // /software-management-service/api/v1/high-level-features
+const IDEAS_BASE = `${API_PREFIX}/ideas`; // /software-management-service/api/v1/ideas
 const PRODUCT_VISION_BASE = `${API_PREFIX}/product-vision`; // /software-management-service/api/v1/product-vision
 const COMMENT_BASE = `${API_PREFIX}/comments`; // /software-management-service/api/v1/comments
 const ACTIVITY_TRACKER_BASE = `${API_PREFIX}/activity-trackers`; // /software-management-service/api/v1/activity-trackers
@@ -34,8 +35,10 @@ module.exports = {
     STAKEHOLDER_BASE,
     CLIENT_BASE,
     PRODUCT_REQUEST_BASE,
+    ORG_PROJECT_REQUEST_BASE,
     SCOPE_BASE,
     HLF_BASE,
+    IDEAS_BASE,
     PRODUCT_VISION_BASE,
     COMMENT_BASE,
     ACTIVITY_TRACKER_BASE,
@@ -101,19 +104,42 @@ module.exports = {
         REJECT_PRODUCT_REQUEST: `/reject/:requestId`,           // PATCH   /api/v1/product-requests/reject/:requestId
         CANCEL_PRODUCT_REQUEST: `/cancel/:requestId`            // PATCH   /api/v1/product-requests/cancel/:requestId
     },
+    ORG_PROJECT_REQUEST_ROUTES: {
+        CREATE_ORG_PROJECT_REQUEST: `/create`,                     // POST    /api/v1/org-project-requests/create
+        GET_ORG_PROJECT_REQUEST:    `/get/:requestId`,             // GET     /api/v1/org-project-requests/get/:requestId
+        LIST_MY_ORG_PROJECT_REQUESTS: `/list`,                     // GET     /api/v1/org-project-requests/list (client's requests)
+        UPDATE_ORG_PROJECT_REQUEST: `/update/:requestId`,          // PATCH   /api/v1/org-project-requests/update/:requestId
+        WITHDRAW_ORG_PROJECT_REQUEST: `/withdraw/:requestId`,      // PATCH   /api/v1/org-project-requests/withdraw/:requestId
+        APPROVE_ORG_PROJECT_REQUEST: `/approve/:requestId`,        // PATCH   /api/v1/org-project-requests/approve/:requestId
+        REJECT_ORG_PROJECT_REQUEST: `/reject/:requestId`,          // PATCH   /api/v1/org-project-requests/reject/:requestId
+        LIST_PROJECT_ORG_REQUESTS: `/by-project/:projectId`        // GET     /api/v1/org-project-requests/by-project/:projectId
+    },
     SCOPE_ROUTES: {
         GET_SCOPE:       `/get/:scopeId`,         // GET /software-management-service/api/v1/scope/get/:projectId
         UPDATE_SCOPE:    `/update/:scopeId`,      // PATCH /software-management-service/api/v1/scope/update/:projectId
         CREATE_SCOPE:    `/create/:projectId`,      // POST /software-management-service/api/v1/scope/create/:projectId
         DELETE_SCOPE:    `/delete/:scopeId`,       // DELETE /software-management-service/api/v1/scope/delete/:projectId
-        LIST_SCOPES:     `/list/:projectId`        // GET /software-management-service/api/v1/scope/list/:projectId
+        LIST_SCOPES:     `/list/:projectId`,        // GET /software-management-service/api/v1/scope/list/:projectId
+        LINK_SCOPE_TO_HLF: `/link/:scopeId/:hlfId`  // PATCH /software-management-service/api/v1/scope/link/:scopeId/:hlfId
     },
     HLF_ROUTES: {
         GET_HLF:       `/get/:hlfId`,         // GET /software-management-service/api/v1/high-level-features/get/:hlfId
         UPDATE_HLF:    `/update/:hlfId`,      // PATCH /software-management-service/api/v1/high-level-features/update/:hlfId
         CREATE_HLF:    `/create/:projectId`,      // POST /software-management-service/api/v1/high-level-features/create/:projectId
         DELETE_HLF:    `/delete/:hlfId`,       // DELETE /software-management-service/api/v1/high-level-features/delete/:hlfId
-        LIST_HLF:     `/list/:projectId`        // GET /software-management-service/api/v1/high-level-features/list/:projectId
+        LIST_HLF:     `/list/:projectId`,        // GET /software-management-service/api/v1/high-level-features/list/:projectId
+        LINK_HLF_TO_IDEA:    `/link/:hlfId/:ideaId`       // PATCH /software-management-service/api/v1/high-level-features/link/:hlfId/:ideaId
+    },
+    IDEAS_ROUTES: {
+        GET_IDEA:       `/get/:ideaId`,              // GET /software-management-service/api/v1/ideas/get/:ideaId
+        UPDATE_IDEA:    `/update/:ideaId`,           // PATCH /software-management-service/api/v1/ideas/update/:ideaId
+        CREATE_IDEA:    `/create/:projectId`,        // POST /software-management-service/api/v1/ideas/create/:projectId
+        DELETE_IDEA:    `/delete/:ideaId`,           // DELETE /software-management-service/api/v1/ideas/delete/:ideaId
+        LIST_IDEAS:     `/list/:projectId`,          // GET /software-management-service/api/v1/ideas/list/:projectId
+        ACCEPT_IDEA:    `/accept/:ideaId`,           // PATCH /software-management-service/api/v1/ideas/accept/:ideaId
+        REJECT_IDEA:    `/reject/:ideaId`,           // PATCH /software-management-service/api/v1/ideas/reject/:ideaId
+        DEFER_IDEA:     `/defer/:ideaId`,            // PATCH /software-management-service/api/v1/ideas/defer/:ideaId
+        REOPEN_IDEA:    `/reopen/:ideaId`            // PATCH /software-management-service/api/v1/ideas/reopen/:ideaId
     },
     PRODUCT_VISION_ROUTES: {
         GET_PRODUCT_VISION:       `/get/:projectId`,         // GET /software-management-service/api/v1/product-vision/get/:projectId
